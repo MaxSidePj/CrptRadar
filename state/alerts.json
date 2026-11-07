@@ -1,5 +1,46 @@
 {
- "alerted": {},
- "alerts": [],
+ "alerted": {
+  "solana:EphCWcWcVcG7fjtGhvk2UjCUqhRcRfpuTbCyn5xoBAGS": {
+   "ts": 1794055845.531619,
+   "score": 71.2,
+   "mcap": 251903.0
+  }
+ },
+ "alerts": [
+  {
+   "key": "solana:EphCWcWcVcG7fjtGhvk2UjCUqhRcRfpuTbCyn5xoBAGS",
+   "ts": 1794055845.531619,
+   "day": "2026-11-07",
+   "kind": "gem",
+   "symbol": "DACITY",
+   "name": "Dacity Coin",
+   "chain": "solana",
+   "address": "EphCWcWcVcG7fjtGhvk2UjCUqhRcRfpuTbCyn5xoBAGS",
+   "score": 71.2,
+   "mcap": 251903.0,
+   "price": 0.0002519,
+   "liq": 38548.67,
+   "age_h": 1.1276211371527778,
+   "why": [
+    "buyers dominate (1.6x more buys)",
+    "+1140 holders/hour",
+    "trending on GeckoTerminal",
+    "trending on CoinGecko",
+    "2,194 holders"
+   ],
+   "warnings": [
+    "Linked insider wallets (3%)"
+   ],
+   "links": {
+    "chart": "https://dexscreener.com/solana/ab2t5dnxajrmkud7t636ey4m4nvv8xwiwts5vvpsxe2s",
+    "x_search": "https://x.com/search?q=%24DACITY%20OR%20EphCWcWcVcG7fjtGhvk2UjCUqhRcRfpuTbCyn5xoBAGS&f=live",
+    "bubblemap": "https://v2.bubblemaps.io/map?address=EphCWcWcVcG7fjtGhvk2UjCUqhRcRfpuTbCyn5xoBAGS&chain=solana",
+    "rugcheck": "https://rugcheck.xyz/tokens/EphCWcWcVcG7fjtGhvk2UjCUqhRcRfpuTbCyn5xoBAGS",
+    "x": "https://x.com/dacitycoin_bags?s=11"
+   },
+   "image": "https://cdn.dexscreener.com/cms/images/M7NBwHE_ZwnVFasd?width=800&height=800&quality=95&format=auto",
+   "sent": true
+  }
+ ],
  "welcomed": true
 }
