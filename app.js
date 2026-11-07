@@ -48,7 +48,8 @@ function safetyTags(e) {
     if (m.lp_locked_pct != null && m.lp_locked_pct >= 0) tags.push(`<span class="tag">LP safe ${m.lp_locked_pct.toFixed(0)}%</span>`);
     if (m.launchpad) tags.push(`<span class="tag">${esc(m.launchpad)}</span>`);
   }
-  if (e.trending) tags.push(`<span class="tag good">🔥 trending</span>`);
+  if (e.trending) tags.push(`<span class="tag good">trending</span>`);
+  if (e.fomo && typeof e.fomo === "object" && e.fomo.buyers_6h) tags.push(`<span class="tag good">🔥 FOMO ×${e.fomo.buyers_6h}</span>`);
   if (e.cto) tags.push(`<span class="tag good">community takeover</span>`);
   if (e.cg_trending) tags.push(`<span class="tag good">CoinGecko trending</span>`);
   if (e.boosts) tags.push(`<span class="tag">boosted</span>`);
@@ -57,12 +58,27 @@ function safetyTags(e) {
 }
 
 function bars(parts) {
-  const max = { traction: 35, momentum: 15, holders: 15, social: 25, early: 10 };
-  const label = { traction: "Traction", momentum: "Momentum", holders: "Holders", social: "Hype", early: "Early" };
+  const max = { staying: 25, traction: 20, fomo: 15, holders: 13, social: 12, momentum: 10, upside: 5 };
+  const label = { staying: "Staying", traction: "Traction", fomo: "FOMO app", holders: "Holders", social: "Hype",
+    momentum: "Momentum", upside: "Upside" };
   return Object.keys(max).map((k) => {
     const v = Math.max(0, (parts || {})[k] || 0);
     return `<div class="bar"><b>${label[k]}</b><i><em style="width:${Math.min(100, (v / max[k]) * 100)}%"></em></i><span>${v.toFixed(0)}/${max[k]}</span></div>`;
   }).join("");
+}
+
+function fomoLine(f) {
+  if (!f || typeof f !== "object") return "";
+  const who = (f.top_buyers || []).slice(0, 4).map(esc).join(", ");
+  return `<p class="fomo">🔥 <b>FOMO app:</b> ${f.buyers_6h} traders bought in 6h${who ? " (" + who + ")" : ""}` +
+    `${f.sellers_6h ? `, ${f.sellers_6h} sold` : ""}${f.rank ? ` · #${f.rank} trending` : ""}` +
+    `${f.theses_24h ? ` · ${f.theses_24h} thesis posts` : ""}</p>`;
+}
+
+function gateList(gates, title = "Staying-power checks") {
+  if (!gates || !gates.length) return "";
+  return `<div class="gates"><b>${title}</b>${gates.map((g) =>
+    `<div class="${g.ok ? "up" : "down"}">${g.ok ? "✓" : "✕"} ${esc(g.text)}</div>`).join("")}</div>`;
 }
 
 function tokenCard(e, extra = "") {
@@ -82,7 +98,11 @@ function tokenCard(e, extra = "") {
         <div><span>X followers</span>${e.x ? e.x.followers.toLocaleString() : "–"}</div>
         <div><span>Checked</span>${e.checked ? ago(e.checked) : "?"}</div>
       </div>
+      ${fomoLine(e.fomo)}
+      ${e.buzz != null ? `<div class="bar"><b>Buzz</b><i><em style="width:${e.buzz}%;background:var(--mid)"></em></i><span>${e.buzz}/100</span></div>` : ""}
       <div class="bars">${bars(e.parts)}</div>
+      ${gateList(e.gates)}
+      ${e.fast_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.fast_gates, "FOMO fast-lane checks (young coins)") : ""}
       ${(e.why || []).length ? `<p class="muted">Why: ${esc(e.why.join(", "))}</p>` : ""}
       <div class="tags">${safetyTags(e)}</div>
       <div class="addr">${esc(e.address)}</div>
@@ -99,8 +119,10 @@ function renderAlerts() {
   html += list.map((a) => {
     const board = (DATA.board || []).find((b) => b.key === a.key);
     const e = { ...(board || {}), ...a, score: a.score, links: a.links, safety: board?.safety, parts: board?.parts,
-      verified: true, rejects: [], warnings: a.warnings, checked: board?.checked };
-    const extra = `<p><b>${a.kind === "gem" ? "💎 Early gem" : "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}
+      verified: true, rejects: [], warnings: a.warnings, checked: board?.checked, gates: a.gates || board?.gates,
+      fomo: (a.fomo && typeof a.fomo === "object") ? a.fomo : board?.fomo, buzz: a.buzz ?? board?.buzz,
+      fast_gates: board?.fast_gates };
+    const extra = `<p><b>${{ gem: "💎 Gem", survivor: "🏆 Survivor", fomo: "🔥 FOMO hype" }[a.kind] || "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}
       · now <span class="perf" data-perf="${esc(a.chain)}|${esc(a.address)}|${a.mcap || 0}">…</span></p>`;
     return tokenCard(e, extra);
   }).join("");

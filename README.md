@@ -7,15 +7,27 @@ your iPhone, and publishes a dashboard on GitHub Pages.
 
 - Scans new and trending pools on all chains indexed by GeckoTerminal, plus DexScreener's new
   profiles, boosts and community takeovers, about every 90 seconds while a run is active.
-- Remembers each new launch for up to 48 hours (the watch pool) and re-checks it, so it alerts
+- Remembers each launch (the watch pool) and re-checks it: dead coins are dropped, active ones are
+  followed for up to 14 days, so it alerts
   when a coin starts gaining traction instead of at its first second.
 - Scam checks: honeypot, buy/sell tax, mint/freeze authority, dev wallet, top-10 wallets, single
   whale, linked insider wallets (bubblemap-style clusters from RugCheck), bundles (trench.bot when
   online), same-size wallet clusters, liquidity lock, serial-rugger developer.
 - Hype: X account followers (via fxtwitter), website/Telegram, DexScreener boosts and takeovers,
   GeckoTerminal and CoinGecko trending, 4chan /biz/ mentions.
-- Sends an alert only if the coin passes **every** scam check and scores at least
-  `alert_min_score` (default 70/100). Max `max_alerts_per_day` (default 6). A score of 85+ may
+- Staying power: never alerts on coins younger than 6 hours. A coin must have been watched for
+  3+ hours, be no more than 45% below its peak, still trade actively, and not lose liquidity,
+  market cap or holders over 3 hours. Holders growing faster than real buys (bot/airdrop wallets)
+  blocks the alert.
+- FOMO meter (0-100): volume speeding up, buyers outnumbering sellers, repeated trending, steady
+  new holders, CoinGecko trending, X followers.
+- FOMO app (fomo.family) via the unofficial fomoapi.io: live feed of FOMO traders' large buys and
+  sells (free, no key), FOMO trending board (free key, `FOMO_API_KEY` secret, checked hourly).
+  FOMO buys add up to 15 points. FOMO fast lane: a young coin bought by 3+ FOMO traders within 2
+  hours (or top 20 on FOMO trending) alerts early as 🔥 if all scam checks pass, FOMO traders
+  aren't selling, it hasn't crashed and its holders aren't bots.
+- Sends an alert only if the coin passes **every** scam and staying-power check and scores at least
+  `alert_min_score` (default 65/100). Max `max_alerts_per_day` (default 6). A score of 85+ may
   break that limit.
 
 ## Setup on iPhone (one time, ~10 minutes)
@@ -44,8 +56,12 @@ Edit `config.json` on GitHub and commit. Useful settings:
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `alert_min_score` | 70 | Higher = fewer, stronger alerts |
+| `alert_min_score` | 65 | Higher = fewer, stronger alerts |
 | `max_alerts_per_day` | 6 | Daily cap (85+ scores can break it) |
+| `min_alert_age_hours` | 6 | Never alert on coins younger than this |
+| `max_drawdown_pct` | 45 | Max % below its peak |
+| `fomo_fast_lane` | true | Early 🔥 alerts for young coins with FOMO-app hype |
+| `fomo_fast_min_buyers` | 3 | FOMO traders needed within 2h for the fast lane |
 | `min_liquidity_usd` | 12000 | Ignore coins with less liquidity |
 | `max_mcap_usd` | 50000000 | Ignore coins above this market cap |
 | `chains_only` | `[]` | e.g. `["solana", "base"]` to restrict |

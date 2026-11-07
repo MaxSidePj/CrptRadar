@@ -54,3 +54,6 @@ main { padding: 0 12px calc(env(safe-area-inset-bottom) + 24px); }
 .stat b { display: block; font-size: 18px; }
 .stat span { color: var(--muted); font-size: 11px; }
 .addr { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--muted); word-break: break-all; }
+.gates { margin: 8px 0; font-size: 12px; line-height: 1.6; }
+.gates b { display: block; color: var(--muted); font-weight: 500; }
+.fomo { margin: 8px 0; font-size: 13px; color: #ffb36b; }

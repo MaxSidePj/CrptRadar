@@ -43,15 +43,20 @@
       <ol>
         <li>passes the market filter (enough liquidity, trades and volume, not dumping),</li>
         <li>passes <b>every</b> scam check: honeypot/tax, mint &amp; freeze authority, dev wallet, top-10 holders, single whales, linked insider wallets (bubblemap-style clusters), bundles and same-size wallet clusters, liquidity lock,</li>
-        <li>and scores at least <b id="minScore">–</b>/100 on traction, momentum, holder growth, hype and how early it is.</li>
+        <li>passes every <b>staying-power check</b>: at least 6 hours old, watched by GemRadar for 3+ hours, no more than 45% below its peak, trading still active, liquidity, market cap and holders not falling over 3 hours, and holders not growing faster than real buys (bot/airdrop wallets),</li>
+        <li>and scores at least <b id="minScore">–</b>/100.</li>
       </ol>
+      <p>Coins younger than 6 hours normally appear only in <b>Live</b>: most pump.fun launches die within the first hours.</p>
+      <p><b>🔥 FOMO fast lane:</b> a young coin can still alert early when 3+ traders on the FOMO app bought it within 2 hours (or it's top 20 on FOMO trending), FOMO traders aren't selling it, all scam checks pass, it hasn't crashed from its peak and its holders aren't bots. These alerts are riskier and are marked 🔥.</p>
       <p>Maximum <b id="maxDay">–</b> alerts per day; only very high scores break that limit. Coins on chains that can't be safety-checked are shown in Live but never alerted.</p>
       <h3>Score parts</h3>
-      <p><b>Traction 35</b> liquidity, volume vs market cap, trades, buy/sell balance, unique buyers.<br>
-      <b>Momentum 15</b> 1h &amp; 6h price trend, no dump in last 5m, penalty if already pumped 10x+.<br>
-      <b>Holders 15</b> holder count, holders gained per hour, spread.<br>
-      <b>Hype 25</b> X/website/Telegram, X followers, DexScreener boosts &amp; takeovers, trending on GeckoTerminal/CoinGecko, 4chan /biz/ mentions.<br>
-      <b>Early 10</b> young age and small market cap.</p>
+      <p><b>Staying power 25</b> how long it survived, distance from its peak, higher lows over 6h, holder and liquidity growth over 3h, steady trading.<br>
+      <b>Traction 20</b> liquidity, volume vs market cap, trades, buy/sell balance, unique buyers.<br>
+      <b>FOMO app 15</b> how many FOMO traders bought (6h), FOMO trending rank, thesis posts; minus points when FOMO traders sell.<br>
+      <b>Holders 13</b> holder count, holders gained per hour, spread.<br>
+      <b>Hype 12</b> X/website/Telegram, X followers, DexScreener boosts &amp; takeovers, trending lists, 4chan /biz/.<br>
+      <b>Momentum 10</b> 1h &amp; 6h price trend plus the buzz meter (volume speeding up, more buyers than sellers, keeps showing up in trending, new holders keep coming).<br>
+      <b>Upside 5</b> smaller market cap = more room to grow.</p>
       <h3>Limits</h3>
       <p>X's own search API isn't free, so X hype = the coin's account followers plus a button to open live X posts. Bundle data for Solana comes from a free service that is sometimes offline; the same-size-wallet check always runs. GitHub can start runs late, so alerts come within minutes, not seconds.</p>
       <p class="warn">Not financial advice. Most new tokens go to zero; passing the checks lowers the scam risk, it does not remove it.</p>

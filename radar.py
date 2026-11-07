@@ -11,6 +11,7 @@ Free data sources (no API keys):
   RugCheck        Solana safety, holders, insider networks (bubblemap-style clusters)
   trench.bot      Solana bundle check (best effort; often unavailable)
   fxtwitter       X account followers / age (X's own API is not free)
+  fomoapi.io      FOMO app: public trades of FOMO users + FOMO trending board (unofficial)
   4chan /biz/     mention count
   CoinGecko       trending list
 
@@ -37,6 +38,8 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+import fomo
+
 ROOT = Path(__file__).resolve().parent
 CONFIG_FILE = ROOT / "config.json"
 ALERTS_FILE = ROOT / "state" / "alerts.json"   # committed to git (small, changes only on alerts)
@@ -47,12 +50,18 @@ WEB_FILES = ("index.html", "app.js", "style.css", "manifest.webmanifest",
 SITE_DIR = ROOT / "site"
 
 DEFAULT_CONFIG = {
-    "alert_min_score": 70,
+    "alert_min_score": 65,
     "exceptional_score": 85,
     "max_alerts_per_day": 6,
     "max_alerts_per_cycle": 2,
-    "gem_max_age_hours": 24,
-    "runner_max_age_hours": 168,
+    "gem_max_age_hours": 72,
+    "runner_max_age_hours": 336,
+    "min_alert_age_hours": 6,
+    "min_observed_hours": 3,
+    "max_drawdown_pct": 45,
+    "fomo_fast_lane": True,
+    "fomo_fast_min_buyers": 3,
+    "fomo_fast_min_score": 55,
     "min_liquidity_usd": 12000,
     "min_mcap_usd": 30000,
     "max_mcap_usd": 50000000,
@@ -215,7 +224,8 @@ def load_state():
 def fresh_state(state):
     state.setdefault("alerted", {})      # key -> alert record
     state.setdefault("alerts", [])       # newest first
-    state.setdefault("snapshots", {})    # key -> [[ts, holders, mcap]]
+    state.pop("snapshots", None)
+    state.setdefault("history", {})      # key -> {"first", "peak", "peak_ts", "trend_hits", "snaps": [[ts, mcap, liq, vol_h1, buys_h1, holders]]}
     state.setdefault("safety_cache", {}) # key -> {"ts", "data"}
     state.setdefault("x_cache", {})      # handle -> {"ts", "data"}
     state.setdefault("board", [])
@@ -228,15 +238,14 @@ def fresh_state(state):
 def prune_state(state, cfg):
     t = now()
     keep_s = cfg["runner_max_age_hours"] * 3600 + 86400
-    state["snapshots"] = {k: [s for s in v if t - s[0] < 48 * 3600][-12:]
-                          for k, v in state["snapshots"].items() if v and t - v[-1][0] < 48 * 3600}
+    state["history"] = {k: h for k, h in state["history"].items() if h["snaps"] and t - h["snaps"][-1][0] < 24 * 3600}
     state["safety_cache"] = {k: v for k, v in state["safety_cache"].items() if t - v["ts"] < 6 * 3600}
     state["x_cache"] = {k: v for k, v in state["x_cache"].items() if t - v["ts"] < 24 * 3600}
     state["alerted"] = {k: v for k, v in state["alerted"].items() if t - v["ts"] < max(keep_s, 30 * 86400)}
     state["alerts"] = state["alerts"][:150]
     w = state["watch"]
-    if len(w) > 4000:
-        for k in sorted(w, key=lambda k: w[k][3])[:len(w) - 4000]:
+    if len(w) > 5000:
+        for k in sorted(w, key=lambda k: w[k][3])[:len(w) - 5000]:
             del w[k]
 
 
@@ -389,6 +398,16 @@ def discover(http, cfg, ctx, state):
                 ctx["boost"][k] = max(ctx["boost"].get(k, 0), int(fnum(it.get("totalAmount") or it.get("amount"))))
             if k not in watch and it.get("chainId") and chain_allowed(it["chainId"], cfg):
                 watch[k] = [it["chainId"], it.get("tokenAddress"), None, now(), 0, 0]
+    # Coins FOMO app traders bought in the last 6 hours, or on FOMO's trending board.
+    t_now = now()
+    for k, r in (state.get("fomo") or {}).items():
+        if any(t_now - b[0] <= 6 * 3600 for b in r["buys"]):
+            add(r["chain"], r["address"], "fomo", symbol=r.get("symbol"))
+            if k not in watch and chain_allowed(r["chain"], cfg):
+                watch[k] = [r["chain"], r["address"], r.get("symbol"), t_now, 0, 0]
+    for k in ((state.get("fomo_board") or {}).get("ranks") or {}):
+        chain, addr = k.split(":", 1)
+        add(chain, addr, "fomo")
     # Re-check launches we saw earlier: this is where early gems show up, hours after launch.
     budget = int(cfg.get("watch_rechecks_per_cycle", 900))
     for k in sorted(watch, key=lambda k: watch[k][4])[:budget]:
@@ -397,9 +416,13 @@ def discover(http, cfg, ctx, state):
     return seeds
 
 
-def update_watch(state, seeds, pairs, tokens_by_key):
+def update_watch(state, seeds, pairs, tokens_by_key, cfg):
     """Track re-check results; forget launches that died or got too old."""
     watch, t = state["watch"], now()
+    max_age = cfg["runner_max_age_hours"]
+    for k, tok in tokens_by_key.items():  # follow every active coin so we can judge its staying power
+        if k not in watch and tok["liq"] >= cfg["min_liquidity_usd"] and (tok.get("age_h") or 0) < max_age:
+            watch[k] = [tok["chain"], tok["address"], tok["symbol"], t, t, 0]
     for k, w in list(watch.items()):
         if k not in seeds:
             continue
@@ -409,7 +432,7 @@ def update_watch(state, seeds, pairs, tokens_by_key):
             w[5] += 1
         age_h = (t - w[3]) / 3600 if not tok or tok.get("age_h") is None else tok["age_h"]
         liq = tok["liq"] if tok else 0
-        if w[5] >= 4 or age_h > 48 or (age_h > 6 and liq < 3000) or (age_h > 24 and liq < 10000):
+        if w[5] >= 4 or age_h > max_age or (age_h > 6 and liq < 3000) or (age_h > 24 and liq < 10000):
             del watch[k]
 
 
@@ -815,22 +838,155 @@ def coingecko_trending(http, ctx):
 
 # --------------------------------------------------------------------------- scoring
 
-def holder_growth_per_hour(state, key, holders):
-    snaps = state["snapshots"].get(key) or []
-    for ts, h0, _ in snaps:
-        dt = (now() - ts) / 3600
-        if dt >= 0.15 and h0:
-            return (holders - h0) / dt
+def record_history(state, t, holders):
+    """One market snapshot per ~10 minutes for every active coin (keeps 24h)."""
+    h = state["history"].setdefault(t["key"], {"first": now(), "peak": 0, "peak_ts": now(),
+                                               "trend_hits": 0, "snaps": []})
+    if t["mcap"] > h["peak"]:
+        h["peak"], h["peak_ts"] = t["mcap"], now()
+    snaps = h["snaps"]
+    if snaps and now() - snaps[-1][0] < 600:
+        if holders and not snaps[-1][5]:
+            snaps[-1][5] = holders
+        return h
+    if t.get("trending"):
+        h["trend_hits"] += 1
+    snaps.append([now(), round(t["mcap"]), round(t["liq"]), round(t["vol"].get("h1", 0)), t["buys_h1"], holders or 0])
+    del snaps[:-144]
+    return h
+
+
+def snap_ago(hist, hours):
+    """Oldest snapshot that is at most `hours` old (None if history is shorter than half of that)."""
+    if not hist or not hist["snaps"]:
+        return None
+    target = now() - hours * 3600
+    best = None
+    for s in hist["snaps"]:
+        if s[0] >= target:
+            best = s
+            break
+    if best is None or now() - best[0] < hours * 3600 * 0.5:
+        return None
+    return best
+
+
+def holder_growth_per_hour(hist, holders):
+    if not hist or not holders:
+        return None
+    for s in hist["snaps"]:
+        dt = (now() - s[0]) / 3600
+        if s[5] and dt >= 0.25:
+            return (holders - s[5]) / dt
     return None
 
 
+def staying_power(t, hist, holders, cfg):
+    """Has this coin survived and is it still alive? Returns points (0-25), alert gates, reasons."""
+    gates, why, pts = [], [], 0.0
+    age = t["age_h"] or 0
+    observed = (now() - hist["first"]) / 3600 if hist else 0
+    peak = max(hist["peak"] if hist else 0, t["mcap"])
+    drawdown = (1 - t["mcap"] / peak) * 100 if peak else 0
+    vol = t["vol"]
+    pace_h1 = vol.get("h1", 0) / max(vol.get("h6", 0) / 6, 1)
+    s3 = snap_ago(hist, 3)
+    s6 = snap_ago(hist, 6)
+
+    def gate(ok, text):
+        gates.append({"ok": bool(ok), "text": text})
+
+    gate(age >= cfg["min_alert_age_hours"], f"Survived {fmt_age(age)} (needs {cfg['min_alert_age_hours']}h+)")
+    gate(observed >= cfg["min_observed_hours"] and hist and len(hist["snaps"]) >= 6,
+         f"Watched by GemRadar for {observed:.1f}h (needs {cfg['min_observed_hours']}h+)")
+    gate(drawdown <= cfg["max_drawdown_pct"], f"{drawdown:.0f}% below its peak (max {cfg['max_drawdown_pct']}%)")
+    gate(pace_h1 >= 0.5, f"Trading still active: last hour = {pace_h1:.1f}x the 6h average")
+    if s3:
+        liq_ratio = t["liq"] / max(s3[2], 1)
+        gate(liq_ratio >= 0.75, f"Liquidity {(liq_ratio - 1) * 100:+.0f}% in 3h")
+        mc_ratio = t["mcap"] / max(s3[1], 1)
+        gate(mc_ratio >= 0.7, f"Market cap {(mc_ratio - 1) * 100:+.0f}% in 3h")
+        if s3[5] and holders:
+            hg = (holders - s3[5]) / s3[5] * 100
+            gate(hg >= -1, f"Holders {hg:+.0f}% in 3h")
+    growth = holder_growth_per_hour(hist, holders)
+    if growth is not None and t["buys_h1"] and growth > max(t["buys_h1"], 50) * 1.2:
+        gate(False, f"Holders grow faster than buys (+{growth:.0f}/h vs {t['buys_h1']} buys): bot/airdrop wallets")
+
+    # points
+    pts += 6 * logscale(max(age, 1), 6, 168)
+    pts += 5 * clamp(1 - drawdown / 50)
+    if s6:
+        r = t["mcap"] / max(s6[1], 1)
+        pts += 4 * clamp((r - 0.7) / 0.6)
+        if r >= 1.2:
+            why.append(f"market cap {(r - 1) * 100:+.0f}% in 6h")
+    if s3 and s3[5] and holders:
+        hg = (holders - s3[5]) / s3[5]
+        pts += 5 * clamp(hg / 0.15)
+        if hg >= 0.05:
+            why.append(f"holders {hg * 100:+.0f}% in 3h")
+    if s3:
+        pts += 3 * clamp((t["liq"] / max(s3[2], 1) - 0.8) / 0.4)
+    h6, h24 = vol.get("h6", 0), vol.get("h24", 0)
+    if h24 > 0 and 0.6 <= h6 / max(h24 / 4, 1) <= 3:
+        pts += 2  # steady trading, not a single spike
+    if age >= 24 and drawdown <= 30:
+        why.append(f"holding up after {fmt_age(age)}")
+    return round(clamp(pts, 0, 25), 1), gates, why
+
+
+def buzz_meter(t, hist, social, holders):
+    """0-100: how much lasting buying interest there is right now (on-chain + social)."""
+    f = 0.0
+    vol = t["vol"]
+    pace = vol.get("h1", 0) / max(vol.get("h6", 0) / 6, 1)
+    f += 20 * clamp((pace - 0.8) / 1.7)                                    # volume accelerating
+    ratio = t["buys_h1"] / max(t["sells_h1"], 1)
+    f += 15 * clamp((ratio - 1) / 1.0) if ratio <= 4 else 5                # more buyers than sellers
+    f += 15 * logscale(max(hist["trend_hits"], 1), 1, 30) if hist else 0  # keeps showing up in trending
+    growth = holder_growth_per_hour(hist, holders)
+    if growth is not None:
+        f += 15 * logscale(max(growth, 1), 5, 300)                         # new holders keep coming
+    if social.get("cg_trending"):
+        f += 10
+    f += 5 * min(social.get("biz") or 0, 3) / 3
+    if t.get("boosts"):
+        f += 5
+    if t.get("cto"):
+        f += 5
+    xp = social.get("x")
+    if xp:
+        f += 10 * logscale(xp["followers"], 500, 50_000)
+    return round(clamp(f, 0, 100))
+
+
+def fast_lane_gates(t, hist, holders, fs, gates, cfg):
+    """Young coin with real FOMO-app hype: skip the 6h wait, keep every safety check."""
+    if not cfg.get("fomo_fast_lane") or not fs:
+        return None
+    out = []
+    hot = fs["buyers_2h"] >= cfg["fomo_fast_min_buyers"] or ((fs["rank"] or 999) <= 20 and fs["buyers_6h"] >= 2)
+    out.append({"ok": hot, "text": f"{fs['buyers_2h']} FOMO traders bought in 2h (needs {cfg['fomo_fast_min_buyers']}+)"
+                + (f", #{fs['rank']} on FOMO trending" if fs["rank"] else "")})
+    out.append({"ok": (t["age_h"] or 0) >= 0.33, "text": f"Age {fmt_age(t['age_h'])} (needs 20m+)"})
+    out.append({"ok": fs["sellers_6h"] <= fs["buyers_6h"],
+                "text": f"FOMO buyers {fs['buyers_6h']} vs sellers {fs['sellers_6h']}"})
+    for g in gates:  # keep the crash and bot-holder checks from staying power
+        if "below its peak" in g["text"] or "faster than buys" in g["text"]:
+            out.append(g)
+    return out
+
+
 def score_token(t, safety_m, verdict, social, state, cfg):
+    """Score 0-100: staying 25, traction 20, FOMO app 15, holders 13, hype 12, momentum 10, upside 5."""
     parts, why = {}, []
+    hist = state["history"].get(t["key"])
     liq, mcap = t["liq"], max(t["mcap"], 1)
     vol_h1 = t["vol"].get("h1", 0)
     buys, sells = t["buys_h1"], t["sells_h1"]
 
-    # Traction (35)
+    # Traction (22)
     tr = 8 * logscale(liq, 10_000, 250_000)
     tr += 8 * clamp((vol_h1 / mcap) / 0.5)
     tr += 5 * logscale(vol_h1, 5_000, 200_000)
@@ -842,9 +998,9 @@ def score_token(t, safety_m, verdict, social, state, cfg):
         tr += 3
     if t.get("buyers_h1"):
         tr += 3 * logscale(t["buyers_h1"], 30, 900)
-    parts["traction"] = round(tr, 1)
+    parts["traction"] = round(tr * 20 / 35, 1)
 
-    # Momentum (15)
+    # Momentum (8)
     pc = t["pc"]
     mo = 6 * clamp(pc.get("h1", 0) / 30) + 5 * clamp(pc.get("h6", 0) / 80)
     if pc.get("m5", 0) > -10:
@@ -853,19 +1009,17 @@ def score_token(t, safety_m, verdict, social, state, cfg):
         mo -= 5
     if pc.get("h1", 0) > 1000 or pc.get("h6", 0) > 3000:
         mo -= 6; why.append("already pumped hard")
-    parts["momentum"] = round(clamp(mo, -10, 15), 1)
+    momentum_raw = clamp(mo, -10, 15)
 
     # Holders (15)
     holders = (safety_m or {}).get("holders", 0)
     ho = 8 * logscale(holders, 100, 3_000)
-    growth = holder_growth_per_hour(state, t["key"], holders) if holders else None
+    growth = holder_growth_per_hour(hist, holders)
     if growth is not None:
-        ho += 4 * logscale(max(growth, 1), 5, 500)
-        if growth > 50:
-            why.append(f"+{growth:.0f} holders/hour")
+        ho += 4 * logscale(max(growth, 1), 5, 300)
     top10 = (safety_m or {}).get("top10_pct", 100)
     ho += 3 if top10 < 15 else 1.5 if top10 < 25 else 0
-    parts["holders"] = round(ho, 1)
+    parts["holders"] = round(ho * 13 / 15, 1)
 
     # Social / hype (25)
     so = 0.0
@@ -892,13 +1046,22 @@ def score_token(t, safety_m, verdict, social, state, cfg):
         so += 4; why.append("trending on CoinGecko")
     if social.get("biz"):
         so += min(3, social["biz"]); why.append(f"{social['biz']} mentions on 4chan /biz/")
-    parts["social"] = round(min(so, 25), 1)
+    parts["social"] = round(min(so, 25) * 12 / 25, 1)
 
-    # Earliness (10)
-    age = t["age_h"] or 0
-    ea = 5 if age <= 2 else 4 if age <= 6 else 3 if age <= 24 else 1.5 if age <= 72 else 0
-    ea += 5 if mcap <= 300_000 else 4 if mcap <= 1_000_000 else 2.5 if mcap <= 5_000_000 else 1 if mcap <= 20_000_000 else 0
-    parts["early"] = ea
+    buzz = buzz_meter(t, hist, social, holders)
+    parts["momentum"] = round(momentum_raw * 6 / 15 + buzz / 25, 1)  # price trend 6 + buzz meter 4
+
+    fs = social.get("fomo")
+    fp, fwhy = fomo.points(fs)
+    parts["fomo"] = round(fp, 1)
+    why = fwhy + why
+
+    stay, gates, stay_why = staying_power(t, hist, holders, cfg)
+    parts["staying"] = stay
+    why = stay_why + why
+
+    # Upside (5): room to grow
+    parts["upside"] = 5 if mcap <= 1_000_000 else 3.5 if mcap <= 5_000_000 else 2 if mcap <= 20_000_000 else 0.5
 
     total = sum(parts.values()) - verdict["penalty"]
     if not verdict["verified"]:
@@ -909,6 +1072,8 @@ def score_token(t, safety_m, verdict, social, state, cfg):
         why.insert(0, f"${liq/1000:.0f}k liquidity")
     if holders >= 500:
         why.append(f"{holders:,} holders")
+    fast = fast_lane_gates(t, hist, holders, fs, gates, cfg)
+    score_token.last = {"gates": gates, "buzz": buzz, "fast_gates": fast}
     return round(clamp(total, 0, 100), 1), parts, why[:6]
 
 
@@ -989,20 +1154,33 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         return False
     if entry["rejects"] or not entry["verified"]:
         return False
-    if entry["score"] < cfg["alert_min_score"]:
+    normal = entry["score"] >= cfg["alert_min_score"] and all(g["ok"] for g in entry.get("gates") or [{"ok": False}])
+    fast = (not normal and entry.get("fast_gates") and entry["score"] >= cfg["fomo_fast_min_score"]
+            and all(g["ok"] for g in entry["fast_gates"]))
+    if not (normal or fast):
         return False
     if cycle_alerts >= cfg["max_alerts_per_cycle"]:
         return False
     if (alerts_today(state) >= cfg["max_alerts_per_day"] or in_quiet_hours(cfg)) and entry["score"] < cfg["exceptional_score"]:
         return False
-    kind = "gem" if (t["age_h"] or 0) <= cfg["gem_max_age_hours"] else "runner"
-    icon = "💎" if kind == "gem" else "🚀"
-    label = "Early gem" if kind == "gem" else "Runner"
+    kind = "fomo" if fast else "gem" if (t["age_h"] or 0) <= cfg["gem_max_age_hours"] else "survivor"
+    icon, label = {"fomo": ("🔥", "FOMO hype"), "gem": ("💎", "Gem"), "survivor": ("🏆", "Survivor")}[kind]
     title = f"{icon} {label}: ${t['symbol']} ({t['chain']}) score {entry['score']:.0f}"
     lines = [
         f"MC {fmt_usd(t['mcap'])} · Liq {fmt_usd(t['liq'])} · Age {fmt_age(t['age_h'])}",
         f"1h: {t['pc'].get('h1', 0):+.0f}% · vol {fmt_usd(t['vol'].get('h1'))} · {t['buys_h1']} buys / {t['sells_h1']} sells",
+        f"Buzz {entry.get('buzz', 0)}/100 · staying power {entry['parts'].get('staying', 0):.0f}/25",
     ]
+    fs = entry.get("fomo")
+    if fs:
+        line = f"FOMO app: {fs['buyers_6h']} traders bought (6h)"
+        if fs["top_buyers"]:
+            line += ": " + ", ".join(fs["top_buyers"][:3])
+        if fs["rank"]:
+            line += f" · #{fs['rank']} trending"
+        lines.append(line)
+    if fast:
+        lines.append("Young coin - early FOMO alert, higher risk")
     m = entry.get("safety") or {}
     safety_line = f"Safe ✓ top10 {m.get('top10_pct', 0):.0f}% · dev {max(m.get('creator_pct', 0), m.get('owner_pct', 0)):.1f}%"
     if m.get("holders"):
@@ -1019,12 +1197,13 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         actions.append({"action": "view", "label": "Bubblemap", "url": links["bubblemap"]})
     actions.append({"action": "view", "label": "X posts", "url": links["x_search"]})
     sent = push(title, "\n".join(lines), click=links["chart"], actions=actions,
-                tags=["gem" if kind == "gem" else "rocket"], priority=5 if entry["score"] >= cfg["exceptional_score"] else 4)
+                tags=[{"fomo": "fire", "gem": "gem", "survivor": "trophy"}[kind]], priority=5 if entry["score"] >= cfg["exceptional_score"] else 4)
     rec = {"key": t["key"], "ts": now(), "day": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
            "kind": kind, "symbol": t["symbol"], "name": t["name"], "chain": t["chain"], "address": t["address"],
            "score": entry["score"], "mcap": t["mcap"], "price": t.get("price"), "liq": t["liq"],
            "age_h": t["age_h"], "why": entry["why"], "warnings": entry["warnings"], "links": links,
-           "image": t.get("image"), "sent": sent}
+           "image": t.get("image"), "sent": sent, "fomo": entry.get("fomo"), "buzz": entry.get("buzz"),
+           "gates": entry.get("fast_gates") if fast else entry.get("gates")}
     state["alerted"][t["key"]] = {"ts": rec["ts"], "score": entry["score"], "mcap": t["mcap"]}
     state["alerts"].insert(0, rec)
     log(f"  ALERT {title}")
@@ -1055,9 +1234,12 @@ def scan_cycle(http, state, cfg, ctx):
     def quick(t):
         dummy = {"verified": True, "rejects": [], "warnings": [], "penalty": 0}
         return score_token(t, {}, dummy, {}, state, cfg)[0]
-    tokens.sort(key=quick, reverse=True)
+    tokens.sort(key=lambda t: (bool(fomo.stats(state, t["key"])), quick(t)), reverse=True)
 
-    update_watch(state, seeds, pairs, built)
+    update_watch(state, seeds, pairs, {k: t for k, t in built.items() if k in {x["key"] for x in tokens}}, cfg)
+    for t in tokens:
+        cached = state["safety_cache"].get(t["key"])
+        record_history(state, t, ((cached or {}).get("data") or {}).get("holders"))
     corpus = biz_corpus(http, ctx)
     cg = coingecko_trending(http, ctx)
     deep_budget = int(cfg["deep_checks_per_cycle"])
@@ -1074,21 +1256,22 @@ def scan_cycle(http, state, cfg, ctx):
         else:
             continue  # checked in a later cycle
         verdict = judge_safety(m, t, cfg)
-        social = {"cg_trending": (t["symbol"] or "").upper() in cg, "biz": biz_mentions(corpus, t)}
+        social = {"cg_trending": (t["symbol"] or "").upper() in cg, "biz": biz_mentions(corpus, t),
+                  "fomo": fomo.stats(state, t["key"])}
         if not verdict["rejects"]:
             social["x"] = x_profile(http, state, parse_x_handle(t["socials"].get("x")))
-        score, parts, why = score_token(t, m, verdict, social, state, cfg)
         if m and m.get("holders"):
-            snaps = state["snapshots"].setdefault(t["key"], [])
-            if not snaps or now() - snaps[-1][0] > 300:
-                snaps.append([now(), m["holders"], t["mcap"]])
+            record_history(state, t, m["holders"])
+        score, parts, why = score_token(t, m, verdict, social, state, cfg)
+        extra = score_token.last
         entry = {**{k: t[k] for k in ("key", "chain", "address", "symbol", "name", "url", "price", "liq", "mcap",
                                       "vol", "pc", "buys_h1", "sells_h1", "age_h", "socials", "trending", "cto",
                                       "boosts", "image", "dex", "sources")},
                  "score": score, "parts": parts, "why": why, "safety": m, "verified": verdict["verified"],
                  "rejects": verdict["rejects"], "warnings": verdict["warnings"], "links": links_for(t),
                  "x": social.get("x"), "biz": social.get("biz"), "cg_trending": social.get("cg_trending"),
-                 "checked": now()}
+                 "gates": extra["gates"], "fast_gates": extra["fast_gates"], "buzz": extra["buzz"],
+                 "fomo": social.get("fomo"), "checked": now()}
         results.append(entry)
 
     results.sort(key=lambda e: e["score"], reverse=True)
@@ -1152,10 +1335,17 @@ def main():
                 f"{cfg['alert_min_score']}+ and passes the scam checks (max {cfg['max_alerts_per_day']}/day).",
                 click=os.environ.get("DASHBOARD_URL") or None, tags=["satellite"], priority=3):
             state["welcomed"] = True
+    stream = fomo.FomoStream(log)
+    stream.start()
+    time.sleep(8 if stream.available else 0)  # let the replay of the last ~15 minutes arrive
     start = now()
     while True:
         c0 = now()
         try:
+            n = fomo.absorb(state, stream.drain())
+            fomo.poll_board(state, log)
+            log(f"FOMO: {n} new trades, {len(state.get('fomo', {}))} coins traded in 24h"
+                f"{'' if stream.connected else ' (stream offline)'}")
             scan_cycle(http, state, cfg, ctx)
         except Exception as e:  # one bad cycle must not kill the run
             import traceback
@@ -1168,6 +1358,9 @@ def main():
         if now() - start + cycle_s + 60 > run_s:
             break
         time.sleep(max(5, cycle_s - (now() - c0)))
+    stream.close()
+    fomo.absorb(state, stream.drain())
+    save_state(state)
     log(f"run finished after {now() - start:.0f}s; calls: {http.calls}")
 
 
