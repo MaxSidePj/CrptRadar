@@ -1,0 +1,33 @@
+{
+  "_help": "Change a number, commit, and the next run uses it. Higher alert_min_score = fewer, stronger alerts.",
+  "alert_min_score": 70,
+  "exceptional_score": 85,
+  "max_alerts_per_day": 6,
+  "max_alerts_per_cycle": 2,
+  "gem_max_age_hours": 24,
+  "runner_max_age_hours": 168,
+  "min_liquidity_usd": 12000,
+  "min_mcap_usd": 30000,
+  "max_mcap_usd": 50000000,
+  "min_txns_1h": 60,
+  "min_volume_1h_usd": 5000,
+  "max_top10_pct": 35,
+  "max_single_holder_pct": 12,
+  "max_creator_pct": 8,
+  "max_insider_pct": 20,
+  "max_bundle_pct": 20,
+  "max_tax_pct": 10,
+  "deep_checks_per_cycle": 12,
+  "gt_new_pool_pages": 4,
+  "gt_trending_networks": [
+    "solana",
+    "base",
+    "bsc",
+    "robinhood",
+    "eth"
+  ],
+  "watch_rechecks_per_cycle": 900,
+  "chains_only": [],
+  "chains_excluded": [],
+  "quiet_hours_utc": []
+}

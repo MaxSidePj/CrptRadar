@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GemRadar">
+<meta name="theme-color" content="#0b0f17">
+<title>GemRadar</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo">◎</span> GemRadar</div>
+  <div id="updated" class="muted">loading…</div>
+</header>
+<nav id="tabs">
+  <button data-tab="alerts" class="on">Alerts</button>
+  <button data-tab="board">Live</button>
+  <button data-tab="blocked">Blocked</button>
+  <button data-tab="about">How</button>
+</nav>
+<main>
+  <section id="alerts"></section>
+  <section id="board" hidden>
+    <div class="filters">
+      <select id="chainFilter"><option value="">All chains</option></select>
+      <label><input type="checkbox" id="youngOnly"> &lt; 24h only</label>
+    </div>
+    <div id="boardList"></div>
+  </section>
+  <section id="blocked" hidden></section>
+  <section id="about" hidden>
+    <div class="card static">
+      <h3>What gets an alert</h3>
+      <p>Every ~90 seconds while a run is active, GemRadar reads new and trending pools on every chain GeckoTerminal indexes, plus DexScreener's new profiles, boosts and community takeovers.</p>
+      <p>A coin only reaches you when it:</p>
+      <ol>
+        <li>passes the market filter (enough liquidity, trades and volume, not dumping),</li>
+        <li>passes <b>every</b> scam check: honeypot/tax, mint &amp; freeze authority, dev wallet, top-10 holders, single whales, linked insider wallets (bubblemap-style clusters), bundles and same-size wallet clusters, liquidity lock,</li>
+        <li>and scores at least <b id="minScore">–</b>/100 on traction, momentum, holder growth, hype and how early it is.</li>
+      </ol>
+      <p>Maximum <b id="maxDay">–</b> alerts per day; only very high scores break that limit. Coins on chains that can't be safety-checked are shown in Live but never alerted.</p>
+      <h3>Score parts</h3>
+      <p><b>Traction 35</b> liquidity, volume vs market cap, trades, buy/sell balance, unique buyers.<br>
+      <b>Momentum 15</b> 1h &amp; 6h price trend, no dump in last 5m, penalty if already pumped 10x+.<br>
+      <b>Holders 15</b> holder count, holders gained per hour, spread.<br>
+      <b>Hype 25</b> X/website/Telegram, X followers, DexScreener boosts &amp; takeovers, trending on GeckoTerminal/CoinGecko, 4chan /biz/ mentions.<br>
+      <b>Early 10</b> young age and small market cap.</p>
+      <h3>Limits</h3>
+      <p>X's own search API isn't free, so X hype = the coin's account followers plus a button to open live X posts. Bundle data for Solana comes from a free service that is sometimes offline; the same-size-wallet check always runs. GitHub can start runs late, so alerts come within minutes, not seconds.</p>
+      <p class="warn">Not financial advice. Most new tokens go to zero; passing the checks lowers the scam risk, it does not remove it.</p>
+    </div>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
