@@ -50,6 +50,7 @@ jobs:
       - name: Scan for new tokens
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          FOMO_API_KEY: ${{ secrets.FOMO_API_KEY }}
           DASHBOARD_URL: ${{ format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
           RUN_SECONDS: "660"
           CYCLE_SECONDS: "90"
