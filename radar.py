@@ -30,6 +30,7 @@ import os
 import re
 import shutil
 import ssl
+import subprocess
 import sys
 import time
 import urllib.error
@@ -1325,6 +1326,8 @@ def scan_cycle(http, state, cfg, ctx):
     for e in results:
         if maybe_alert(e, state, cfg, sent):
             sent += 1
+    if sent:
+        publish_alerts(state)
     merge_board(state, results)
     return finish_cycle(state, t0, seeds, tokens, results, skipped, sent)
 
@@ -1465,6 +1468,26 @@ def refresh_alerts(http, state):
             continue
         keep.append(a)
     state["alerts"] = keep
+
+
+def publish_alerts(state):
+    """Push state/alerts.json right away, so the dashboard shows a new alert within a minute instead of
+    after the run (~13 min). Only on GitHub Actions; failures are harmless (the end-of-run step retries)."""
+    save_state(state)
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return
+    git = ["git", "-c", "user.name=gemradar-bot", "-c", "user.email=actions@users.noreply.github.com"]
+    try:
+        subprocess.run(git + ["add", str(ALERTS_FILE)], cwd=ROOT, timeout=30, check=True, capture_output=True)
+        if subprocess.run(git + ["diff", "--cached", "--quiet"], cwd=ROOT, timeout=30).returncode == 0:
+            return
+        subprocess.run(git + ["commit", "-q", "-m", "New GemRadar alert"], cwd=ROOT, timeout=30, check=True,
+                       capture_output=True)
+        subprocess.run(git + ["pull", "--rebase", "--autostash", "-q"], cwd=ROOT, timeout=60, capture_output=True)
+        subprocess.run(git + ["push", "-q"], cwd=ROOT, timeout=60, check=True, capture_output=True)
+        log("  alert published to the dashboard")
+    except Exception as e:
+        log(f"  alert publish skipped ({type(e).__name__}); dashboard updates at the end of the run")
 
 
 def heartbeat(state):

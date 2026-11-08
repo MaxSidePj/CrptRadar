@@ -219,7 +219,31 @@ async function load() {
     render();
   } catch (e) {
     $("#updated").textContent = "Could not load data yet";
+    return;
   }
+  freshAlerts();
+}
+
+// New alerts are pushed to the repository the moment they are sent; the site itself is only rebuilt
+// at the end of each run. Read the alert list straight from GitHub (no cache) so they show up at once.
+async function freshAlerts() {
+  const owner = location.hostname.split(".")[0];
+  const repo = location.pathname.split("/").filter(Boolean)[0];
+  if (!location.hostname.endsWith("github.io") || !repo) return;
+  try {
+    const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/state/alerts.json`,
+      { headers: { Accept: "application/vnd.github.raw+json" }, cache: "no-store" });
+    if (!r.ok) return; // e.g. GitHub's 60-per-hour limit for this phone: keep the site's copy
+    const fresh = (await r.json()).alerts || [];
+    const known = new Set((DATA.alerts || []).map((a) => a.key));
+    const added = fresh.filter((a) => !known.has(a.key) && a.ts > ((DATA.alerts || [])[0]?.ts || 0));
+    if (!added.length) return;
+    DATA.alerts = [...added, ...(DATA.alerts || [])];
+    const day = new Date().toISOString().slice(0, 10);
+    DATA.alerts_today = DATA.alerts.filter((a) => a.day === day).length;
+    renderAlerts();
+    fetchLive(DATA.alerts);
+  } catch (_) { /* offline or blocked: the site's copy is still shown */ }
 }
 
 document.addEventListener("click", (ev) => {
