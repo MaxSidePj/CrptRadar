@@ -34,9 +34,96 @@
    "ts": 1794096381.2255003,
    "score": 59.3,
    "mcap": 12668197.0
+  },
+  "robinhood:0x000de658153f47f23e92973c8eb1e89762703676": {
+   "ts": 1794100859.3862307,
+   "score": 66.5,
+   "mcap": 8270207.0
   }
  },
  "alerts": [
+  {
+   "key": "robinhood:0x000de658153f47f23e92973c8eb1e89762703676",
+   "ts": 1794100859.3862307,
+   "day": "2026-11-08",
+   "kind": "survivor",
+   "symbol": "FOBO",
+   "name": "FOBO",
+   "chain": "robinhood",
+   "address": "0x000DE658153f47f23e92973C8EB1e89762703676",
+   "score": 66.5,
+   "mcap": 8270207.0,
+   "price": 0.008297,
+   "liq": 5613259.49,
+   "age_h": 296.29966788275823,
+   "why": [
+    "$5613k liquidity",
+    "market cap +73% in 6h",
+    "holders +18% in 3h",
+    "holding up after 12d",
+    "4 FOMO traders bought (Prophetgam7ng, RoundTripChamp, mj_criptooo_mj)",
+    "1 FOMO thesis posts"
+   ],
+   "warnings": [],
+   "links": {
+    "chart": "https://dexscreener.com/robinhood/0x32c50d83271c3af69696fe6b08def9c4f26d38b640da2cdb2a7c39acd8bbca5a",
+    "x_search": "https://x.com/search?q=%24FOBO%20OR%200x000DE658153f47f23e92973C8EB1e89762703676&f=live",
+    "goplus": "https://gopluslabs.io/token-security/4663/0x000DE658153f47f23e92973C8EB1e89762703676",
+    "x": "https://x.com/fobodotfun",
+    "telegram": "https://t.me/fobodotfun",
+    "website": "https://fobo.fun"
+   },
+   "image": "https://cdn.dexscreener.com/cms/images/q-Z2BGrKBNIkf5RH?width=800&height=800&quality=95&format=auto",
+   "sent": true,
+   "fomo": {
+    "buyers_1h": 0,
+    "buyers_2h": 2,
+    "buyers_6h": 4,
+    "buyers_24h": 4,
+    "sellers_6h": 1,
+    "buy_usd_6h": 18337,
+    "theses_24h": 1,
+    "top_buyers": [
+     "Prophetgam7ng",
+     "RoundTripChamp",
+     "mj_criptooo_mj",
+     "rellu9090908888888"
+    ],
+    "rank": null,
+    "first_seen_h": 4.8
+   },
+   "buzz": 28,
+   "gates": [
+    {
+     "ok": true,
+     "text": "Survived 12d (needs 6h+)"
+    },
+    {
+     "ok": true,
+     "text": "Watched by GemRadar for 4.8h (needs 3h+)"
+    },
+    {
+     "ok": true,
+     "text": "0% below its peak (max 45%)"
+    },
+    {
+     "ok": true,
+     "text": "Trading still active: last hour = 1.1x the 6h average"
+    },
+    {
+     "ok": true,
+     "text": "Liquidity +37% in 3h"
+    },
+    {
+     "ok": true,
+     "text": "Market cap +38% in 3h"
+    },
+    {
+     "ok": true,
+     "text": "Holders +18% in 3h"
+    }
+   ]
+  },
   {
    "key": "solana:Bv1a7cEj5aRnJQhMw4kRQqAFesMSd5LwcDnUzq52BMmr",
    "ts": 1794096381.2255003,
