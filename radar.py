@@ -229,6 +229,17 @@ def load_state():
                 state.update(json.loads(f.read_text(encoding="utf-8")))
             except Exception as e:
                 log(f"{f.name} unreadable ({e})")
+    # Backup copy from the run cache: if a run starts from an older copy of the repository, coins that
+    # were already alerted are still known, so nobody gets the same notification twice.
+    alerted = state.setdefault("alerted", {})
+    for k, v in (state.pop("alerted_backup", None) or {}).items():
+        alerted.setdefault(k, v)
+    alerts = {a["key"]: a for a in state.get("alerts") or []}
+    removed = set(state.pop("removed_backup", None) or [])
+    for a in state.pop("alerts_backup", None) or []:
+        if a["key"] not in alerts and a["key"] not in removed:
+            alerts[a["key"]] = a
+    state["alerts"] = sorted(alerts.values(), key=lambda a: a.get("ts", 0), reverse=True)
     return state
 
 
@@ -272,7 +283,11 @@ def _write_json(path, obj, indent=None):
 
 def save_state(state):
     _write_json(ALERTS_FILE, {k: state[k] for k in ALERT_KEYS if k in state}, indent=1)
-    _write_json(CACHE_FILE, {k: v for k, v in state.items() if k not in ALERT_KEYS})
+    cache = {k: v for k, v in state.items() if k not in ALERT_KEYS}
+    cache["alerted_backup"] = state.get("alerted", {})
+    cache["alerts_backup"] = state.get("alerts", [])
+    cache["removed_backup"] = [k for k in state.get("alerted", {}) if k not in {a["key"] for a in state.get("alerts", [])}]
+    _write_json(CACHE_FILE, cache)
 
 
 # --------------------------------------------------------------------------- helpers

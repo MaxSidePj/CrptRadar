@@ -1,4 +1,5 @@
 """Offline tests for GemRadar: python -m unittest test_radar.py"""
+import json
 import os
 import time
 import unittest
@@ -384,6 +385,47 @@ class FomoChainTests(unittest.TestCase):
         state["fomo_chain"] = {"coins": {"solana:abc": {"ts": time.time(), "holders": ["w1", "w2"], "buyers": 2,
                                                          "sellers": 0, "trades": 2, "span_h": 8}}}
         self.assertTrue(radar.fomo.has_signal(radar.fomo.stats(state, "solana:abc")))
+
+
+class DuplicateTests(unittest.TestCase):
+    def test_old_repository_copy_cannot_cause_a_second_alert(self):
+        import tempfile, pathlib
+        with tempfile.TemporaryDirectory() as d:
+            orig = (radar.ALERTS_FILE, radar.CACHE_FILE)
+            radar.ALERTS_FILE = pathlib.Path(d) / "state" / "alerts.json"
+            radar.CACHE_FILE = pathlib.Path(d) / "cache" / "radar.json"
+            try:
+                state = radar.fresh_state(radar.load_state())
+                t = token(key="solana:stank", address="stank", age_h=20)
+                e = {**t, "score": 80, "why": [], "warnings": [], "rejects": [], "verified": True, "safety": SAFE,
+                     "links": radar.links_for(t), "gates": OK_GATES, "fast_gates": None, "fomo": None, "buzz": 0,
+                     "parts": {"staying": 20}}
+                self.assertTrue(radar.maybe_alert(e, state, CFG, 0))
+                radar.save_state(state)
+                radar.ALERTS_FILE.write_text('{"alerted": {}, "alerts": []}')  # next run got an old copy
+                state2 = radar.fresh_state(radar.load_state())
+                self.assertFalse(radar.maybe_alert(dict(e), state2, CFG, 0))
+                self.assertEqual([a["key"] for a in state2["alerts"]], ["solana:stank"])
+            finally:
+                radar.ALERTS_FILE, radar.CACHE_FILE = orig
+
+    def test_crashed_alert_stays_removed_after_restore(self):
+        state = radar.fresh_state({})
+        state["alerted"]["solana:dead"] = {"ts": 1}
+        state["alerts"] = []
+        import tempfile, pathlib
+        with tempfile.TemporaryDirectory() as d:
+            orig = (radar.ALERTS_FILE, radar.CACHE_FILE)
+            radar.ALERTS_FILE = pathlib.Path(d) / "a.json"
+            radar.CACHE_FILE = pathlib.Path(d) / "c.json"
+            try:
+                radar.save_state(state)
+                cache = json.loads(radar.CACHE_FILE.read_text())
+                cache["alerts_backup"] = [{"key": "solana:dead", "ts": 1}]
+                radar.CACHE_FILE.write_text(json.dumps(cache))
+                self.assertEqual(radar.load_state()["alerts"], [])
+            finally:
+                radar.ALERTS_FILE, radar.CACHE_FILE = orig
 
 
 class ParsingTests(unittest.TestCase):
