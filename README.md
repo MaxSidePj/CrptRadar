@@ -26,8 +26,9 @@ your iPhone, and publishes a dashboard on GitHub Pages.
   FOMO buys add up to 15 points. FOMO fast lane: a young coin bought by 3+ FOMO traders within 2
   hours (or top 20 on FOMO trending) alerts early as 🔥 if all scam checks pass, FOMO traders
   aren't selling, it hasn't crashed and its holders aren't bots.
-- 🐋 Smart money: alerts before the move when 3+ FOMO traders (or 2+ from FOMO's top-150
-  leaderboard) hold a coin and haven't sold, and it hasn't run up yet (under +100% in 6h). Every scam
+- 🐋 Smart money: alerts before the move on low caps (max $1M) when at least one trader from FOMO's
+  top-150 leaderboard holds the coin, FOMO traders are buying more than selling, and it hasn't risen
+  more than 2.5x since FOMO traders were first seen in it. Every scam
   check still applies. FOMO trades are remembered for 7 days; with a free `FOMO_API_KEY` GemRadar also
   reads the leaderboard (daily), FOMO's trending and graduated coins (every 4h) and "which FOMO
   traders hold this coin" (15 lookups a day), capped at 900 of the 1,000 free calls a month.
@@ -74,8 +75,14 @@ Edit `config.json` on GitHub and commit. Useful settings:
 | `fomo_fast_lane` | true | Early 🔥 alerts for young coins with FOMO-app hype |
 | `fomo_fast_min_buyers` | 3 | FOMO traders needed within 2h for the fast lane |
 | `smart_money_lane` | true | 🐋 alerts when FOMO traders already hold a coin before it runs |
-| `smart_min_holders` | 3 | FOMO traders holding needed (or `smart_min_top_traders`: 2) |
+| `smart_min_top_traders` | 1 | Top-150 FOMO traders that must hold it (needs the free `FOMO_API_KEY`) |
+| `smart_min_holders` | 2 | Named FOMO traders/wallets holding in total (or 2+ top traders) |
 | `smart_max_runup_6h_pct` | 100 | No 🐋 alert once it already rose this much in 6h |
+| `smart_min_fresh_buyers` | 2 | FOMO traders that must have bought in the last 24h (and more buyers than sellers) |
+| `smart_max_age_hours` | 336 | 🐋 only for coins up to 14 days old |
+| `smart_max_mcap_usd` | 1000000 | 🐋 only below this market cap |
+| `smart_max_rise_since_spotted` | 2.5 | No 🐋 once it rose more than this since FOMO traders were first seen in it |
+| `smart_max_per_day` | 5 | Max 🐋 alerts per day (and 1 per scan) |
 | `min_liquidity_usd` | 12000 | Ignore coins with less liquidity |
 | `max_mcap_usd` | 50000000 | Ignore coins above this market cap |
 | `chains_only` | `[]` | e.g. `["solana", "base"]` to restrict |

@@ -69,10 +69,15 @@ DEFAULT_CONFIG = {
     "fomo_fast_min_buyers": 3,
     "fomo_fast_min_score": 55,
     "smart_money_lane": True,
-    "smart_min_holders": 3,
-    "smart_min_top_traders": 2,
-    "smart_min_score": 40,
+    "smart_min_holders": 2,
+    "smart_min_top_traders": 1,
+    "smart_min_score": 50,
     "smart_max_runup_6h_pct": 100,
+    "smart_min_fresh_buyers": 2,
+    "smart_max_age_hours": 336,
+    "smart_max_mcap_usd": 1000000,
+    "smart_max_rise_since_spotted": 2.5,
+    "smart_max_per_day": 5,
     "min_liquidity_usd": 12000,
     "min_mcap_usd": 30000,
     "max_mcap_usd": 50000000,
@@ -265,6 +270,7 @@ def prune_state(state, cfg):
     state["x_cache"] = {k: v for k, v in state["x_cache"].items() if t - v["ts"] < 24 * 3600}
     state["alerted"] = {k: v for k, v in state["alerted"].items() if t - v["ts"] < max(keep_s, 30 * 86400)}
     state["alerts"] = state["alerts"][:150]
+    state["fomo_spotted"] = {k: v for k, v in (state.get("fomo_spotted") or {}).items() if t - v["ts"] < 30 * 86400}
     w = state["watch"]
     if len(w) > 5000:
         for k in sorted(w, key=lambda k: w[k][3])[:len(w) - 5000]:
@@ -1022,16 +1028,31 @@ def smart_lane_gates(t, hist, holders, fs, gates, cfg):
     """FOMO traders (ideally top ones) already hold it and it hasn't run yet: alert before the move."""
     if not cfg.get("smart_money_lane") or not fs:
         return None
-    held, good = fs["holders_n"], len(fs["good_holders"])
-    out = [{"ok": held >= cfg["smart_min_holders"] or good >= cfg["smart_min_top_traders"],
-            "text": f"{held} FOMO traders hold it, {good} top traders (needs {cfg['smart_min_holders']}+ or "
-                    f"{cfg['smart_min_top_traders']}+ top)"}]
+    held, good, good_recent = fs["named_holders"], len(fs["good_holders"]), len(fs["good_recent"])
+    min_top = cfg["smart_min_top_traders"]
+    names = ", ".join(fs["good_holders"][:3])
+    out = [{"ok": good >= min_top and (held >= cfg["smart_min_holders"] or good >= 2),
+            "text": f"{good} top FOMO trader(s) hold it{' (' + names + ')' if names else ''}, {held} FOMO holders "
+                    f"(needs {min_top}+ top trader and {cfg['smart_min_holders']}+ holders)"}]
+    buy, sell = fs["fresh_buyers"], fs["fresh_sellers"]
+    need = cfg["smart_min_fresh_buyers"]
+    out.append({"ok": buy > sell and (buy >= need or good_recent >= 1),
+                "text": f"Fresh FOMO buying: {buy} bought vs {sell} sold in 24h, {good_recent} top trader(s) "
+                        f"bought in 48h"})
+    spotted = fs.get("spotted_mcap")
+    if spotted:
+        rise = t["mcap"] / max(spotted, 1)
+        out.append({"ok": rise <= cfg["smart_max_rise_since_spotted"],
+                    "text": f"Not too late: FOMO traders spotted it at {fmt_usd(spotted)}, now {rise:.1f}x "
+                            f"(max {cfg['smart_max_rise_since_spotted']}x)"})
     run6 = t["pc"].get("h6", 0)
     out.append({"ok": run6 < cfg["smart_max_runup_6h_pct"] and t["pc"].get("h1", 0) < 60,
                 "text": f"Not run up yet: 6h {run6:+.0f}% (max +{cfg['smart_max_runup_6h_pct']}%)"})
-    out.append({"ok": (t["age_h"] or 0) >= 1, "text": f"Age {fmt_age(t['age_h'])} (needs 1h+)"})
-    out.append({"ok": fs["sellers_6h"] <= max(held, fs["buyers_6h"]),
-                "text": f"FOMO traders not dumping ({fs['sellers_6h']} sold in 6h)"})
+    age = t["age_h"] or 0
+    out.append({"ok": 1 <= age <= cfg["smart_max_age_hours"],
+                "text": f"Age {fmt_age(age)} (1h to {cfg['smart_max_age_hours'] // 24}d)"})
+    out.append({"ok": t["mcap"] <= cfg["smart_max_mcap_usd"],
+                "text": f"Market cap {fmt_usd(t['mcap'])} (max {fmt_usd(cfg['smart_max_mcap_usd'])})"})
     for g in gates:  # keep the crash, liquidity and bot-holder checks
         if any(w in g["text"] for w in ("below its peak", "faster than buys", "Liquidity")):
             out.append(g)
@@ -1225,6 +1246,14 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
              and all(g["ok"] for g in entry["smart_gates"]))
     if not (normal or fast or smart):
         return False
+    if smart:
+        day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        if sum(1 for a in state["alerts"] if a.get("day") == day and a.get("kind") == "smart") >= cfg["smart_max_per_day"]:
+            return False
+        scan = state["stats"].get("cycles", 0)
+        if "_smart_scan" in state and state["_smart_scan"] == scan:
+            return False  # max 1 smart-money alert per scan
+        state["_smart_scan"] = scan
     if cycle_alerts >= cfg["max_alerts_per_cycle"]:
         return False
     if alerts_today(state) >= NTFY_DAILY_CEILING:
@@ -1252,7 +1281,9 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
     if fast:
         lines.append("Young coin - early FOMO alert, higher risk")
     if smart:
-        lines.append("Early: FOMO traders are in before the move - it may also never run")
+        if fs and fs.get("spotted_mcap"):
+            lines.append(f"FOMO traders spotted it at {fmt_usd(fs['spotted_mcap'])}, now {fmt_usd(t['mcap'])}")
+        lines.append("Early: top FOMO traders are in before the move - it may also never run")
     m = entry.get("safety") or {}
     safety_line = f"Safe ✓ top10 {m.get('top10_pct', 0):.0f}% · dev {max(m.get('creator_pct', 0), m.get('owner_pct', 0)):.1f}%"
     if m.get("holders"):
@@ -1364,6 +1395,10 @@ def evaluate(http, state, cfg, t, corpus, cg, budget, pool):
     verdict = judge_safety(m, t, cfg)
     social = {"cg_trending": (t["symbol"] or "").upper() in cg, "biz": biz_mentions(corpus, t),
               "fomo": fomo.stats(state, t["key"])}
+    fs = social["fomo"]
+    if fs and (fs["named_holders"] or fs["fresh_buyers"]):
+        spotted = state.setdefault("fomo_spotted", {}).setdefault(t["key"], {"ts": now(), "mcap": t["mcap"]})
+        fs["spotted_mcap"], fs["spotted_h"] = spotted["mcap"], round((now() - spotted["ts"]) / 3600, 1)
     if not verdict["rejects"]:
         social["x"] = x_profile(http, state, parse_x_handle(t["socials"].get("x")))
     record_history(state, t, (m or {}).get("holders"))

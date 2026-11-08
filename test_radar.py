@@ -88,7 +88,8 @@ class ScoringTests(unittest.TestCase):
         with_history(self.state, t, hours=6)
         fs = {"buyers_1h": 1, "buyers_2h": 2, "buyers_6h": 3, "buyers_24h": 4, "sellers_6h": 1, "buy_usd_6h": 9000,
               "theses_24h": 0, "top_buyers": ["a", "b", "c"], "rank": None, "first_seen_h": 5,
-              "buyers_7d": 4, "holders": ["a", "b", "c"], "holders_n": 3, "good_holders": [], "graduated": False}
+              "buyers_7d": 4, "holders": ["a", "b", "c"], "holders_n": 3, "good_holders": [], "graduated": False,
+              "sellers_24h": 1, "named_holders": 3, "good_recent": [], "fresh_buyers": 4, "fresh_sellers": 1}
         s, parts, why, gates = run_score(t, SAFE, self.state, {**SOCIAL, "fomo": fs})
         self.assertGreaterEqual(s, CFG["alert_min_score"] + 3, parts)
         self.assertTrue(all(g["ok"] for g in gates), gates)
@@ -268,17 +269,25 @@ class AlertRescoreTests(unittest.TestCase):
 
 
 class SmartMoneyTests(unittest.TestCase):
-    def quiet_coin(self, holders=("a", "b", "c"), h6=5, sell_after=(), days_ago=2):
-        """Pirate-Shop-like: 3 days old, quiet trading, FOMO traders bought days ago and still hold."""
+    def quiet_coin(self, holders=("a", "b", "c"), h6=5, sell_after=(), days_ago=5 / 24, age_h=80, mcap=320_000,
+                   leaders=("a",), spotted_mcap=None):
+        """Pirate-Shop-like: 3 days old, quiet trading, FOMO traders (one of them a top trader) bought a few
+        hours ago and still hold."""
         state = radar.fresh_state({})
+        state["fomo_rest"] = {"leaders": list(leaders), "holders": {}, "trending": {}, "graduated": {}}
+        if spotted_mcap:
+            state["fomo_spotted"] = {"solana:abc": {"ts": time.time() - 86400, "mcap": spotted_mcap}}
         ev = [fomo_event(i, "buy", h, minutes_ago=days_ago * 1440) for i, h in enumerate(holders)]
         ev += [fomo_event(100 + i, "sell", h, minutes_ago=60) for i, h in enumerate(sell_after)]
         radar.fomo.absorb(state, ev)
-        t = token(age_h=80, mcap=320_000, liq=60_000, buys_h1=25, sells_h1=15, buyers_h1=20, trending=False,
+        t = token(age_h=age_h, mcap=mcap, liq=60_000, buys_h1=25, sells_h1=15, buyers_h1=20, trending=False,
                   vol={"m5": 100, "h1": 4_000, "h6": 40_000, "h24": 150_000},
                   pc={"m5": 0, "h1": 2, "h6": h6, "h24": 8})
         with_history(state, t, hours=6, mcap_start=300_000, holders_start=1400, holders_now=1450)
         fs = radar.fomo.stats(state, t["key"])
+        spotted = (state.get("fomo_spotted") or {}).get(t["key"])
+        if spotted:
+            fs["spotted_mcap"] = spotted["mcap"]
         social = {**SOCIAL, "fomo": fs}
         safety = {**SAFE, "holders": 1450}
         v = radar.judge_safety(safety, t, CFG)
@@ -313,12 +322,66 @@ class SmartMoneyTests(unittest.TestCase):
     def test_two_top_traders_are_enough(self):
         state = radar.fresh_state({})
         state["fomo_rest"] = {"leaders": ["whale1", "whale2"], "holders": {}, "trending": {}, "graduated": {}}
-        radar.fomo.absorb(state, [fomo_event(1, "buy", "whale1", minutes_ago=3000),
+        radar.fomo.absorb(state, [fomo_event(1, "buy", "whale1", minutes_ago=1200),
                                   fomo_event(2, "buy", "whale2", minutes_ago=3000)])
         fs = radar.fomo.stats(state, "solana:abc")
         self.assertEqual(fs["good_holders"], ["whale1", "whale2"])
         gates = radar.smart_lane_gates(token(age_h=80, pc={"m5": 0, "h1": 1, "h6": 3, "h24": 5}), None, 0, fs, [], CFG)
         self.assertTrue(all(g["ok"] for g in gates), gates)
+
+    def test_no_top_trader_no_smart_alert(self):
+        state, t, e = self.quiet_coin(leaders=())
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_above_one_million_is_too_late(self):
+        state, t, e = self.quiet_coin(mcap=1_500_000)
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_risen_3x_since_fomo_spotted_it_is_too_late(self):
+        state, t, e = self.quiet_coin(mcap=900_000, spotted_mcap=300_000)
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+        state, t, e = self.quiet_coin(mcap=600_000, spotted_mcap=300_000)   # 2x: still fine
+        self.assertTrue(radar.maybe_alert(e, state, CFG, 0), e["smart_gates"])
+
+    def test_old_big_coin_like_dacity_is_blocked(self):
+        state, t, e = self.quiet_coin(age_h=676, mcap=7_500_000)
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_holders_without_fresh_buying_are_not_enough(self):
+        state, t, e = self.quiet_coin(days_ago=3)      # bought 3 days ago, nothing since
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_as_many_sellers_as_buyers_like_wealth_is_blocked(self):
+        state, t, e = self.quiet_coin(holders=("a", "b", "c"), sell_after=("x", "y", "z"))
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_popular_on_fomo_boards_alone_is_not_enough(self):
+        state = radar.fresh_state({})
+        state["fomo_rest"] = {"leaders": [], "holders": {}, "graduated": {},
+                              "trending": {"solana:abc": {"rank": 5, "holders": 50}}}
+        fs = radar.fomo.stats(state, "solana:abc")
+        self.assertEqual(fs["holders_n"], 50)
+        self.assertEqual(fs["named_holders"], 0)
+        gates = radar.smart_lane_gates(token(age_h=80, pc={"m5": 0, "h1": 1, "h6": 3, "h24": 5}), None, 0, fs, [], CFG)
+        self.assertFalse(all(g["ok"] for g in gates))
+
+    def test_max_one_smart_alert_per_scan_and_five_per_day(self):
+        sent = 0
+        state = None
+        for i in range(8):
+            st, t, e = self.quiet_coin()
+            if state is None:
+                state = st
+            e = {**e, "key": f"solana:c{i}", "address": f"c{i}"}
+            if i % 2 == 0:
+                state["stats"]["cycles"] = i   # a new scan every 2 coins
+            sent += radar.maybe_alert(e, state, CFG, 0)
+        self.assertEqual(sent, 4)                       # 1 per scan, 4 scans
+        for i in range(8, 12):
+            st, t, e = self.quiet_coin()
+            state["stats"]["cycles"] = 100 + i
+            sent += radar.maybe_alert({**e, "key": f"solana:c{i}", "address": f"c{i}"}, state, CFG, 0)
+        self.assertEqual(sent, CFG["smart_max_per_day"])
 
     def test_fomo_api_budget_never_exceeded(self):
         state = radar.fresh_state({})
