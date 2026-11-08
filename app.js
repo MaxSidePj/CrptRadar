@@ -1,5 +1,6 @@
 "use strict";
 let DATA = null;
+const LIVE = {}; // address(lowercase) -> latest DexScreener pair, fetched by this phone
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -94,7 +95,7 @@ function tokenCard(e, extra = "") {
         <div><span>Volume 1h / 24h</span>${usd((e.vol || {}).h1)} / ${usd((e.vol || {}).h24)}</div>
         <div><span>Buys / sells 1h</span>${e.buys_h1 ?? "?"} / ${e.sells_h1 ?? "?"}</div>
         <div><span>Price 5m / 6h</span>${pct((e.pc || {}).m5)} / ${pct((e.pc || {}).h6)}</div>
-        <div><span>Holders</span>${m.holders ? m.holders.toLocaleString() : "?"}</div>
+        <div><span>Holders</span>${m.holders ? m.holders.toLocaleString() : "–"}</div>
         <div><span>X followers</span>${e.x ? e.x.followers.toLocaleString() : "–"}</div>
         <div><span>Checked</span>${e.checked ? ago(e.checked) : "?"}</div>
       </div>
@@ -118,43 +119,65 @@ function renderAlerts() {
   if (!list.length) html += `<div class="empty">No alerts yet. GemRadar only alerts when a coin passes every scam check and scores ${DATA.config.alert_min_score}+.<br>See the <b>Live</b> tab for what it's watching.</div>`;
   html += list.map((a) => {
     const board = (DATA.board || []).find((b) => b.key === a.key);
-    const e = { ...(board || {}), ...a, score: a.score, links: a.links, safety: board?.safety, parts: board?.parts,
-      verified: true, rejects: [], warnings: a.warnings, checked: board?.checked, gates: a.gates || board?.gates,
-      fomo: (a.fomo && typeof a.fomo === "object") ? a.fomo : board?.fomo, buzz: a.buzz ?? board?.buzz,
-      fast_gates: board?.fast_gates };
+    const e = { ...a, ...(board || {}), score: a.score, links: a.links, kind: a.kind, ts: a.ts,
+      safety: board?.safety || a.safety, parts: board?.parts || a.parts, verified: true, rejects: [],
+      warnings: a.warnings, checked: board?.checked, gates: a.gates || board?.gates,
+      fomo: (board?.fomo && typeof board.fomo === "object") ? board.fomo : (a.fomo && typeof a.fomo === "object" ? a.fomo : null),
+      buzz: board?.buzz ?? a.buzz, fast_gates: board?.fast_gates || a.fast_gates };
+    applyLive(e, LIVE[(a.address || "").toLowerCase()], a.live);
     const extra = `<p><b>${{ gem: "💎 Gem", survivor: "🏆 Survivor", fomo: "🔥 FOMO hype" }[a.kind] || "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}
-      · now <span class="perf" data-perf="${esc(a.chain)}|${esc(a.address)}|${a.mcap || 0}">…</span></p>`;
+      · now ${perfText(e.mcap_now, a.mcap)}</p>`;
     return tokenCard(e, extra);
   }).join("");
+  const open = document.querySelector("#alerts .card.open")?.dataset.key;
   $("#alerts").innerHTML = html;
-  livePerformance(list);
+  if (open) document.querySelector(`#alerts .card[data-key="${CSS.escape(open)}"]`)?.classList.add("open");
 }
 
-async function livePerformance(list) {
+function perfText(now, then) {
+  if (!now) return `<span class="perf">…</span>`;
+  const ch = then > 0 ? (now / then - 1) * 100 : null;
+  const cls = ch == null ? "" : ch >= 0 ? "up" : "down";
+  return `<span class="perf ${cls}">${usd(now)}${ch == null ? "" : ` (${ch >= 0 ? "+" : ""}${ch.toFixed(0)}%)`}</span>`;
+}
+
+// Current market numbers: this phone's own fetch first, else the scanner's last refresh.
+function applyLive(e, p, live) {
+  if (p) {
+    const tx = p.txns?.h1 || {};
+    e.mcap = e.mcap_now = p.marketCap || p.fdv;
+    e.liq = p.liquidity?.usd;
+    e.vol = { m5: p.volume?.m5, h1: p.volume?.h1, h6: p.volume?.h6, h24: p.volume?.h24 };
+    e.pc = { m5: p.priceChange?.m5, h1: p.priceChange?.h1, h6: p.priceChange?.h6, h24: p.priceChange?.h24 };
+    e.buys_h1 = tx.buys; e.sells_h1 = tx.sells;
+    if (p.pairCreatedAt) e.age_h = (Date.now() - p.pairCreatedAt) / 3.6e6;
+    if (!e.image && p.info?.imageUrl) e.image = p.info.imageUrl;
+    e.checked = Date.now() / 1000;
+  } else if (live) {
+    Object.assign(e, { mcap: live.mcap, liq: live.liq, vol: live.vol, pc: live.pc, buys_h1: live.buys_h1,
+      sells_h1: live.sells_h1, checked: live.ts });
+    e.mcap_now = live.mcap;
+    if (live.age_h != null) e.age_h = live.age_h;
+  } else if (e.age_h != null && e.ts) {
+    e.age_h = e.age_h + (Date.now() / 1000 - e.ts) / 3600; // age keeps counting since the alert
+  }
+}
+
+async function fetchLive(list) {
   const byChain = {};
   list.slice(0, 60).forEach((a) => (byChain[a.chain] = byChain[a.chain] || []).push(a.address));
   for (const [chain, addrs] of Object.entries(byChain)) {
     for (let i = 0; i < addrs.length; i += 30) {
       try {
         const r = await fetch(`https://api.dexscreener.com/tokens/v1/${chain}/${addrs.slice(i, i + 30).join(",")}`);
-        const pairs = await r.json();
-        const best = {};
-        pairs.forEach((p) => {
+        (await r.json()).forEach((p) => {
           const a = (p.baseToken?.address || "").toLowerCase();
-          if (!best[a] || (p.liquidity?.usd || 0) > (best[a].liquidity?.usd || 0)) best[a] = p;
+          if (!LIVE[a] || (p.liquidity?.usd || 0) > (LIVE[a].liquidity?.usd || 0)) LIVE[a] = p;
         });
-        document.querySelectorAll(`[data-perf^="${chain}|"]`).forEach((el) => {
-          const [, addr, mc0] = el.dataset.perf.split("|");
-          const p = best[addr.toLowerCase()];
-          if (!p) { el.textContent = "no data"; return; }
-          const mc = p.marketCap || p.fdv;
-          const ch = mc0 > 0 ? (mc / mc0 - 1) * 100 : null;
-          el.textContent = `${usd(mc)} (${ch == null ? "?" : (ch >= 0 ? "+" : "") + ch.toFixed(0) + "%"})`;
-          el.className = "perf " + (ch >= 0 ? "up" : "down");
-        });
-      } catch (_) { /* offline: keep placeholder */ }
+      } catch (_) { /* offline: keep the scanner's numbers */ }
     }
   }
+  renderAlerts();
 }
 
 function renderBoard() {
@@ -179,6 +202,7 @@ function render() {
   const sel = $("#chainFilter"), cur = sel.value;
   sel.innerHTML = `<option value="">All chains</option>` + chains.map((c) => `<option ${c === cur ? "selected" : ""}>${esc(c)}</option>`).join("");
   renderAlerts(); renderBoard(); renderBlocked();
+  fetchLive(DATA.alerts || []);
 }
 
 async function load() {

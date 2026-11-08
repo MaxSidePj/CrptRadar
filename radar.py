@@ -1208,7 +1208,12 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
            "kind": kind, "symbol": t["symbol"], "name": t["name"], "chain": t["chain"], "address": t["address"],
            "score": entry["score"], "mcap": t["mcap"], "price": t.get("price"), "liq": t["liq"],
            "age_h": t["age_h"], "why": entry["why"], "warnings": entry["warnings"], "links": links,
-           "image": t.get("image"), "sent": sent, "fomo": entry.get("fomo"), "buzz": entry.get("buzz"),
+           "image": t.get("image"), "sent": sent,
+           "vol": t.get("vol"), "pc": t.get("pc"), "buys_h1": t.get("buys_h1"), "sells_h1": t.get("sells_h1"),
+           "safety": entry.get("safety"), "parts": entry.get("parts"), "x": entry.get("x"),
+           "socials": t.get("socials"), "dex": t.get("dex"), "url": t.get("url"), "biz": entry.get("biz"),
+           "trending": t.get("trending"), "cto": t.get("cto"), "boosts": t.get("boosts"),
+           "cg_trending": entry.get("cg_trending"), "fast_gates": entry.get("fast_gates"), "fomo": entry.get("fomo"), "buzz": entry.get("buzz"),
            "gates": entry.get("fast_gates") if fast else entry.get("gates")}
     state["alerted"][t["key"]] = {"ts": rec["ts"], "score": entry["score"], "mcap": t["mcap"]}
     state["alerts"].insert(0, rec)
@@ -1343,6 +1348,14 @@ def refresh_alerts(http, state):
         mc = fnum(p.get("marketCap")) or fnum(p.get("fdv"))
         liq = fnum((p.get("liquidity") or {}).get("usd"))
         a["now_mcap"], a["now_liq"] = mc, liq
+        tx = p.get("txns") or {}
+        created = p.get("pairCreatedAt")
+        a["live"] = {"ts": now(), "mcap": mc, "liq": liq, "price": fnum(p.get("priceUsd")),
+                     "vol": {k: fnum((p.get("volume") or {}).get(k)) for k in ("m5", "h1", "h6", "h24")},
+                     "pc": {k: fnum((p.get("priceChange") or {}).get(k)) for k in ("m5", "h1", "h6", "h24")},
+                     "buys_h1": int(fnum((tx.get("h1") or {}).get("buys"))),
+                     "sells_h1": int(fnum((tx.get("h1") or {}).get("sells"))),
+                     "age_h": hours_since_ms(created) if created else None}
         a["peak_mcap"] = max(a.get("peak_mcap") or 0, mc, a.get("mcap") or 0)
         if (a.get("mcap") and mc < a["mcap"] * 0.10) or liq < 1000:
             log(f"  removed crashed alert ${a['symbol']} (MC {fmt_usd(mc)} vs {fmt_usd(a.get('mcap'))} at alert)")

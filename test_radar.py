@@ -85,8 +85,10 @@ class ScoringTests(unittest.TestCase):
     def test_survivor_scores_high_and_passes_all_gates(self):
         t = token(age_h=20)
         with_history(self.state, t, hours=6)
-        s, parts, why, gates = run_score(t, SAFE, self.state, SOCIAL)
-        self.assertGreaterEqual(s, CFG["alert_min_score"], parts)
+        fs = {"buyers_1h": 1, "buyers_2h": 2, "buyers_6h": 3, "buyers_24h": 4, "sellers_6h": 1, "buy_usd_6h": 9000,
+              "theses_24h": 0, "top_buyers": ["a", "b", "c"], "rank": None, "first_seen_h": 5}
+        s, parts, why, gates = run_score(t, SAFE, self.state, {**SOCIAL, "fomo": fs})
+        self.assertGreaterEqual(s, CFG["alert_min_score"] + 3, parts)
         self.assertTrue(all(g["ok"] for g in gates), gates)
 
     def test_unverified_is_capped(self):
