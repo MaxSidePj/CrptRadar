@@ -487,6 +487,8 @@ def build_token(seed, pairs, ctx):
         t["sells_h1"] = sum(int(fnum(((p.get("txns") or {}).get("h1") or {}).get("sells"))) for p in pairs)
         t["buys_m5"] = sum(int(fnum(((p.get("txns") or {}).get("m5") or {}).get("buys"))) for p in pairs)
         t["sells_m5"] = sum(int(fnum(((p.get("txns") or {}).get("m5") or {}).get("sells"))) for p in pairs)
+        t["txns_h24"] = sum(int(fnum(((p.get("txns") or {}).get("h24") or {}).get("buys")))
+                            + int(fnum(((p.get("txns") or {}).get("h24") or {}).get("sells"))) for p in pairs)
         t["pc"] = {k: fnum((main.get("priceChange") or {}).get(k)) for k in ("m5", "h1", "h6", "h24")}
         created = [p.get("pairCreatedAt") for p in pairs if p.get("pairCreatedAt")]
         t["created_ms"] = min(created) if created else None
@@ -523,6 +525,11 @@ def build_token(seed, pairs, ctx):
     return t
 
 
+def typical_hourly_volume(t):
+    v = t["vol"]
+    return max(v.get("h1", 0), v.get("h6", 0) / 6, v.get("h24", 0) / 24)
+
+
 def prefilter(t, cfg):
     """Cheap market filters before spending API calls on safety. Returns reason or None."""
     if (t["symbol"] or "").upper() in STABLE_OR_MAJOR:
@@ -535,9 +542,9 @@ def prefilter(t, cfg):
         return "low liquidity"
     if not (cfg["min_mcap_usd"] <= t["mcap"] <= cfg["max_mcap_usd"]):
         return "market cap out of range"
-    if t["buys_h1"] + t["sells_h1"] < cfg["min_txns_1h"]:
+    if max(t["buys_h1"] + t["sells_h1"], (t.get("txns_h24") or 0) / 24) < cfg["min_txns_1h"]:
         return "few trades"
-    if t["vol"].get("h1", 0) < cfg["min_volume_1h_usd"]:
+    if typical_hourly_volume(t) < cfg["min_volume_1h_usd"]:
         return "low volume"
     if t["pc"].get("h1", 0) < -50 or t["pc"].get("h6", 0) < -75:
         return "dumping"
@@ -749,8 +756,10 @@ def judge_safety(m, t, cfg):
     ins = m.get("insider_pct", 0)
     if ins > cfg["max_insider_pct"]:
         rejects.append(f"Insider cluster holds {ins:.0f}% (bubblemap)")
-    elif ins > 8 or m.get("insider_networks", 0) >= 2:
-        warns.append(f"Linked insider wallets ({ins:.0f}%)"); penalty += 8
+    elif ins > 8:
+        warns.append(f"Linked insider wallets hold {ins:.0f}%"); penalty += 8
+    elif m.get("insider_networks", 0) >= 2 and ins >= 3:
+        warns.append(f"Linked insider wallets hold {ins:.0f}%"); penalty += 3
     bundle = m.get("bundle_pct")
     if bundle is not None:
         if bundle > cfg["max_bundle_pct"]:
@@ -992,12 +1001,15 @@ def score_token(t, safety_m, verdict, social, state, cfg):
     liq, mcap = t["liq"], max(t["mcap"], 1)
     vol_h1 = t["vol"].get("h1", 0)
     buys, sells = t["buys_h1"], t["sells_h1"]
+    vol_hour = typical_hourly_volume(t)                            # last hour, or 6h/24h average if higher
+    vol_day = max(t["vol"].get("h24", 0), vol_hour * 24 if (t["age_h"] or 0) >= 24 else vol_hour)
+    trades_hour = max(buys + sells, (t.get("txns_h24") or 0) / 24)
 
-    # Traction (22)
+    # Traction (20)
     tr = 8 * logscale(liq, 10_000, 250_000)
-    tr += 8 * clamp((vol_h1 / mcap) / 0.5)
-    tr += 5 * logscale(vol_h1, 5_000, 200_000)
-    tr += 6 * logscale(buys + sells, 50, 2_000)
+    tr += 8 * clamp((vol_day / mcap) / 1.0)                         # 100% of market cap traded per day = full
+    tr += 5 * logscale(vol_hour, 5_000, 200_000)
+    tr += 6 * logscale(trades_hour, 50, 2_000)
     ratio = buys / max(sells, 1)
     if 1.1 <= ratio <= 3:
         tr += 5; why.append(f"buyers dominate ({ratio:.1f}x more buys)")
@@ -1009,7 +1021,7 @@ def score_token(t, safety_m, verdict, social, state, cfg):
 
     # Momentum (8)
     pc = t["pc"]
-    mo = 6 * clamp(pc.get("h1", 0) / 30) + 5 * clamp(pc.get("h6", 0) / 80)
+    mo = 4 * clamp(pc.get("h1", 0) / 30) + 4 * clamp(pc.get("h6", 0) / 80) + 3 * clamp(pc.get("h24", 0) / 150)
     if pc.get("m5", 0) > -10:
         mo += 4
     elif pc.get("m5", 0) < -25:
