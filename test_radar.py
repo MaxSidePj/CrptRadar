@@ -559,6 +559,70 @@ class ProjectLaneTests(unittest.TestCase):
         self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
 
 
+GT_PAID = {"websites": ["https://usepaid.com"], "twitter": "UsePaid", "telegram": None, "coingecko": "paid",
+           "gt_score": 83, "verified": True, "categories": ["Pump Fun"], "description": "", "launchpad": True}
+GT_JUNK = {"websites": ["https://x.fun"], "twitter": None, "telegram": None, "coingecko": None,
+           "gt_score": 47, "verified": False, "categories": [], "description": "", "launchpad": True}
+
+
+class EarlyLaunchTests(unittest.TestCase):
+    def coin(self, gt=GT_PAID, safety=None, liq=150_000, mcap=2_000_000, buys=600, sells=350, buyers=300,
+             watched_h=0.75, peak=None, pc1=40, holders_start=2000, holders_now=2300, name="Paid",
+             x={"followers": 47_000, "tweets": 400, "age_days": 22}):
+        state = radar.fresh_state({})
+        t = token(name=name, symbol="PAID", age_h=2.0, mcap=mcap, liq=liq, buys_h1=buys, sells_h1=sells,
+                  buyers_h1=buyers, socials={"website": "https://usepaid.com"},
+                  vol={"m5": 20_000, "h1": 400_000, "h6": 900_000, "h24": 900_000},
+                  pc={"m5": 2, "h1": pc1, "h6": 150, "h24": 150})
+        with_history(state, t, hours=watched_h, mcap_start=mcap * 0.8, holders_start=holders_start,
+                     holders_now=holders_now, peak=peak or mcap)
+        safety = {**SAFE, "holders": holders_now, "top10_pct": 18, "creator_pct": 1.0, **(safety or {})}
+        social = {"x": x, "cg_trending": False, "biz": 0, "fomo": None, "gt": gt}
+        v = radar.judge_safety(safety, t, CFG)
+        sc, parts, why = radar.score_token(t, safety, v, social, state, CFG)
+        last = radar.score_token.last
+        e = {**t, "score": sc, "parts": parts, "why": why, "warnings": v["warnings"], "rejects": v["rejects"],
+             "verified": True, "safety": safety, "links": radar.links_for(t), "fomo": None, "buzz": last["buzz"],
+             **{k: last[k] for k in ("gates", "fast_gates", "smart_gates", "project_gates", "early_gates",
+                                     "quality", "quality_why")}}
+        return state, e
+
+    def test_paid_like_launch_alerts_within_hours(self):
+        state, e = self.coin()
+        self.assertTrue(radar.maybe_alert(e, state, CFG, 0), (e["score"], e["early_gates"]))
+        self.assertEqual(state["alerts"][0]["kind"], "early")
+
+    def test_garbage_launch_without_real_project(self):
+        state, e = self.coin(gt=GT_JUNK, name="Imam", x=None)
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0), e["early_gates"])
+        # even with a fresh, small X account it stays below the bar
+        state, e = self.coin(gt=GT_JUNK, name="Imam", x={"followers": 300, "tweets": 10, "age_days": 0})
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0), e["early_gates"])
+
+    def test_whales_or_dev_bag_blocked(self):
+        for bad in ({"top10_pct": 30}, {"creator_pct": 5}, {"cluster_pct": 12}):
+            state, e = self.coin(safety=bad)
+            self.assertFalse(radar.maybe_alert(e, state, CFG, 0), bad)
+
+    def test_thin_liquidity_blocked(self):
+        state, e = self.coin(liq=60_000, mcap=3_000_000)   # 2% of market cap
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_bot_like_buying_blocked(self):
+        state, e = self.coin(buys=900, sells=100)          # 9x more buys than sells
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_one_candle_pump_or_dump_blocked(self):
+        state, e = self.coin(pc1=300)
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+        state, e = self.coin(peak=4_000_000)               # already 50% below its peak
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_needs_30_minutes_of_watching(self):
+        state, e = self.coin(watched_h=0.2)
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+
 class ParsingTests(unittest.TestCase):
     def test_x_handle(self):
         self.assertEqual(radar.parse_x_handle("https://x.com/gemcoin"), "gemcoin")

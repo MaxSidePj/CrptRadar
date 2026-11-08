@@ -87,6 +87,21 @@ DEFAULT_CONFIG = {
     "project_min_recovery_pct": 15,
     "project_min_score": 40,
     "project_max_per_day": 3,
+    "early_lane": True,
+    "early_min_quality": 6,
+    "early_min_age_hours": 1,
+    "early_max_age_hours": 6,
+    "early_max_mcap_usd": 5000000,
+    "early_min_liquidity_usd": 40000,
+    "early_min_liq_to_mcap_pct": 5,
+    "early_min_buyers_1h": 100,
+    "early_max_top10_pct": 25,
+    "early_max_dev_pct": 3,
+    "early_max_cluster_pct": 8,
+    "early_max_drawdown_pct": 30,
+    "early_max_runup_1h_pct": 150,
+    "early_min_score": 45,
+    "early_max_per_day": 3,
     "new_chains": ["robinhood", "hyperevm", "hyperliquid", "monad", "abstract", "plasma", "megaeth", "unichain", "sonic", "berachain", "ink", "soneium", "worldchain", "stable", "story", "arc", "katana", "plume"],
     "tech_keywords": ["launchpad", "pad", "launch", "pay", "payment", "swap", "dex", "ai", "agent", "protocol", "labs", "bridge", "terminal", "bot", "network", "layer", "zk", "depin", "rwa", "oracle", "wallet", "exchange", "perp", "stake", "yield", "infra", "compute", "gpu", "platform", "app", "trading", "defi", "chain", "robinhood"],
     "min_liquidity_usd": 12000,
@@ -1173,6 +1188,48 @@ def project_lane_gates(t, hist, holders, fs, gates, gt, xp, cfg):
     return out, quality, qwhy
 
 
+def early_lane_gates(t, hist, holders, safety_m, gates, quality, cfg):
+    """A 1-6h old coin that is clearly a real project with real, organic demand: alert before it is 6h old.
+    Garbage launches (no project, bots, whales, thin liquidity, pump-and-dump candles) can't pass."""
+    if not cfg.get("early_lane") or quality is None:
+        return None
+    m = safety_m or {}
+    age = t["age_h"] or 0
+    out = [{"ok": cfg["early_min_age_hours"] <= age <= cfg["early_max_age_hours"],
+            "text": f"Age {fmt_age(age)} ({cfg['early_min_age_hours']}h to {cfg['early_max_age_hours']}h)"},
+           {"ok": quality >= cfg["early_min_quality"],
+            "text": f"Real project {quality:.0f}/14 (needs {cfg['early_min_quality']}+)"}]
+    top10, dev = m.get("top10_pct", 100), max(m.get("creator_pct", 0), m.get("owner_pct", 0))
+    clusters = max(m.get("cluster_pct", 0), m.get("insider_pct", 0), m.get("bundle_pct") or 0)
+    out.append({"ok": top10 <= cfg["early_max_top10_pct"] and dev <= cfg["early_max_dev_pct"]
+                and clusters <= cfg["early_max_cluster_pct"],
+                "text": f"Clean wallets: top10 {top10:.0f}%, dev {dev:.1f}%, bundles/clusters {clusters:.0f}% "
+                        f"(max {cfg['early_max_top10_pct']}/{cfg['early_max_dev_pct']}/{cfg['early_max_cluster_pct']}%)"})
+    liq_pct = t["liq"] / max(t["mcap"], 1) * 100
+    out.append({"ok": t["liq"] >= cfg["early_min_liquidity_usd"] and liq_pct >= cfg["early_min_liq_to_mcap_pct"],
+                "text": f"Deep liquidity {fmt_usd(t['liq'])} = {liq_pct:.0f}% of market cap "
+                        f"(needs {fmt_usd(cfg['early_min_liquidity_usd'])} and {cfg['early_min_liq_to_mcap_pct']}%)"})
+    buyers = t.get("buyers_h1") or t["buys_h1"] // 2
+    ratio = t["buys_h1"] / max(t["sells_h1"], 1)
+    out.append({"ok": buyers >= cfg["early_min_buyers_1h"] and 1.0 <= ratio <= 3.0,
+                "text": f"Organic demand: ~{buyers} buyers in 1h, {ratio:.1f}x more buys than sells "
+                        f"(needs {cfg['early_min_buyers_1h']}+ buyers, 1-3x)"})
+    peak = max((hist or {}).get("peak", 0), t["mcap"])
+    dd = (1 - t["mcap"] / peak) * 100 if peak else 0
+    watched = (now() - hist["first"]) / 60 if hist else 0
+    pc1 = t["pc"].get("h1", 0)
+    out.append({"ok": watched >= 30 and dd <= cfg["early_max_drawdown_pct"] and pc1 <= cfg["early_max_runup_1h_pct"]
+                and t["pc"].get("m5", 0) > -15,
+                "text": f"Holding its gains: watched {watched:.0f} min, {dd:.0f}% below peak, 1h {pc1:+.0f}% "
+                        f"(needs 30+ min, max {cfg['early_max_drawdown_pct']}% below, max +{cfg['early_max_runup_1h_pct']}%)"})
+    out.append({"ok": t["mcap"] <= cfg["early_max_mcap_usd"],
+                "text": f"Market cap {fmt_usd(t['mcap'])} (max {fmt_usd(cfg['early_max_mcap_usd'])})"})
+    for g in gates:
+        if "faster than buys" in g["text"]:
+            out.append(g)
+    return out
+
+
 def score_token(t, safety_m, verdict, social, state, cfg):
     """Score 0-100: staying 25, traction 20, FOMO app 15, holders 13, hype 12, momentum 10, upside 5."""
     parts, why = {}, []
@@ -1273,8 +1330,11 @@ def score_token(t, safety_m, verdict, social, state, cfg):
     fast = fast_lane_gates(t, hist, holders, fs, gates, cfg)
     smart = smart_lane_gates(t, hist, holders, fs, gates, cfg)
     project, quality, qwhy = project_lane_gates(t, hist, holders, fs, gates, social.get("gt"), social.get("x"), cfg)
+    if social.get("gt") is not None and not quality:
+        quality, qwhy = project_quality(t, social.get("gt"), social.get("x"), cfg)
+    early = early_lane_gates(t, hist, holders, safety_m, gates, quality if social.get("gt") is not None else None, cfg)
     score_token.last = {"gates": gates, "buzz": buzz, "fast_gates": fast, "smart_gates": smart,
-                        "project_gates": project, "quality": quality, "quality_why": qwhy}
+                        "project_gates": project, "early_gates": early, "quality": quality, "quality_why": qwhy}
     return round(clamp(total, 0, 100), 1), parts, why[:6]
 
 
@@ -1362,16 +1422,20 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
              and all(g["ok"] for g in entry["smart_gates"]))
     project = (not normal and not fast and not smart and entry.get("project_gates")
                and entry["score"] >= cfg["project_min_score"] and all(g["ok"] for g in entry["project_gates"]))
-    if not (normal or fast or smart or project):
+    early = (not normal and not fast and not smart and not project and entry.get("early_gates")
+             and entry["score"] >= cfg["early_min_score"] and all(g["ok"] for g in entry["early_gates"]))
+    if not (normal or fast or smart or project or early):
         return False
-    if project:
+    for lane, on, cap in (("project", project, cfg["project_max_per_day"]), ("early", early, cfg["early_max_per_day"])):
+        if not on:
+            continue
         day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        if sum(1 for a in state["alerts"] if a.get("day") == day and a.get("kind") == "project") >= cfg["project_max_per_day"]:
+        if sum(1 for a in state["alerts"] if a.get("day") == day and a.get("kind") == lane) >= cap:
             return False
         scan = state["stats"].get("cycles", 0)
-        if "_project_scan" in state and state["_project_scan"] == scan:
-            return False
-        state["_project_scan"] = scan
+        if state.get(f"_{lane}_scan", object()) == scan:
+            return False  # max 1 per scan
+        state[f"_{lane}_scan"] = scan
     if smart:
         day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         if sum(1 for a in state["alerts"] if a.get("day") == day and a.get("kind") == "smart") >= cfg["smart_max_per_day"]:
@@ -1386,10 +1450,10 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         return False  # hard free-tier ceiling, even for exceptional scores
     if (alerts_today(state) >= cfg["max_alerts_per_day"] or in_quiet_hours(cfg)) and entry["score"] < cfg["exceptional_score"]:
         return False
-    kind = ("fomo" if fast else "smart" if smart else "project" if project
+    kind = ("fomo" if fast else "smart" if smart else "project" if project else "early" if early
             else "gem" if (t["age_h"] or 0) <= cfg["gem_max_age_hours"] else "survivor")
     icon, label = {"fomo": ("🔥", "FOMO hype"), "smart": ("🐋", "Smart money"), "project": ("🧩", "Early project"),
-                   "gem": ("💎", "Gem"), "survivor": ("🏆", "Survivor")}[kind]
+                   "early": ("🚀", "Early launch"), "gem": ("💎", "Gem"), "survivor": ("🏆", "Survivor")}[kind]
     title = f"{icon} {label}: ${t['symbol']} ({t['chain']}) score {entry['score']:.0f}"
     lines = [
         f"MC {fmt_usd(t['mcap'])} · Liq {fmt_usd(t['liq'])} · Age {fmt_age(t['age_h'])}",
@@ -1407,6 +1471,9 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         lines.append(line)
     if fast:
         lines.append("Young coin - early FOMO alert, higher risk")
+    if early:
+        lines.append("Project: " + ", ".join((entry.get("quality_why") or [])[:4]))
+        lines.append("Young coin (under 6h) - real project with organic demand, still higher risk")
     if project:
         lines.append("Project: " + ", ".join((entry.get("quality_why") or [])[:4]))
         lines.append("Early: real project forming a base before a run - it may also never run")
@@ -1430,7 +1497,7 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         actions.append({"action": "view", "label": "Bubblemap", "url": links["bubblemap"]})
     actions.append({"action": "view", "label": "X posts", "url": links["x_search"]})
     sent = push(title, "\n".join(lines), click=links["chart"], actions=actions,
-                tags=[{"fomo": "fire", "smart": "whale", "project": "jigsaw", "gem": "gem", "survivor": "trophy"}[kind]], priority=5 if entry["score"] >= cfg["exceptional_score"] else 4)
+                tags=[{"fomo": "fire", "smart": "whale", "project": "jigsaw", "early": "rocket", "gem": "gem", "survivor": "trophy"}[kind]], priority=5 if entry["score"] >= cfg["exceptional_score"] else 4)
     rec = {"key": t["key"], "ts": now(), "day": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
            "kind": kind, "symbol": t["symbol"], "name": t["name"], "chain": t["chain"], "address": t["address"],
            "score": entry["score"], "mcap": t["mcap"], "price": t.get("price"), "liq": t["liq"],
@@ -1442,7 +1509,8 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
            "trending": t.get("trending"), "cto": t.get("cto"), "boosts": t.get("boosts"),
            "cg_trending": entry.get("cg_trending"), "fast_gates": entry.get("fast_gates"), "fomo": entry.get("fomo"), "buzz": entry.get("buzz"),
            "gates": (entry.get("fast_gates") if fast else entry.get("smart_gates") if smart
-                     else entry.get("project_gates") if project else entry.get("gates")),
+                     else entry.get("project_gates") if project else entry.get("early_gates") if early
+                     else entry.get("gates")),
            "quality": entry.get("quality"), "quality_why": entry.get("quality_why")}
     state["alerted"][t["key"]] = {"ts": rec["ts"], "score": entry["score"], "mcap": t["mcap"]}
     state["alerts"].insert(0, rec)
@@ -1485,7 +1553,7 @@ def scan_cycle(http, state, cfg, ctx):
         record_history(state, t, ((cached or {}).get("data") or {}).get("holders"))
     corpus = biz_corpus(http, ctx)
     cg = coingecko_trending(http, ctx)
-    budget = {"deep": min(int(cfg["deep_checks_per_cycle"]), MAX_DEEP_CHECKS), "alerts": 4, "gt_info": 2}
+    budget = {"deep": min(int(cfg["deep_checks_per_cycle"]), MAX_DEEP_CHECKS), "alerts": 4, "gt_info": 3}
     results = []
     for t in tokens:
         entry = evaluate(http, state, cfg, t, corpus, cg, budget, "deep")
@@ -1532,8 +1600,11 @@ def evaluate(http, state, cfg, t, corpus, cg, budget, pool):
     if fs and (fs["named_holders"] or fs["fresh_buyers"]):
         spotted = state.setdefault("fomo_spotted", {}).setdefault(t["key"], {"ts": now(), "mcap": t["mcap"]})
         fs["spotted_mcap"], fs["spotted_h"] = spotted["mcap"], round((now() - spotted["ts"]) / 3600, 1)
-    if (cfg.get("project_lane") and not verdict["rejects"] and fs
-            and fs["named_holders"] >= cfg["project_min_fomo_holders"] and t["mcap"] <= cfg["project_max_mcap_usd"]):
+    young = (cfg.get("early_lane") and cfg["early_min_age_hours"] <= (t["age_h"] or 0) <= cfg["early_max_age_hours"]
+             and t["liq"] >= cfg["early_min_liquidity_usd"] and t["mcap"] <= cfg["early_max_mcap_usd"])
+    holders_ok = (cfg.get("project_lane") and fs and fs["named_holders"] >= cfg["project_min_fomo_holders"]
+                  and t["mcap"] <= cfg["project_max_mcap_usd"])
+    if not verdict["rejects"] and (young or holders_ok):
         social["gt"] = gt_info(http, state, t, budget)
     if not verdict["rejects"]:
         social["x"] = x_profile(http, state, parse_x_handle(t["socials"].get("x")))
@@ -1547,7 +1618,8 @@ def evaluate(http, state, cfg, t, corpus, cg, budget, pool):
             "rejects": verdict["rejects"], "warnings": verdict["warnings"], "links": links_for(t),
             "x": social.get("x"), "biz": social.get("biz"), "cg_trending": social.get("cg_trending"),
             "gates": extra["gates"], "fast_gates": extra["fast_gates"], "smart_gates": extra["smart_gates"],
-            "project_gates": extra["project_gates"], "quality": extra["quality"], "quality_why": extra["quality_why"],
+            "project_gates": extra["project_gates"], "early_gates": extra["early_gates"],
+            "quality": extra["quality"], "quality_why": extra["quality_why"],
             "buzz": extra["buzz"],
             "fomo": social.get("fomo"), "checked": now()}
 
@@ -1566,7 +1638,7 @@ def lookup_fomo_holders(state, results):
 
 
 NOW_FIELDS = ("score", "parts", "why", "safety", "verified", "rejects", "warnings", "gates", "fast_gates",
-              "smart_gates", "project_gates", "quality", "quality_why", "buzz",
+              "smart_gates", "project_gates", "early_gates", "quality", "quality_why", "buzz",
               "fomo", "x", "biz", "cg_trending", "trending", "cto", "boosts", "socials", "checked")
 
 
