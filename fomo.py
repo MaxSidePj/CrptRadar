@@ -1,9 +1,12 @@
 """FOMO app (fomo.family) signals via the unofficial fomoapi.io service.
 
-- Live feed of FOMO users' large trades: free, no key needed (60s delay; 15s with a free key).
-  Each connection also replays roughly the last 15 minutes, so runs every 15 minutes see it all.
-- FOMO trending board: needs a free key (FOMO_API_KEY); polled at most once per hour to stay
-  inside the free 1,000 calls/month.
+Free, no key: live feed of FOMO users' large trades (60s delay; 15s with a free key). Each connection
+replays roughly the last 15 minutes, so runs every 15 minutes see almost everything. Trades are kept
+for 7 days, which shows which FOMO traders still hold a coin.
+
+With a free key (FOMO_API_KEY): the top-trader leaderboard (daily), FOMO's trending and graduated coin
+boards (every 4h) and "which FOMO traders hold this coin" lookups (max 15 a day). A monthly counter
+keeps this at or below 900 of the 1,000 free calls. The free plan has no card, so it can never bill.
 """
 from __future__ import annotations
 
@@ -16,11 +19,9 @@ import urllib.request
 from collections import deque
 
 WS_URL = "wss://api.fomoapi.io/ws/alerts"
-BOARD_URL = "https://api.fomoapi.io/v2/leaderboard/tokens/trending?limit=50"
 CHAIN_MAP = {"eth": "ethereum", "ethereum": "ethereum", "bnb": "bsc", "bsc": "bsc", "solana": "solana",
              "base": "base", "robinhood": "robinhood", "arbitrum": "arbitrum", "polygon": "polygon",
              "abstract": "abstract", "monad": "monad", "avalanche": "avalanche", "tron": "tron"}
-KEEP_SECONDS = 24 * 3600
 
 
 def norm_chain(c):
@@ -100,8 +101,11 @@ def token_key(chain, addr):
     return f"{chain}:{addr.lower() if addr.startswith('0x') else addr}"
 
 
+KEEP_DAYS = 7
+
+
 def absorb(state, events):
-    """Store FOMO buys/sells/theses per token (24h window). Returns number of new events."""
+    """Store FOMO buys/sells/theses per token (7-day window). Returns number of new events."""
     fomo = state.setdefault("fomo", {})
     seen = state.setdefault("fomo_seen", [])
     seen_set = set(seen)
@@ -124,14 +128,14 @@ def absorb(state, events):
                                   "first": ts, "buys": [], "sells": [], "theses": []})
         trader = e.get("trader") or "?"
         if typ == "buy":
-            rec["buys"].append([ts, trader, round(float(e.get("tradeUsd") or e.get("usdValue") or 0))])
+            rec["buys"].append([ts, trader, round(_num(e.get("tradeUsd") or e.get("usdValue")))])
         elif typ == "sell":
-            rec["sells"].append([ts, trader, round(float(e.get("tradeUsd") or 0))])
+            rec["sells"].append([ts, trader, round(_num(e.get("tradeUsd")))])
         else:
             rec["theses"].append([ts, trader])
         rec["first"] = min(rec["first"], ts)
-    del seen[:-5000]
-    cutoff = time.time() - KEEP_SECONDS
+    del seen[:-8000]
+    cutoff = time.time() - KEEP_DAYS * 86400
     for k in list(fomo):
         r = fomo[k]
         for f in ("buys", "sells", "theses"):
@@ -141,66 +145,196 @@ def absorb(state, events):
     return new
 
 
-def poll_board(state, log, http_timeout=20):
-    """FOMO trending board (needs FOMO_API_KEY). At most once per hour; ETag makes repeats free."""
-    key = os.environ.get("FOMO_API_KEY", "").strip()
-    board = state.setdefault("fomo_board", {"ts": 0, "etag": None, "ranks": {}})
-    # every 90 min = ~480 calls/month, well inside the free 1,000 (unchanged boards cost nothing)
-    if not key or time.time() - board["ts"] < 5400 or time.time() < board.get("paused_until", 0):
-        return board["ranks"]
-    board["ts"] = time.time()
-    headers = {"authorization": f"Bearer {key}", "User-Agent": "GemRadar", "Accept": "application/json"}
-    if board.get("etag"):
-        headers["If-None-Match"] = board["etag"]
+def _num(v):
     try:
-        req = urllib.request.Request(BOARD_URL, headers=headers)
-        with urllib.request.urlopen(req, timeout=http_timeout) as r:
-            data = json.loads(r.read().decode("utf-8", "replace"))
-            board["etag"] = r.headers.get("ETag")
+        return float(v or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def stream_holders(rec):
+    """Traders whose latest large trade on this coin (last 7 days) was a buy: they still hold."""
+    last = {}
+    for ts, trader, _ in rec.get("buys", []):
+        last[trader] = max(last.get(trader, ("", 0)), ("buy", ts), key=lambda x: x[1])
+    for ts, trader, _ in rec.get("sells", []):
+        if ts >= last.get(trader, ("", 0))[1]:
+            last[trader] = ("sell", ts)
+    return sorted(t for t, (side, _) in last.items() if side == "buy")
+
+
+# --------------------------------------------------------------------------- REST (needs a free key)
+# Free plan: 1,000 calls/month. Budget: leaderboard 1/day + 2 coin boards every 4h + max 15 holder
+# lookups/day = at most 28/day (~870/month). A hard monthly counter stops everything at 900.
+
+API = "https://api.fomoapi.io"
+MONTHLY_CAP = 900
+DAILY_CAP = 29
+HOLDER_LOOKUPS_PER_DAY = 15
+
+
+def _budget(state):
+    b = state.setdefault("fomo_api", {})
+    month, day = time.strftime("%Y-%m", time.gmtime()), time.strftime("%Y-%m-%d", time.gmtime())
+    if b.get("month") != month:
+        b.update(month=month, calls=0)
+    if b.get("day") != day:
+        b.update(day=day, day_calls=0, holder_calls=0)
+    return b
+
+
+def _can_call(state, holder=False):
+    b = _budget(state)
+    if not os.environ.get("FOMO_API_KEY", "").strip() or time.time() < b.get("paused_until", 0):
+        return False
+    if b["calls"] >= MONTHLY_CAP or b["day_calls"] >= DAILY_CAP:
+        return False
+    return not holder or b["holder_calls"] < HOLDER_LOOKUPS_PER_DAY
+
+
+def _get(state, path, log, holder=False):
+    b = _budget(state)
+    b["calls"] += 1
+    b["day_calls"] += 1
+    if holder:
+        b["holder_calls"] += 1
+    key = os.environ.get("FOMO_API_KEY", "").strip()
+    req = urllib.request.Request(API + path, headers={"authorization": f"Bearer {key}", "User-Agent": "GemRadar",
+                                                      "Accept": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return json.loads(r.read().decode("utf-8", "replace"))
     except urllib.error.HTTPError as e:
-        if e.code in (402, 429):  # free credits used up / rate limited: stop until tomorrow
-            board["paused_until"] = time.time() + 86400
-        if e.code != 304:
-            log(f"  FOMO board http {e.code}")
-        return board["ranks"]
+        if e.code in (401, 402, 429):  # bad key / free credits used up / rate limited: stop for a day
+            b["paused_until"] = time.time() + 86400
+        log(f"  FOMO API {path.split('?')[0]}: http {e.code}")
     except Exception as e:
-        log(f"  FOMO board error {type(e).__name__}")
-        return board["ranks"]
-    ranks = {}
-    for i, t in enumerate(data.get("tokens") or []):
+        log(f"  FOMO API {path.split('?')[0]}: {type(e).__name__}")
+    return None
+
+
+def _rows(data, *names):
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        for n in names:
+            if isinstance(data.get(n), list):
+                return data[n]
+    return []
+
+
+def _handle(row):
+    if not isinstance(row, dict):
+        return None
+    for k in ("handle", "username", "userName", "name", "trader"):
+        if isinstance(row.get(k), str) and row[k]:
+            return row[k]
+    user = row.get("user") or row.get("trader")
+    return _handle(user) if isinstance(user, dict) else None
+
+
+def _board_tokens(data):
+    out = {}
+    for i, t in enumerate(_rows(data, "tokens", "board", "data")):
         tok = t.get("token") or {}
-        chain = norm_chain(t.get("network") or tok.get("network") or t.get("chain"))
+        chain = norm_chain(t.get("network") or tok.get("network") or t.get("chain") or tok.get("chain"))
         addr = tok.get("address") or t.get("address")
         if chain and addr:
-            ranks[token_key(chain, addr)] = int(t.get("rank") or i + 1)
-    board["ranks"] = ranks
-    log(f"  FOMO trending board: {len(ranks)} tokens")
-    return ranks
+            out[token_key(chain, addr)] = {"rank": int(_num(t.get("rank")) or i + 1),
+                                           "holders": int(_num(t.get("holders")))}
+    return out
+
+
+def refresh(state, log):
+    """Periodic FOMO REST data: good traders (daily) and trending/graduated coin boards (every 4h)."""
+    st = state.setdefault("fomo_rest", {"leaders": [], "leaders_ts": 0, "trending": {}, "trending_ts": 0,
+                                        "graduated": {}, "graduated_ts": 0, "holders": {}})
+    now = time.time()
+    if now - st["leaders_ts"] > 86400 and _can_call(state):
+        st["leaders_ts"] = now
+        data = _get(state, "/v2/leaderboard/30d?limit=150", log)
+        leaders = [h for h in (_handle(r) for r in _rows(data, "traders", "leaderboard", "board", "data")) if h]
+        if leaders:
+            st["leaders"] = leaders
+        log(f"  FOMO leaderboard: {len(leaders)} top traders")
+    for board, path in (("trending", "/v2/leaderboard/tokens/trending?limit=50"),
+                        ("graduated", "/v2/leaderboard/tokens/graduated?limit=50")):
+        if now - st[f"{board}_ts"] > 4 * 3600 and _can_call(state):
+            st[f"{board}_ts"] = now
+            data = _get(state, path, log)
+            if data is not None:
+                st[board] = _board_tokens(data)
+            log(f"  FOMO {board} board: {len(st[board])} coins")
+    # keep the old field the scorer reads
+    state["fomo_board"] = {"ranks": {k: v["rank"] for k, v in st["trending"].items()}}
+    st["holders"] = {k: v for k, v in st["holders"].items() if now - v["ts"] < 3 * 86400}
+    return st
+
+
+def lookup_holders(state, key, chain, address, log):
+    """Which FOMO traders hold this coin right now (max 15 lookups a day, cached 12h)."""
+    st = state.setdefault("fomo_rest", {}).setdefault("holders", {})
+    cached = st.get(key)
+    if cached and time.time() - cached["ts"] < 12 * 3600:
+        return cached["handles"]
+    if not _can_call(state, holder=True):
+        return cached["handles"] if cached else None
+    data = _get(state, f"/token/{address}/holders?limit=50", log, holder=True)
+    if data is None:
+        return cached["handles"] if cached else None
+    handles = sorted({h for h in (_handle(r) for r in _rows(data, "holders", "traders", "data")) if h})
+    st[key] = {"ts": time.time(), "handles": handles}
+    log(f"  FOMO holders of {address[:6]}…: {len(handles)}")
+    return handles
+
+
+def wants_lookup(state, key):
+    st = (state.get("fomo_rest") or {}).get("holders") or {}
+    return key not in st or time.time() - st[key]["ts"] >= 12 * 3600
 
 
 def stats(state, key, now=None):
     """FOMO activity summary for one token."""
     now = now or time.time()
     r = (state.get("fomo") or {}).get(key)
-    rank = ((state.get("fomo_board") or {}).get("ranks") or {}).get(key)
-    if not r and not rank:
+    rest = state.get("fomo_rest") or {}
+    trend = (rest.get("trending") or {}).get(key) or {}
+    grad = (rest.get("graduated") or {}).get(key)
+    rank = trend.get("rank") or ((state.get("fomo_board") or {}).get("ranks") or {}).get(key)
+    api_holders = ((rest.get("holders") or {}).get(key) or {}).get("handles") or []
+    chain = ((state.get("fomo_chain") or {}).get("coins") or {}).get(key) or {}
+    if not r and not rank and not grad and not api_holders and not chain.get("trades"):
         return None
     r = r or {"buys": [], "sells": [], "theses": [], "first": now}
 
     def traders(rows, hours):
         return {x[1] for x in rows if now - x[0] <= hours * 3600}
 
-    b1, b2, b6, b24 = (traders(r["buys"], h) for h in (1, 2, 6, 24))
+    b1, b2, b6, b24, b7d = (traders(r["buys"], h) for h in (1, 2, 6, 24, 24 * 7))
     s6 = traders(r["sells"], 6)
+    holders = sorted(set(stream_holders(r)) | set(api_holders))
+    leaders = set(rest.get("leaders") or [])
+    good = [h for h in holders if h in leaders]
+    board_holders = max(trend.get("holders") or 0, (grad or {}).get("holders") or 0)
     return {
         "buyers_1h": len(b1), "buyers_2h": len(b2), "buyers_6h": len(b6), "buyers_24h": len(b24),
-        "sellers_6h": len(s6),
+        "buyers_7d": len(b7d), "sellers_6h": len(s6),
         "buy_usd_6h": sum(x[2] for x in r["buys"] if now - x[0] <= 6 * 3600),
-        "theses_24h": len(r["theses"]),
+        "theses_24h": len([x for x in r["theses"] if now - x[0] <= 86400]),
         "top_buyers": sorted(b6)[:5],
+        "holders": holders[:20],
+        "holders_n": max(len(holders), board_holders, len(chain.get("holders") or [])),
+        "wallets_holding": len(chain.get("holders") or []),      # on-chain: any trade size (Solana)
+        "onchain_trades": chain.get("trades", 0), "onchain_span_h": chain.get("span_h"),
+        "good_holders": good[:10], "graduated": bool(grad),
         "rank": rank,
         "first_seen_h": round((now - r["first"]) / 3600, 1),
     }
+
+
+def has_signal(fs):
+    """Enough FOMO interest to look at a coin even while its trading is still quiet."""
+    return bool(fs) and (fs["holders_n"] >= 2 or fs["good_holders"] or fs["buyers_24h"] >= 2 or fs["rank"])
 
 
 def points(fs):
@@ -210,14 +344,25 @@ def points(fs):
     import math
     why = []
     n = fs["buyers_6h"]
-    p = 8 * min(1.0, math.log10(1 + n) / math.log10(11))  # 10 traders -> full
+    p = 6 * min(1.0, math.log10(1 + n) / math.log10(11))           # recent buyers (10 -> full)
     if n >= 2:
         why.append(f"{n} FOMO traders bought ({', '.join(fs['top_buyers'][:3])})")
+    h = fs["holders_n"]
+    p += 5 * min(1.0, math.log10(1 + h) / math.log10(11))           # FOMO traders still holding
+    if h >= 2:
+        why.append(f"{h} FOMO traders hold it")
+    elif fs.get("onchain_trades"):
+        why.append(f"{fs['onchain_trades']} FOMO trades on-chain")
+    if fs["good_holders"]:
+        p += min(4, 2 * len(fs["good_holders"]))                     # top-150 traders count extra
+        why.append(f"top FOMO traders hold: {', '.join(fs['good_holders'][:3])}")
     if fs["rank"]:
-        p += 5 if fs["rank"] <= 10 else 3 if fs["rank"] <= 30 else 1.5
+        p += 3 if fs["rank"] <= 10 else 2 if fs["rank"] <= 30 else 1
         why.append(f"#{fs['rank']} on FOMO trending")
+    if fs["graduated"]:
+        p += 1
     if fs["theses_24h"]:
-        p += 2
+        p += 1
         why.append(f"{fs['theses_24h']} FOMO thesis posts")
     if fs["sellers_6h"] > max(2, 2 * n):
         p -= 4

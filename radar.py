@@ -39,6 +39,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import fomo
+import fomo_chain
 
 ROOT = Path(__file__).resolve().parent
 CONFIG_FILE = ROOT / "config.json"
@@ -66,6 +67,11 @@ DEFAULT_CONFIG = {
     "fomo_fast_lane": True,
     "fomo_fast_min_buyers": 3,
     "fomo_fast_min_score": 55,
+    "smart_money_lane": True,
+    "smart_min_holders": 3,
+    "smart_min_top_traders": 2,
+    "smart_min_score": 40,
+    "smart_max_runup_6h_pct": 100,
     "min_liquidity_usd": 12000,
     "min_mcap_usd": 30000,
     "max_mcap_usd": 50000000,
@@ -408,11 +414,12 @@ def discover(http, cfg, ctx, state):
     # Coins FOMO app traders bought in the last 6 hours, or on FOMO's trending board.
     t_now = now()
     for k, r in (state.get("fomo") or {}).items():
-        if any(t_now - b[0] <= 6 * 3600 for b in r["buys"]):
+        if any(t_now - b[0] <= 6 * 3600 for b in r["buys"]) or fomo.stream_holders(r):
             add(r["chain"], r["address"], "fomo", symbol=r.get("symbol"))
             if k not in watch and chain_allowed(r["chain"], cfg):
                 watch[k] = [r["chain"], r["address"], r.get("symbol"), t_now, 0, 0]
-    for k in ((state.get("fomo_board") or {}).get("ranks") or {}):
+    rest = state.get("fomo_rest") or {}
+    for k in {**(rest.get("trending") or {}), **(rest.get("graduated") or {})}:
         chain, addr = k.split(":", 1)
         add(chain, addr, "fomo")
     # Re-check launches we saw earlier: this is where early gems show up, hours after launch.
@@ -530,8 +537,9 @@ def typical_hourly_volume(t):
     return max(v.get("h1", 0), v.get("h6", 0) / 6, v.get("h24", 0) / 24)
 
 
-def prefilter(t, cfg):
-    """Cheap market filters before spending API calls on safety. Returns reason or None."""
+def prefilter(t, cfg, quiet_ok=False):
+    """Cheap market filters before spending API calls on safety. Returns reason or None.
+    quiet_ok: FOMO traders hold it, so low trading (accumulation before a run) is not a reason to skip."""
     if (t["symbol"] or "").upper() in STABLE_OR_MAJOR:
         return "major/stable"
     if t["age_h"] is None:
@@ -542,9 +550,9 @@ def prefilter(t, cfg):
         return "low liquidity"
     if not (cfg["min_mcap_usd"] <= t["mcap"] <= cfg["max_mcap_usd"]):
         return "market cap out of range"
-    if max(t["buys_h1"] + t["sells_h1"], (t.get("txns_h24") or 0) / 24) < cfg["min_txns_1h"]:
+    if not quiet_ok and max(t["buys_h1"] + t["sells_h1"], (t.get("txns_h24") or 0) / 24) < cfg["min_txns_1h"]:
         return "few trades"
-    if typical_hourly_volume(t) < cfg["min_volume_1h_usd"]:
+    if not quiet_ok and typical_hourly_volume(t) < cfg["min_volume_1h_usd"]:
         return "low volume"
     if t["pc"].get("h1", 0) < -50 or t["pc"].get("h6", 0) < -75:
         return "dumping"
@@ -994,6 +1002,26 @@ def fast_lane_gates(t, hist, holders, fs, gates, cfg):
     return out
 
 
+def smart_lane_gates(t, hist, holders, fs, gates, cfg):
+    """FOMO traders (ideally top ones) already hold it and it hasn't run yet: alert before the move."""
+    if not cfg.get("smart_money_lane") or not fs:
+        return None
+    held, good = fs["holders_n"], len(fs["good_holders"])
+    out = [{"ok": held >= cfg["smart_min_holders"] or good >= cfg["smart_min_top_traders"],
+            "text": f"{held} FOMO traders hold it, {good} top traders (needs {cfg['smart_min_holders']}+ or "
+                    f"{cfg['smart_min_top_traders']}+ top)"}]
+    run6 = t["pc"].get("h6", 0)
+    out.append({"ok": run6 < cfg["smart_max_runup_6h_pct"] and t["pc"].get("h1", 0) < 60,
+                "text": f"Not run up yet: 6h {run6:+.0f}% (max +{cfg['smart_max_runup_6h_pct']}%)"})
+    out.append({"ok": (t["age_h"] or 0) >= 1, "text": f"Age {fmt_age(t['age_h'])} (needs 1h+)"})
+    out.append({"ok": fs["sellers_6h"] <= max(held, fs["buyers_6h"]),
+                "text": f"FOMO traders not dumping ({fs['sellers_6h']} sold in 6h)"})
+    for g in gates:  # keep the crash, liquidity and bot-holder checks
+        if any(w in g["text"] for w in ("below its peak", "faster than buys", "Liquidity")):
+            out.append(g)
+    return out
+
+
 def score_token(t, safety_m, verdict, social, state, cfg):
     """Score 0-100: staying 25, traction 20, FOMO app 15, holders 13, hype 12, momentum 10, upside 5."""
     parts, why = {}, []
@@ -1092,7 +1120,8 @@ def score_token(t, safety_m, verdict, social, state, cfg):
     if holders >= 500:
         why.append(f"{holders:,} holders")
     fast = fast_lane_gates(t, hist, holders, fs, gates, cfg)
-    score_token.last = {"gates": gates, "buzz": buzz, "fast_gates": fast}
+    smart = smart_lane_gates(t, hist, holders, fs, gates, cfg)
+    score_token.last = {"gates": gates, "buzz": buzz, "fast_gates": fast, "smart_gates": smart}
     return round(clamp(total, 0, 100), 1), parts, why[:6]
 
 
@@ -1176,7 +1205,9 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
     normal = entry["score"] >= cfg["alert_min_score"] and all(g["ok"] for g in entry.get("gates") or [{"ok": False}])
     fast = (not normal and entry.get("fast_gates") and entry["score"] >= cfg["fomo_fast_min_score"]
             and all(g["ok"] for g in entry["fast_gates"]))
-    if not (normal or fast):
+    smart = (not normal and not fast and entry.get("smart_gates") and entry["score"] >= cfg["smart_min_score"]
+             and all(g["ok"] for g in entry["smart_gates"]))
+    if not (normal or fast or smart):
         return False
     if cycle_alerts >= cfg["max_alerts_per_cycle"]:
         return False
@@ -1184,8 +1215,9 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         return False  # hard free-tier ceiling, even for exceptional scores
     if (alerts_today(state) >= cfg["max_alerts_per_day"] or in_quiet_hours(cfg)) and entry["score"] < cfg["exceptional_score"]:
         return False
-    kind = "fomo" if fast else "gem" if (t["age_h"] or 0) <= cfg["gem_max_age_hours"] else "survivor"
-    icon, label = {"fomo": ("🔥", "FOMO hype"), "gem": ("💎", "Gem"), "survivor": ("🏆", "Survivor")}[kind]
+    kind = "fomo" if fast else "smart" if smart else "gem" if (t["age_h"] or 0) <= cfg["gem_max_age_hours"] else "survivor"
+    icon, label = {"fomo": ("🔥", "FOMO hype"), "smart": ("🐋", "Smart money"), "gem": ("💎", "Gem"),
+                   "survivor": ("🏆", "Survivor")}[kind]
     title = f"{icon} {label}: ${t['symbol']} ({t['chain']}) score {entry['score']:.0f}"
     lines = [
         f"MC {fmt_usd(t['mcap'])} · Liq {fmt_usd(t['liq'])} · Age {fmt_age(t['age_h'])}",
@@ -1194,14 +1226,17 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
     ]
     fs = entry.get("fomo")
     if fs:
-        line = f"FOMO app: {fs['buyers_6h']} traders bought (6h)"
-        if fs["top_buyers"]:
-            line += ": " + ", ".join(fs["top_buyers"][:3])
+        line = f"FOMO app: {fs['holders_n']} traders hold, {fs['buyers_6h']} bought (6h)"
+        names = fs["good_holders"] or fs["holders"] or fs["top_buyers"]
+        if names:
+            line += ": " + ", ".join(names[:3])
         if fs["rank"]:
             line += f" · #{fs['rank']} trending"
         lines.append(line)
     if fast:
         lines.append("Young coin - early FOMO alert, higher risk")
+    if smart:
+        lines.append("Early: FOMO traders are in before the move - it may also never run")
     m = entry.get("safety") or {}
     safety_line = f"Safe ✓ top10 {m.get('top10_pct', 0):.0f}% · dev {max(m.get('creator_pct', 0), m.get('owner_pct', 0)):.1f}%"
     if m.get("holders"):
@@ -1218,7 +1253,7 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         actions.append({"action": "view", "label": "Bubblemap", "url": links["bubblemap"]})
     actions.append({"action": "view", "label": "X posts", "url": links["x_search"]})
     sent = push(title, "\n".join(lines), click=links["chart"], actions=actions,
-                tags=[{"fomo": "fire", "gem": "gem", "survivor": "trophy"}[kind]], priority=5 if entry["score"] >= cfg["exceptional_score"] else 4)
+                tags=[{"fomo": "fire", "smart": "whale", "gem": "gem", "survivor": "trophy"}[kind]], priority=5 if entry["score"] >= cfg["exceptional_score"] else 4)
     rec = {"key": t["key"], "ts": now(), "day": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
            "kind": kind, "symbol": t["symbol"], "name": t["name"], "chain": t["chain"], "address": t["address"],
            "score": entry["score"], "mcap": t["mcap"], "price": t.get("price"), "liq": t["liq"],
@@ -1229,7 +1264,7 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
            "socials": t.get("socials"), "dex": t.get("dex"), "url": t.get("url"), "biz": entry.get("biz"),
            "trending": t.get("trending"), "cto": t.get("cto"), "boosts": t.get("boosts"),
            "cg_trending": entry.get("cg_trending"), "fast_gates": entry.get("fast_gates"), "fomo": entry.get("fomo"), "buzz": entry.get("buzz"),
-           "gates": entry.get("fast_gates") if fast else entry.get("gates")}
+           "gates": entry.get("fast_gates") if fast else entry.get("smart_gates") if smart else entry.get("gates")}
     state["alerted"][t["key"]] = {"ts": rec["ts"], "score": entry["score"], "mcap": t["mcap"]}
     state["alerts"].insert(0, rec)
     log(f"  ALERT {title}")
@@ -1243,16 +1278,18 @@ def scan_cycle(http, state, cfg, ctx):
     ctx["gt_trending"], ctx["cto"], ctx["profile"], ctx["boost"] = set(), set(), set(), {}
     seeds = discover(http, cfg, ctx, state)
     pairs = ds_market(http, seeds)
-    tokens, skipped, built = [], {}, {}
+    tokens, skipped, built, quiet = [], {}, {}, []
     for k, seed in seeds.items():
         t = build_token(seed, pairs.get(k), ctx)
         if not t:
             skipped["no market data"] = skipped.get("no market data", 0) + 1
             continue
         built[k] = t
-        reason = prefilter(t, cfg)
+        reason = prefilter(t, cfg, quiet_ok=fomo.has_signal(fomo.stats(state, k)))
         if reason:
             skipped[reason] = skipped.get(reason, 0) + 1
+            if reason in ("few trades", "low volume") and t["chain"] == "solana":
+                quiet.append(t)  # maybe FOMO traders are buying it quietly: checked on-chain below
             continue
         tokens.append(t)
 
@@ -1275,6 +1312,13 @@ def scan_cycle(http, state, cfg, ctx):
         if entry:
             results.append(entry)
     rescore_alerts(http, state, cfg, built, results, corpus, cg, budget)
+    lookup_fomo_holders(state, results)
+    if ctx.get("rpc"):
+        safe = [e for e in results if e["chain"] == "solana" and not e["rejects"] and e["key"] not in state["alerted"]]
+        safe.sort(key=lambda e: e["score"], reverse=True)
+        quiet.sort(key=lambda t: t["liq"], reverse=True)
+        fomo_chain.run_cycle(state, ctx["rpc"], [(e["key"], e["address"]) for e in safe[:4]]
+                             + [(t["key"], t["address"]) for t in quiet], log)
 
     results.sort(key=lambda e: e["score"], reverse=True)
     sent = 0
@@ -1313,11 +1357,26 @@ def evaluate(http, state, cfg, t, corpus, cg, budget, pool):
             "score": score, "parts": parts, "why": why, "safety": m, "verified": verdict["verified"],
             "rejects": verdict["rejects"], "warnings": verdict["warnings"], "links": links_for(t),
             "x": social.get("x"), "biz": social.get("biz"), "cg_trending": social.get("cg_trending"),
-            "gates": extra["gates"], "fast_gates": extra["fast_gates"], "buzz": extra["buzz"],
+            "gates": extra["gates"], "fast_gates": extra["fast_gates"], "smart_gates": extra["smart_gates"],
+            "buzz": extra["buzz"],
             "fomo": social.get("fomo"), "checked": now()}
 
 
-NOW_FIELDS = ("score", "parts", "why", "safety", "verified", "rejects", "warnings", "gates", "fast_gates", "buzz",
+def lookup_fomo_holders(state, results):
+    """Ask FOMO which traders hold the most promising safe coin (1 per cycle, 15 a day, needs the key)."""
+    picks = [e for e in results if not e["rejects"] and e["verified"] and e["key"] not in state["alerted"]
+             and fomo.wants_lookup(state, e["key"])
+             and (fomo.has_signal(e.get("fomo")) or e["score"] >= 45)]
+    if not picks:
+        return
+    picks.sort(key=lambda e: ((e.get("fomo") or {}).get("holders_n", 0), e["score"]), reverse=True)
+    e = picks[0]
+    if fomo.lookup_holders(state, e["key"], e["chain"], e["address"], log) is not None:
+        e["fomo"] = fomo.stats(state, e["key"])
+
+
+NOW_FIELDS = ("score", "parts", "why", "safety", "verified", "rejects", "warnings", "gates", "fast_gates",
+              "smart_gates", "buzz",
               "fomo", "x", "biz", "cg_trending", "trending", "cto", "boosts", "socials", "checked")
 
 
@@ -1442,6 +1501,7 @@ def main():
                 f"{cfg['alert_min_score']}+ and passes the scam checks (max {cfg['max_alerts_per_day']}/day).",
                 click=os.environ.get("DASHBOARD_URL") or None, tags=["satellite"], priority=3):
             state["welcomed"] = True
+    ctx["rpc"] = fomo_chain.Rpc(log)
     stream = fomo.FomoStream(log)
     stream.start()
     time.sleep(8 if stream.available else 0)  # let the replay of the last ~15 minutes arrive
@@ -1450,7 +1510,7 @@ def main():
         c0 = now()
         try:
             n = fomo.absorb(state, stream.drain())
-            fomo.poll_board(state, log)
+            fomo.refresh(state, log)
             log(f"FOMO: {n} new trades, {len(state.get('fomo', {}))} coins traded in 24h"
                 f"{'' if stream.connected else ' (stream offline)'}")
             scan_cycle(http, state, cfg, ctx)

@@ -51,6 +51,7 @@ function safetyTags(e) {
   }
   if (e.trending) tags.push(`<span class="tag good">trending</span>`);
   if (e.fomo && typeof e.fomo === "object" && e.fomo.buyers_6h) tags.push(`<span class="tag good">🔥 FOMO ×${e.fomo.buyers_6h}</span>`);
+  if (e.fomo && typeof e.fomo === "object" && e.fomo.holders_n >= 2) tags.push(`<span class="tag good">🐋 ${e.fomo.holders_n} FOMO holders</span>`);
   if (e.cto) tags.push(`<span class="tag good">community takeover</span>`);
   if (e.cg_trending) tags.push(`<span class="tag good">CoinGecko trending</span>`);
   if (e.boosts) tags.push(`<span class="tag">boosted</span>`);
@@ -71,7 +72,9 @@ function bars(parts) {
 function fomoLine(f) {
   if (!f || typeof f !== "object") return "";
   const who = (f.top_buyers || []).slice(0, 4).map(esc).join(", ");
-  return `<p class="fomo">🔥 <b>FOMO app:</b> ${f.buyers_6h} traders bought in 6h${who ? " (" + who + ")" : ""}` +
+  const top = (f.good_holders || []).slice(0, 4).map(esc).join(", ");
+  const held = f.holders_n ? `${f.holders_n} FOMO traders hold it${top ? ` (top traders: ${top})` : ""} · ` : "";
+  return `<p class="fomo">🔥 <b>FOMO app:</b> ${held}${f.buyers_6h} bought in 6h${who ? " (" + who + ")" : ""}` +
     `${f.sellers_6h ? `, ${f.sellers_6h} sold` : ""}${f.rank ? ` · #${f.rank} trending` : ""}` +
     `${f.theses_24h ? ` · ${f.theses_24h} thesis posts` : ""}</p>`;
 }
@@ -104,6 +107,7 @@ function tokenCard(e, extra = "") {
       <div class="bars">${bars(e.parts)}</div>
       ${gateList(e.gates)}
       ${e.fast_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.fast_gates, "FOMO fast-lane checks (young coins)") : ""}
+      ${e.smart_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.smart_gates, "🐋 Smart-money checks (before the run)") : ""}
       ${(e.why || []).length ? `<p class="muted">Why: ${esc(e.why.join(", "))}</p>` : ""}
       <div class="tags">${safetyTags(e)}</div>
       <div class="addr">${esc(e.address)}</div>
@@ -125,9 +129,10 @@ function renderAlerts() {
       rejects: cur.rejects || [], warnings: cur.warnings || a.warnings, checked: cur.checked,
       gates: cur.gates || a.gates, why: cur.why || a.why,
       fomo: (cur.fomo && typeof cur.fomo === "object") ? cur.fomo : (a.fomo && typeof a.fomo === "object" ? a.fomo : null),
-      buzz: cur.buzz ?? a.buzz, fast_gates: cur.fast_gates || a.fast_gates };
+      buzz: cur.buzz ?? a.buzz, fast_gates: cur.fast_gates || a.fast_gates,
+      smart_gates: cur.smart_gates || a.smart_gates };
     applyLive(e, LIVE[(a.address || "").toLowerCase()], a.live);
-    const extra = `<p><b>${{ gem: "💎 Gem", survivor: "🏆 Survivor", fomo: "🔥 FOMO hype" }[a.kind] || "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}, score ${Math.round(a.score)}${cur.score != null ? ` → now ${Math.round(cur.score)}` : ""}
+    const extra = `<p><b>${{ gem: "💎 Gem", survivor: "🏆 Survivor", fomo: "🔥 FOMO hype", smart: "🐋 Smart money" }[a.kind] || "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}, score ${Math.round(a.score)}${cur.score != null ? ` → now ${Math.round(cur.score)}` : ""}
       · now ${perfText(e.mcap_now, a.mcap)}</p>`;
     return tokenCard(e, extra);
   }).join("");

@@ -86,7 +86,8 @@ class ScoringTests(unittest.TestCase):
         t = token(age_h=20)
         with_history(self.state, t, hours=6)
         fs = {"buyers_1h": 1, "buyers_2h": 2, "buyers_6h": 3, "buyers_24h": 4, "sellers_6h": 1, "buy_usd_6h": 9000,
-              "theses_24h": 0, "top_buyers": ["a", "b", "c"], "rank": None, "first_seen_h": 5}
+              "theses_24h": 0, "top_buyers": ["a", "b", "c"], "rank": None, "first_seen_h": 5,
+              "buyers_7d": 4, "holders": ["a", "b", "c"], "holders_n": 3, "good_holders": [], "graduated": False}
         s, parts, why, gates = run_score(t, SAFE, self.state, {**SOCIAL, "fomo": fs})
         self.assertGreaterEqual(s, CFG["alert_min_score"] + 3, parts)
         self.assertTrue(all(g["ok"] for g in gates), gates)
@@ -263,6 +264,126 @@ class AlertRescoreTests(unittest.TestCase):
         self.assertIn("staying", now["parts"])
         self.assertIsNotNone(now["buzz"])
         self.assertTrue(now["gates"])
+
+
+class SmartMoneyTests(unittest.TestCase):
+    def quiet_coin(self, holders=("a", "b", "c"), h6=5, sell_after=(), days_ago=2):
+        """Pirate-Shop-like: 3 days old, quiet trading, FOMO traders bought days ago and still hold."""
+        state = radar.fresh_state({})
+        ev = [fomo_event(i, "buy", h, minutes_ago=days_ago * 1440) for i, h in enumerate(holders)]
+        ev += [fomo_event(100 + i, "sell", h, minutes_ago=60) for i, h in enumerate(sell_after)]
+        radar.fomo.absorb(state, ev)
+        t = token(age_h=80, mcap=320_000, liq=60_000, buys_h1=25, sells_h1=15, buyers_h1=20, trending=False,
+                  vol={"m5": 100, "h1": 4_000, "h6": 40_000, "h24": 150_000},
+                  pc={"m5": 0, "h1": 2, "h6": h6, "h24": 8})
+        with_history(state, t, hours=6, mcap_start=300_000, holders_start=1400, holders_now=1450)
+        fs = radar.fomo.stats(state, t["key"])
+        social = {**SOCIAL, "fomo": fs}
+        safety = {**SAFE, "holders": 1450}
+        v = radar.judge_safety(safety, t, CFG)
+        s, parts, why = radar.score_token(t, safety, v, social, state, CFG)
+        last = radar.score_token.last
+        e = {**t, "score": s, "parts": parts, "why": why, "warnings": [], "rejects": [], "verified": True,
+             "safety": safety, "links": radar.links_for(t), "gates": last["gates"], "fast_gates": last["fast_gates"],
+             "smart_gates": last["smart_gates"], "buzz": last["buzz"], "fomo": fs}
+        return state, t, e
+
+    def test_quiet_coin_held_by_fomo_traders_passes_market_filter(self):
+        state, t, _ = self.quiet_coin()
+        self.assertEqual(radar.prefilter(t, CFG), "few trades")      # used to be skipped here
+        fs = radar.fomo.stats(state, t["key"])
+        self.assertEqual(fs["holders"], ["a", "b", "c"])
+        self.assertIsNone(radar.prefilter(t, CFG, quiet_ok=radar.fomo.has_signal(fs)))
+
+    def test_smart_money_alert_before_the_run(self):
+        state, t, e = self.quiet_coin()
+        self.assertTrue(radar.maybe_alert(e, state, CFG, 0), (e["score"], e["smart_gates"]))
+        self.assertEqual(state["alerts"][0]["kind"], "smart")
+
+    def test_no_smart_alert_after_it_already_ran(self):
+        state, t, e = self.quiet_coin(h6=150)
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_traders_who_sold_do_not_count(self):
+        state, t, e = self.quiet_coin(sell_after=("a", "b"))
+        self.assertEqual(e["fomo"]["holders"], ["c"])
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_two_top_traders_are_enough(self):
+        state = radar.fresh_state({})
+        state["fomo_rest"] = {"leaders": ["whale1", "whale2"], "holders": {}, "trending": {}, "graduated": {}}
+        radar.fomo.absorb(state, [fomo_event(1, "buy", "whale1", minutes_ago=3000),
+                                  fomo_event(2, "buy", "whale2", minutes_ago=3000)])
+        fs = radar.fomo.stats(state, "solana:abc")
+        self.assertEqual(fs["good_holders"], ["whale1", "whale2"])
+        gates = radar.smart_lane_gates(token(age_h=80, pc={"m5": 0, "h1": 1, "h6": 3, "h24": 5}), None, 0, fs, [], CFG)
+        self.assertTrue(all(g["ok"] for g in gates), gates)
+
+    def test_fomo_api_budget_never_exceeded(self):
+        state = radar.fresh_state({})
+        os.environ["FOMO_API_KEY"] = "test"
+        try:
+            calls = 0
+            orig = radar.fomo._get
+            radar.fomo._get = lambda st, path, log, holder=False: (radar.fomo._budget(st).__setitem__(
+                "calls", radar.fomo._budget(st)["calls"] + 1), radar.fomo._budget(st).__setitem__(
+                "day_calls", radar.fomo._budget(st)["day_calls"] + 1), radar.fomo._budget(st).__setitem__(
+                "holder_calls", radar.fomo._budget(st)["holder_calls"] + (1 if holder else 0)), {"holders": []})[-1]
+            for i in range(100):
+                radar.fomo.lookup_holders(state, f"solana:t{i}", "solana", f"t{i}", print)
+            b = radar.fomo._budget(state)
+            self.assertEqual(b["holder_calls"], radar.fomo.HOLDER_LOOKUPS_PER_DAY)
+            b["day_calls"] = 0; b["holder_calls"] = 0; b["calls"] = radar.fomo.MONTHLY_CAP
+            self.assertFalse(radar.fomo._can_call(state))
+        finally:
+            radar.fomo._get = orig
+            del os.environ["FOMO_API_KEY"]
+
+
+class FakeRpc:
+    """Fake Solana RPC: FOMO signer signed s1..s4; the coin MINT has s1, s2, s3, x9 in its history."""
+    def __init__(self):
+        self.calls = 0
+
+    def budget_left(self):
+        return 99
+
+    def call(self, method, params):
+        self.calls += 1
+        now = time.time()
+        if method == "getSignaturesForAddress" and params[0] == radar.fomo_chain.FOMO_SIGNER:
+            return [{"signature": f"s{i}" + "x" * 20, "blockTime": now - i * 60} for i in range(1, 5)]
+        if method == "getSignaturesForAddress":
+            return [{"signature": sig + "x" * 20, "blockTime": now - n * 600} for n, sig in enumerate(("s1", "s2", "s3", "x9"))]
+        if method == "getTransaction":
+            sig = params[0][:2]
+            wallet, amount = {"s1": ("walletA", 100), "s2": ("walletB", 50), "s3": ("walletA", -100)}[sig]
+            pre = [{"accountIndex": 1, "mint": "MINT", "owner": wallet, "uiTokenAmount": {"uiAmount": 100 if amount < 0 else 0}}]
+            post = [{"accountIndex": 1, "mint": "MINT", "owner": wallet, "uiTokenAmount": {"uiAmount": 0 if amount < 0 else amount}}]
+            return {"blockTime": now - (4 - int(sig[1])) * 600,  # s1 oldest, s3 newest
+                    "transaction": {"message": {"accountKeys": [{"pubkey": radar.fomo_chain.FOMO_SIGNER, "signer": True},
+                                                                {"pubkey": wallet, "signer": True}]}},
+                    "meta": {"preTokenBalances": pre, "postTokenBalances": post}}
+
+
+class FomoChainTests(unittest.TestCase):
+    def test_small_fomo_trades_found_on_chain(self):
+        state = radar.fresh_state({})
+        rpc = FakeRpc()
+        radar.fomo_chain.run_cycle(state, rpc, [("solana:MINT", "MINT")], lambda *a: None)
+        c = radar.fomo_chain.summary(state, "solana:MINT")
+        self.assertEqual(c["trades"], 3)                 # x9 is not a FOMO trade
+        self.assertEqual(c["holders"], ["walletB"])       # walletA bought, then sold
+        fs = radar.fomo.stats(state, "solana:MINT")
+        self.assertEqual(fs["wallets_holding"], 1)
+        radar.fomo_chain.run_cycle(state, rpc, [("solana:MINT", "MINT")], lambda *a: None)
+        self.assertEqual(rpc.calls, 1)                   # coin cached for 3h: only the index is refreshed
+
+    def test_two_wallets_holding_make_a_quiet_coin_eligible(self):
+        state = radar.fresh_state({})
+        state["fomo_chain"] = {"coins": {"solana:abc": {"ts": time.time(), "holders": ["w1", "w2"], "buyers": 2,
+                                                         "sellers": 0, "trades": 2, "span_h": 8}}}
+        self.assertTrue(radar.fomo.has_signal(radar.fomo.stats(state, "solana:abc")))
 
 
 class ParsingTests(unittest.TestCase):

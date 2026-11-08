@@ -26,6 +26,16 @@ your iPhone, and publishes a dashboard on GitHub Pages.
   FOMO buys add up to 15 points. FOMO fast lane: a young coin bought by 3+ FOMO traders within 2
   hours (or top 20 on FOMO trending) alerts early as 🔥 if all scam checks pass, FOMO traders
   aren't selling, it hasn't crashed and its holders aren't bots.
+- 🐋 Smart money: alerts before the move when 3+ FOMO traders (or 2+ from FOMO's top-150
+  leaderboard) hold a coin and haven't sold, and it hasn't run up yet (under +100% in 6h). Every scam
+  check still applies. FOMO trades are remembered for 7 days; with a free `FOMO_API_KEY` GemRadar also
+  reads the leaderboard (daily), FOMO's trending and graduated coins (every 4h) and "which FOMO
+  traders hold this coin" (15 lookups a day), capped at 900 of the 1,000 free calls a month.
+- FOMO trades of any size on Solana, read for free from the public blockchain: every FOMO-app trade
+  is signed by one FOMO wallet (identified by Bitquery, not confirmed by FOMO). GemRadar keeps 12
+  hours of that wallet's transaction IDs and matches them against a coin's own recent transactions,
+  so it sees which FOMO wallets bought and still hold, even small and quiet buys. Max 16 paced calls
+  per cycle to the free Solana RPC.
 - Sends an alert only if the coin passes **every** scam and staying-power check and scores at least
   `alert_min_score` (default 65/100). Max `max_alerts_per_day` (default 40, never above 60).
 - Alerts for coins that crash below 10% of their alert market cap are removed automatically
@@ -63,6 +73,9 @@ Edit `config.json` on GitHub and commit. Useful settings:
 | `max_drawdown_pct` | 45 | Max % below its peak |
 | `fomo_fast_lane` | true | Early 🔥 alerts for young coins with FOMO-app hype |
 | `fomo_fast_min_buyers` | 3 | FOMO traders needed within 2h for the fast lane |
+| `smart_money_lane` | true | 🐋 alerts when FOMO traders already hold a coin before it runs |
+| `smart_min_holders` | 3 | FOMO traders holding needed (or `smart_min_top_traders`: 2) |
+| `smart_max_runup_6h_pct` | 100 | No 🐋 alert once it already rose this much in 6h |
 | `min_liquidity_usd` | 12000 | Ignore coins with less liquidity |
 | `max_mcap_usd` | 50000000 | Ignore coins above this market cap |
 | `chains_only` | `[]` | e.g. `["solana", "base"]` to restrict |
@@ -90,7 +103,8 @@ Edit `config.json` on GitHub and commit. Useful settings:
 | GeckoTerminal | 30 calls/min | max 15/min |
 | DexScreener | 60-300 calls/min | well below |
 | GoPlus | free tier | max 15 checks per 90 s |
-| fomoapi.io | live feed free; 1,000 REST calls/month | ~480/month; stops for a day if it ever answers 402/429 |
+| Solana public RPC | free, rate-limited | max 16 calls per ~90 s, pauses 2 min on 429 |
+| fomoapi.io | live feed free; 1,000 REST calls/month | max 29/day and 900/month (hard-coded); stops for a day on 401/402/429 |
 
 No service has a payment card attached, so nothing can ever be billed. state/alerts.json is
 updated at least weekly so GitHub never pauses the schedule for inactivity.
