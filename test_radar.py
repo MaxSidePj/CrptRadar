@@ -491,6 +491,74 @@ class DuplicateTests(unittest.TestCase):
                 radar.ALERTS_FILE, radar.CACHE_FILE = orig
 
 
+GT_ELYSION = {"websites": ["https://tryelysion.fun"], "twitter": "tryelysion", "telegram": None, "coingecko": "elysion",
+              "gt_score": 58, "verified": True, "categories": [], "description": "", "launchpad": True}
+
+
+class ProjectLaneTests(unittest.TestCase):
+    def setup_coin(self, name="Elysion Pad", chain="solana", gt=GT_ELYSION, fomo_holders=("trader1",),
+                   pc=None, low=70_000, mcap=100_000, x=None, sellers=()):
+        state = radar.fresh_state({})
+        state["fomo_rest"] = {"leaders": [], "holders": {}, "trending": {}, "graduated": {}}
+        ev = [fomo_event(i, "buy", h, minutes_ago=300) for i, h in enumerate(fomo_holders)]
+        ev += [fomo_event(50 + i, "sell", h, minutes_ago=60) for i, h in enumerate(sellers)]
+        radar.fomo.absorb(state, ev)
+        t = token(name=name, symbol="ELY", chain=chain, age_h=24, mcap=mcap, liq=30_000, buys_h1=40, sells_h1=30,
+                  buyers_h1=25, trending=False, socials={"x": "https://x.com/tryelysion", "website": "https://tryelysion.fun"},
+                  vol={"m5": 100, "h1": 3_000, "h6": 20_000, "h24": 90_000},
+                  pc=pc or {"m5": 1, "h1": 5, "h6": 20, "h24": 30})
+        # 24h after an early pump to $230k and a crash: base at ~$70k, now recovering to $100k
+        with_history(state, t, hours=8, mcap_start=low, holders_start=900, holders_now=966, peak=230_000)
+        fs = radar.fomo.stats(state, t["key"])
+        social = {"x": x or {"followers": 356, "tweets": 56, "age_days": 1}, "cg_trending": False, "biz": 0,
+                  "fomo": fs, "gt": gt}
+        safety = {**SAFE, "holders": 966}
+        v = radar.judge_safety(safety, t, CFG)
+        sc, parts, why = radar.score_token(t, safety, v, social, state, CFG)
+        last = radar.score_token.last
+        e = {**t, "score": sc, "parts": parts, "why": why, "warnings": [], "rejects": [], "verified": True,
+             "safety": safety, "links": radar.links_for(t), "fomo": fs, "buzz": last["buzz"], "gates": last["gates"],
+             "fast_gates": last["fast_gates"], "smart_gates": last["smart_gates"],
+             "project_gates": last["project_gates"], "quality": last["quality"], "quality_why": last["quality_why"]}
+        return state, e
+
+    def test_elysion_before_the_spike_alerts_as_early_project(self):
+        state, e = self.setup_coin()
+        self.assertFalse(all(g["ok"] for g in e["gates"]))          # far below its launch peak: no Gem
+        self.assertTrue(radar.maybe_alert(e, state, CFG, 0), (e["score"], e["project_gates"]))
+        self.assertEqual(state["alerts"][0]["kind"], "project")
+
+    def test_quiet_new_chain_coin_like_fobo(self):
+        gt = {**GT_ELYSION, "gt_score": 86, "websites": ["https://fobo.fun"], "coingecko": None}
+        state, e = self.setup_coin(name="FOBO", chain="robinhood", gt=gt,
+                                   x={"followers": 2018, "tweets": 300, "age_days": 22})
+        self.assertTrue(radar.maybe_alert(e, state, CFG, 0), (e["score"], e["project_gates"]))
+
+    def test_no_alert_on_the_spike_itself(self):
+        state, e = self.setup_coin(pc={"m5": 20, "h1": 279, "h6": 400, "h24": 300})
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+        self.assertTrue(any("Not spiking" in g["text"] and not g["ok"] for g in e["gates"]))
+
+    def test_no_fomo_holder_no_project_alert(self):
+        state, e = self.setup_coin(fomo_holders=())
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_fomo_traders_selling_blocks(self):
+        state, e = self.setup_coin(fomo_holders=("a",), sellers=("b", "c"))
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_no_real_project_no_alert(self):
+        gt = {"websites": [], "twitter": None, "telegram": None, "coingecko": None, "gt_score": 20,
+              "verified": False, "categories": [], "description": "", "launchpad": False}
+        state, e = self.setup_coin(name="Random Dog", gt=gt, x={"followers": 50, "tweets": 3, "age_days": 0})
+        e["socials"] = {}
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_still_dumping_no_alert(self):
+        state, e = self.setup_coin(low=100_000, mcap=100_000)       # no recovery from the low yet
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+
 class ParsingTests(unittest.TestCase):
     def test_x_handle(self):
         self.assertEqual(radar.parse_x_handle("https://x.com/gemcoin"), "gemcoin")

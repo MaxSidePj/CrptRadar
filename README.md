@@ -32,6 +32,11 @@ your iPhone, and publishes a dashboard on GitHub Pages.
   check still applies. FOMO trades are remembered for 7 days; with a free `FOMO_API_KEY` GemRadar also
   reads the leaderboard (daily), FOMO's trending and graduated coins (every 4h) and "which FOMO
   traders hold this coin" (15 lookups a day), capped at 900 of the 1,000 free calls a month.
+- 🧩 Early project: real projects (website, own X account made before the coin, GeckoTerminal
+  score, CoinGecko listing, tech theme or new chain) with at least one FOMO holder, under $1.5M,
+  forming a base (+15% above the 24h low, not dumping) but not spiking yet. Based on what PAID,
+  FLOAT, Elysion Pad, FOBO, TORCH and CASHCAT looked like before their 11x-61x runs.
+- 💎/🏆 don't alert on a spike (max +100% in 1h, +200% in 6h).
 - FOMO trades of any size on Solana, read for free from the public blockchain: every FOMO-app trade
   is signed by one FOMO wallet (identified by Bitquery, not confirmed by FOMO). GemRadar keeps 12
   hours of that wallet's transaction IDs and matches them against a coin's own recent transactions,
@@ -83,6 +88,13 @@ Edit `config.json` on GitHub and commit. Useful settings:
 | `smart_max_mcap_usd` | 1000000 | 🐋 only below this market cap |
 | `smart_max_rise_since_spotted` | 2.5 | No 🐋 once it rose more than this since FOMO traders were first seen in it |
 | `smart_max_per_day` | 5 | Max 🐋 alerts per day (and 1 per scan) |
+| `project_lane` | true | 🧩 alerts for real projects forming a base |
+| `project_min_quality` | 5 | Project quality needed (0-14) |
+| `project_max_mcap_usd` | 1500000 | 🧩 only below this market cap |
+| `project_min_recovery_pct` | 15 | Must be this much above its 24h low |
+| `project_max_per_day` | 3 | Max 🧩 alerts per day |
+| `new_chains` / `tech_keywords` | lists | Chains and words that count as new-chain / tech theme |
+| `max_runup_1h_pct` / `max_runup_6h_pct` | 100 / 200 | No 💎/🏆 alert on a spike |
 | `min_liquidity_usd` | 12000 | Ignore coins with less liquidity |
 | `max_mcap_usd` | 50000000 | Ignore coins above this market cap |
 | `chains_only` | `[]` | e.g. `["solana", "base"]` to restrict |
