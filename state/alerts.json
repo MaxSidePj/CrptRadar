@@ -29,9 +29,87 @@
    "ts": 1794069261.4049935,
    "score": 71.9,
    "mcap": 483487.0
+  },
+  "solana:Bv1a7cEj5aRnJQhMw4kRQqAFesMSd5LwcDnUzq52BMmr": {
+   "ts": 1794096381.2255003,
+   "score": 59.3,
+   "mcap": 12668197.0
   }
  },
  "alerts": [
+  {
+   "key": "solana:Bv1a7cEj5aRnJQhMw4kRQqAFesMSd5LwcDnUzq52BMmr",
+   "ts": 1794096381.2255003,
+   "day": "2026-11-08",
+   "kind": "fomo",
+   "symbol": "FLOAT",
+   "name": "FLOAT",
+   "chain": "solana",
+   "address": "Bv1a7cEj5aRnJQhMw4kRQqAFesMSd5LwcDnUzq52BMmr",
+   "score": 59.3,
+   "mcap": 12668197.0,
+   "price": 0.01268,
+   "liq": 714701.5,
+   "age_h": 241.83711384562176,
+   "why": [
+    "$715k liquidity",
+    "market cap +21% in 6h",
+    "holders +11% in 3h",
+    "holding up after 10d",
+    "27 FOMO traders bought (6foot4Lean, HodlZ, LightFairStork)",
+    "17 FOMO thesis posts"
+   ],
+   "warnings": [
+    "Linked insider wallets (2%)"
+   ],
+   "links": {
+    "chart": "https://dexscreener.com/solana/fjk9sajdc2q4herppu3ylzkmf2zbyzkpihqlv9e2bn5a",
+    "x_search": "https://x.com/search?q=%24FLOAT%20OR%20Bv1a7cEj5aRnJQhMw4kRQqAFesMSd5LwcDnUzq52BMmr&f=live",
+    "bubblemap": "https://v2.bubblemaps.io/map?address=Bv1a7cEj5aRnJQhMw4kRQqAFesMSd5LwcDnUzq52BMmr&chain=solana",
+    "rugcheck": "https://rugcheck.xyz/tokens/Bv1a7cEj5aRnJQhMw4kRQqAFesMSd5LwcDnUzq52BMmr",
+    "x": "https://x.com/floatdotxyz",
+    "website": "https://www.floatlaunch.xyz/"
+   },
+   "image": "https://cdn.dexscreener.com/cms/images/GcjeczTah2v57O9h?width=800&height=800&quality=95&format=auto",
+   "sent": true,
+   "fomo": {
+    "buyers_1h": 11,
+    "buyers_2h": 14,
+    "buyers_6h": 27,
+    "buyers_24h": 27,
+    "sellers_6h": 27,
+    "buy_usd_6h": 668283,
+    "theses_24h": 17,
+    "top_buyers": [
+     "6foot4Lean",
+     "HodlZ",
+     "LightFairStork",
+     "LingonBerry",
+     "MereVagueDeer"
+    ],
+    "rank": null,
+    "first_seen_h": 3.8
+   },
+   "buzz": 40,
+   "gates": [
+    {
+     "ok": true,
+     "text": "14 FOMO traders bought in 2h (needs 3+)"
+    },
+    {
+     "ok": true,
+     "text": "Age 10d (needs 20m+)"
+    },
+    {
+     "ok": true,
+     "text": "FOMO buyers 27 vs sellers 27"
+    },
+    {
+     "ok": true,
+     "text": "6% below its peak (max 45%)"
+    }
+   ]
+  },
   {
    "key": "solana:75VDY6P9kJyAp7QGYRzq7o85oKBSXpR9XmaWVHcspump",
    "ts": 1794069261.4049935,
