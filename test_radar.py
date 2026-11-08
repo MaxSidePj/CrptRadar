@@ -250,6 +250,21 @@ class LimitTests(unittest.TestCase):
         self.assertEqual(sent, radar.NTFY_DAILY_CEILING)
 
 
+class AlertRescoreTests(unittest.TestCase):
+    def test_old_alert_gets_current_scores_even_outside_market_filter(self):
+        state = radar.fresh_state({})
+        t = token(key="solana:old", address="old", age_h=40, liq=8000)  # fails the market filter now
+        self.assertIsNotNone(radar.prefilter(t, CFG))
+        state["alerts"].append({"key": t["key"], "chain": "solana", "address": "old", "symbol": "OLD", "score": 70})
+        state["safety_cache"][t["key"]] = {"ts": time.time(), "data": SAFE}
+        budget = {"deep": 0, "alerts": 0}
+        radar.rescore_alerts(FakeHttp(None), state, CFG, {t["key"]: t}, [], "", set(), budget)
+        now = state["alerts"][0]["now"]
+        self.assertIn("staying", now["parts"])
+        self.assertIsNotNone(now["buzz"])
+        self.assertTrue(now["gates"])
+
+
 class ParsingTests(unittest.TestCase):
     def test_x_handle(self):
         self.assertEqual(radar.parse_x_handle("https://x.com/gemcoin"), "gemcoin")

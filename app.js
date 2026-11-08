@@ -119,13 +119,15 @@ function renderAlerts() {
   if (!list.length) html += `<div class="empty">No alerts yet. GemRadar only alerts when a coin passes every scam check and scores ${DATA.config.alert_min_score}+.<br>See the <b>Live</b> tab for what it's watching.</div>`;
   html += list.map((a) => {
     const board = (DATA.board || []).find((b) => b.key === a.key);
-    const e = { ...a, ...(board || {}), score: a.score, links: a.links, kind: a.kind, ts: a.ts,
-      safety: board?.safety || a.safety, parts: board?.parts || a.parts, verified: true, rejects: [],
-      warnings: a.warnings, checked: board?.checked, gates: a.gates || board?.gates,
-      fomo: (board?.fomo && typeof board.fomo === "object") ? board.fomo : (a.fomo && typeof a.fomo === "object" ? a.fomo : null),
-      buzz: board?.buzz ?? a.buzz, fast_gates: board?.fast_gates || a.fast_gates };
+    const cur = board || a.now || {};
+    const e = { ...a, ...cur, score: cur.score ?? a.score, links: a.links, kind: a.kind, ts: a.ts,
+      safety: cur.safety || a.safety, parts: cur.parts || a.parts, verified: cur.verified ?? true,
+      rejects: cur.rejects || [], warnings: cur.warnings || a.warnings, checked: cur.checked,
+      gates: cur.gates || a.gates, why: cur.why || a.why,
+      fomo: (cur.fomo && typeof cur.fomo === "object") ? cur.fomo : (a.fomo && typeof a.fomo === "object" ? a.fomo : null),
+      buzz: cur.buzz ?? a.buzz, fast_gates: cur.fast_gates || a.fast_gates };
     applyLive(e, LIVE[(a.address || "").toLowerCase()], a.live);
-    const extra = `<p><b>${{ gem: "💎 Gem", survivor: "🏆 Survivor", fomo: "🔥 FOMO hype" }[a.kind] || "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}
+    const extra = `<p><b>${{ gem: "💎 Gem", survivor: "🏆 Survivor", fomo: "🔥 FOMO hype" }[a.kind] || "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}, score ${Math.round(a.score)}${cur.score != null ? ` → now ${Math.round(cur.score)}` : ""}
       · now ${perfText(e.mcap_now, a.mcap)}</p>`;
     return tokenCard(e, extra);
   }).join("");

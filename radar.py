@@ -402,6 +402,9 @@ def discover(http, cfg, ctx, state):
                 ctx["boost"][k] = max(ctx["boost"].get(k, 0), int(fnum(it.get("totalAmount") or it.get("amount"))))
             if k not in watch and it.get("chainId") and chain_allowed(it["chainId"], cfg):
                 watch[k] = [it["chainId"], it.get("tokenAddress"), None, now(), 0, 0]
+    # Coins in the alerts list: keep scoring them for as long as they stay there.
+    for a in state.get("alerts") or []:
+        add(a["chain"], a["address"], "alert", symbol=a.get("symbol"))
     # Coins FOMO app traders bought in the last 6 hours, or on FOMO's trending board.
     t_now = now()
     for k, r in (state.get("fomo") or {}).items():
@@ -1253,37 +1256,13 @@ def scan_cycle(http, state, cfg, ctx):
         record_history(state, t, ((cached or {}).get("data") or {}).get("holders"))
     corpus = biz_corpus(http, ctx)
     cg = coingecko_trending(http, ctx)
-    deep_budget = min(int(cfg["deep_checks_per_cycle"]), MAX_DEEP_CHECKS)
+    budget = {"deep": min(int(cfg["deep_checks_per_cycle"]), MAX_DEEP_CHECKS), "alerts": 4}
     results = []
     for t in tokens:
-        cached = state["safety_cache"].get(t["key"])
-        ttl = 1200 if (t["age_h"] or 0) < 24 else 3600
-        if cached and now() - cached["ts"] < ttl:
-            m = cached["data"]
-        elif deep_budget > 0:
-            deep_budget -= 1
-            m = safety_solana(http, t, cfg) if t["chain"] == "solana" else safety_goplus(http, t, cfg)
-            state["safety_cache"][t["key"]] = {"ts": now(), "data": m}
-        else:
-            continue  # checked in a later cycle
-        verdict = judge_safety(m, t, cfg)
-        social = {"cg_trending": (t["symbol"] or "").upper() in cg, "biz": biz_mentions(corpus, t),
-                  "fomo": fomo.stats(state, t["key"])}
-        if not verdict["rejects"]:
-            social["x"] = x_profile(http, state, parse_x_handle(t["socials"].get("x")))
-        if m and m.get("holders"):
-            record_history(state, t, m["holders"])
-        score, parts, why = score_token(t, m, verdict, social, state, cfg)
-        extra = score_token.last
-        entry = {**{k: t[k] for k in ("key", "chain", "address", "symbol", "name", "url", "price", "liq", "mcap",
-                                      "vol", "pc", "buys_h1", "sells_h1", "age_h", "socials", "trending", "cto",
-                                      "boosts", "image", "dex", "sources")},
-                 "score": score, "parts": parts, "why": why, "safety": m, "verified": verdict["verified"],
-                 "rejects": verdict["rejects"], "warnings": verdict["warnings"], "links": links_for(t),
-                 "x": social.get("x"), "biz": social.get("biz"), "cg_trending": social.get("cg_trending"),
-                 "gates": extra["gates"], "fast_gates": extra["fast_gates"], "buzz": extra["buzz"],
-                 "fomo": social.get("fomo"), "checked": now()}
-        results.append(entry)
+        entry = evaluate(http, state, cfg, t, corpus, cg, budget, "deep")
+        if entry:
+            results.append(entry)
+    rescore_alerts(http, state, cfg, built, results, corpus, cg, budget)
 
     results.sort(key=lambda e: e["score"], reverse=True)
     sent = 0
@@ -1291,6 +1270,57 @@ def scan_cycle(http, state, cfg, ctx):
         if maybe_alert(e, state, cfg, sent):
             sent += 1
     merge_board(state, results)
+    return finish_cycle(state, t0, seeds, tokens, results, skipped, sent)
+
+
+def evaluate(http, state, cfg, t, corpus, cg, budget, pool):
+    """Safety + social + score for one token. None if its safety check has to wait for a later cycle."""
+    cached = state["safety_cache"].get(t["key"])
+    ttl = 1200 if (t["age_h"] or 0) < 24 else 3600
+    if cached and now() - cached["ts"] < ttl:
+        m = cached["data"]
+    elif budget[pool] > 0:
+        budget[pool] -= 1
+        m = safety_solana(http, t, cfg) if t["chain"] == "solana" else safety_goplus(http, t, cfg)
+        state["safety_cache"][t["key"]] = {"ts": now(), "data": m}
+    elif cached:
+        m = cached["data"]  # a slightly older check is fine for the dashboard
+    else:
+        return None
+    verdict = judge_safety(m, t, cfg)
+    social = {"cg_trending": (t["symbol"] or "").upper() in cg, "biz": biz_mentions(corpus, t),
+              "fomo": fomo.stats(state, t["key"])}
+    if not verdict["rejects"]:
+        social["x"] = x_profile(http, state, parse_x_handle(t["socials"].get("x")))
+    record_history(state, t, (m or {}).get("holders"))
+    score, parts, why = score_token(t, m, verdict, social, state, cfg)
+    extra = score_token.last
+    return {**{k: t[k] for k in ("key", "chain", "address", "symbol", "name", "url", "price", "liq", "mcap",
+                                 "vol", "pc", "buys_h1", "sells_h1", "age_h", "socials", "trending", "cto",
+                                 "boosts", "image", "dex", "sources")},
+            "score": score, "parts": parts, "why": why, "safety": m, "verified": verdict["verified"],
+            "rejects": verdict["rejects"], "warnings": verdict["warnings"], "links": links_for(t),
+            "x": social.get("x"), "biz": social.get("biz"), "cg_trending": social.get("cg_trending"),
+            "gates": extra["gates"], "fast_gates": extra["fast_gates"], "buzz": extra["buzz"],
+            "fomo": social.get("fomo"), "checked": now()}
+
+
+NOW_FIELDS = ("score", "parts", "why", "safety", "verified", "rejects", "warnings", "gates", "fast_gates", "buzz",
+              "fomo", "x", "biz", "cg_trending", "trending", "cto", "boosts", "socials", "checked")
+
+
+def rescore_alerts(http, state, cfg, built, results, corpus, cg, budget):
+    """Keep score bars, FOMO, buzz and checks current for every coin still in the alerts list."""
+    scored = {e["key"]: e for e in results}
+    for a in state.get("alerts") or []:
+        e = scored.get(a["key"])
+        if e is None and a["key"] in built:
+            e = evaluate(http, state, cfg, built[a["key"]], corpus, cg, budget, "alerts")
+        if e:
+            a["now"] = {k: e.get(k) for k in NOW_FIELDS}
+
+
+def finish_cycle(state, t0, seeds, tokens, results, skipped, sent):
     st = state["stats"]
     st["last_cycle"] = {"ts": now(), "seconds": round(now() - t0, 1), "seeds": len(seeds),
                         "passed_market_filter": len(tokens), "deep_checked": len(results), "alerts": sent,
