@@ -8,7 +8,7 @@ your iPhone, and publishes a dashboard on GitHub Pages.
 - Scans new and trending pools on all chains indexed by GeckoTerminal, plus DexScreener's new
   profiles, boosts and community takeovers, about every 90 seconds while a run is active.
 - Remembers each launch (the watch pool) and re-checks it: dead coins are dropped, active ones are
-  followed for up to 14 days, so it alerts
+  followed for up to 30 days, so it alerts
   when a coin starts gaining traction instead of at its first second.
 - Scam checks: honeypot, buy/sell tax, mint/freeze authority, dev wallet, top-10 wallets, single
   whale, linked insider wallets (bubblemap-style clusters from RugCheck), bundles (trench.bot when
@@ -27,8 +27,9 @@ your iPhone, and publishes a dashboard on GitHub Pages.
   hours (or top 20 on FOMO trending) alerts early as 🔥 if all scam checks pass, FOMO traders
   aren't selling, it hasn't crashed and its holders aren't bots.
 - Sends an alert only if the coin passes **every** scam and staying-power check and scores at least
-  `alert_min_score` (default 65/100). Max `max_alerts_per_day` (default 6). A score of 85+ may
-  break that limit.
+  `alert_min_score` (default 65/100). Max `max_alerts_per_day` (default 40, never above 60).
+- Alerts for coins that crash below 10% of their alert market cap are removed automatically
+  (they are never alerted again).
 
 ## Setup on iPhone (one time, ~10 minutes)
 
@@ -57,7 +58,7 @@ Edit `config.json` on GitHub and commit. Useful settings:
 | Setting | Default | Meaning |
 |---|---|---|
 | `alert_min_score` | 65 | Higher = fewer, stronger alerts |
-| `max_alerts_per_day` | 6 | Daily cap (85+ scores can break it) |
+| `max_alerts_per_day` | 40 | Daily cap; the code never sends more than 60 (ntfy free limit is 250) |
 | `min_alert_age_hours` | 6 | Never alert on coins younger than this |
 | `max_drawdown_pct` | 45 | Max % below its peak |
 | `fomo_fast_lane` | true | Early 🔥 alerts for young coins with FOMO-app hype |
@@ -77,3 +78,19 @@ Edit `config.json` on GitHub and commit. Useful settings:
   same-size-wallet bundle check always runs.
 - GitHub can start scheduled runs late, so alerts arrive within minutes, not seconds.
 - Not financial advice. Passing the checks lowers scam risk; it does not remove it.
+
+## Always free
+
+| Service | Free limit | GemRadar uses |
+|---|---|---|
+| GitHub Actions (public repo) | unlimited minutes | ~1 run per 15 min |
+| GitHub Pages | 100 GB/month, ~10 deploys/hour | 4 deploys/hour, tiny page |
+| GitHub cache | 10 GB, old entries auto-deleted | ~1 MB per run |
+| ntfy.sh | 250 messages/day | max 60/day (hard-coded) |
+| GeckoTerminal | 30 calls/min | max 15/min |
+| DexScreener | 60-300 calls/min | well below |
+| GoPlus | free tier | max 15 checks per 90 s |
+| fomoapi.io | live feed free; 1,000 REST calls/month | ~480/month; stops for a day if it ever answers 402/429 |
+
+No service has a payment card attached, so nothing can ever be billed. state/alerts.json is
+updated at least weekly so GitHub never pauses the schedule for inactivity.

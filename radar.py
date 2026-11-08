@@ -44,7 +44,11 @@ ROOT = Path(__file__).resolve().parent
 CONFIG_FILE = ROOT / "config.json"
 ALERTS_FILE = ROOT / "state" / "alerts.json"   # committed to git (small, changes only on alerts)
 CACHE_FILE = ROOT / "cache" / "radar.json"     # kept with actions/cache (watch pool, board, caches)
-ALERT_KEYS = ("alerted", "alerts", "welcomed")
+ALERT_KEYS = ("alerted", "alerts", "welcomed", "heartbeat")
+
+# Free-tier ceilings (never exceeded, whatever config.json says)
+NTFY_DAILY_CEILING = 60      # ntfy.sh free/anonymous allows 250 messages a day
+MAX_DEEP_CHECKS = 15         # GoPlus / RugCheck calls per cycle
 WEB_FILES = ("index.html", "app.js", "style.css", "manifest.webmanifest",
              "icon-180.png", "icon-192.png", "icon-512.png")
 SITE_DIR = ROOT / "site"
@@ -52,10 +56,10 @@ SITE_DIR = ROOT / "site"
 DEFAULT_CONFIG = {
     "alert_min_score": 65,
     "exceptional_score": 85,
-    "max_alerts_per_day": 6,
+    "max_alerts_per_day": 40,
     "max_alerts_per_cycle": 2,
     "gem_max_age_hours": 72,
-    "runner_max_age_hours": 336,
+    "runner_max_age_hours": 720,
     "min_alert_age_hours": 6,
     "min_observed_hours": 3,
     "max_drawdown_pct": 45,
@@ -156,7 +160,7 @@ class Http:
     def __init__(self):
         self.last = {}
         self.calls = {}
-        self.min_gap = {"api.geckoterminal.com": 4.0, "api.gopluslabs.io": 1.2,
+        self.min_gap = {"api.geckoterminal.com": 4.0, "api.gopluslabs.io": 2.1,
                         "api.rugcheck.xyz": 0.8, "api.fxtwitter.com": 0.6,
                         "api.dexscreener.com": 0.25, "trench.bot": 1.0}
         self.dead_until = {}
@@ -1161,6 +1165,8 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         return False
     if cycle_alerts >= cfg["max_alerts_per_cycle"]:
         return False
+    if alerts_today(state) >= NTFY_DAILY_CEILING:
+        return False  # hard free-tier ceiling, even for exceptional scores
     if (alerts_today(state) >= cfg["max_alerts_per_day"] or in_quiet_hours(cfg)) and entry["score"] < cfg["exceptional_score"]:
         return False
     kind = "fomo" if fast else "gem" if (t["age_h"] or 0) <= cfg["gem_max_age_hours"] else "survivor"
@@ -1242,7 +1248,7 @@ def scan_cycle(http, state, cfg, ctx):
         record_history(state, t, ((cached or {}).get("data") or {}).get("holders"))
     corpus = biz_corpus(http, ctx)
     cg = coingecko_trending(http, ctx)
-    deep_budget = int(cfg["deep_checks_per_cycle"])
+    deep_budget = min(int(cfg["deep_checks_per_cycle"]), MAX_DEEP_CHECKS)
     results = []
     for t in tokens:
         cached = state["safety_cache"].get(t["key"])
@@ -1308,6 +1314,52 @@ def merge_board(state, results):
 
 # --------------------------------------------------------------------------- site
 
+def refresh_alerts(http, state):
+    """Every ~10 minutes: update alerted coins' market cap; drop alerts for coins that went to ~zero.
+    Dropped coins stay in `alerted`, so they are never alerted again."""
+    if now() - state.get("alerts_refreshed", 0) < 600 or not state["alerts"]:
+        return
+    state["alerts_refreshed"] = now()
+    by_chain = {}
+    for a in state["alerts"]:
+        by_chain.setdefault(a["chain"], []).append(a)
+    best = {}
+    for chain, items in by_chain.items():
+        addrs = [a["address"] for a in items]
+        for i in range(0, len(addrs), 30):
+            data = http.get_json(f"https://api.dexscreener.com/tokens/v1/{chain}/{','.join(addrs[i:i + 30])}")
+            if not isinstance(data, list):
+                continue
+            for p in data:
+                k = token_key(chain, (p.get("baseToken") or {}).get("address"))
+                if k not in best or fnum((p.get("liquidity") or {}).get("usd")) > fnum((best[k].get("liquidity") or {}).get("usd")):
+                    best[k] = p
+    keep = []
+    for a in state["alerts"]:
+        p = best.get(a["key"])
+        if p is None:
+            keep.append(a)  # no data this time: keep, try again later
+            continue
+        mc = fnum(p.get("marketCap")) or fnum(p.get("fdv"))
+        liq = fnum((p.get("liquidity") or {}).get("usd"))
+        a["now_mcap"], a["now_liq"] = mc, liq
+        a["peak_mcap"] = max(a.get("peak_mcap") or 0, mc, a.get("mcap") or 0)
+        if (a.get("mcap") and mc < a["mcap"] * 0.10) or liq < 1000:
+            log(f"  removed crashed alert ${a['symbol']} (MC {fmt_usd(mc)} vs {fmt_usd(a.get('mcap'))} at alert)")
+            state.setdefault("stats", {}).setdefault("removed_crashed", 0)
+            state["stats"]["removed_crashed"] += 1
+            continue
+        keep.append(a)
+    state["alerts"] = keep
+
+
+def heartbeat(state):
+    """Change state/alerts.json once a week so GitHub never pauses the schedule for inactivity (60 days)."""
+    week = datetime.now(timezone.utc).strftime("%G-W%V")
+    if state.get("heartbeat") != week:
+        state["heartbeat"] = week
+
+
 def write_site(state, cfg):
     SITE_DIR.mkdir(parents=True, exist_ok=True)
     for name in WEB_FILES:
@@ -1347,6 +1399,8 @@ def main():
             log(f"FOMO: {n} new trades, {len(state.get('fomo', {}))} coins traded in 24h"
                 f"{'' if stream.connected else ' (stream offline)'}")
             scan_cycle(http, state, cfg, ctx)
+            refresh_alerts(http, state)
+            heartbeat(state)
         except Exception as e:  # one bad cycle must not kill the run
             import traceback
             traceback.print_exc()

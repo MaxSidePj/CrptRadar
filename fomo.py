@@ -145,7 +145,8 @@ def poll_board(state, log, http_timeout=20):
     """FOMO trending board (needs FOMO_API_KEY). At most once per hour; ETag makes repeats free."""
     key = os.environ.get("FOMO_API_KEY", "").strip()
     board = state.setdefault("fomo_board", {"ts": 0, "etag": None, "ranks": {}})
-    if not key or time.time() - board["ts"] < 3600:
+    # every 90 min = ~480 calls/month, well inside the free 1,000 (unchanged boards cost nothing)
+    if not key or time.time() - board["ts"] < 5400 or time.time() < board.get("paused_until", 0):
         return board["ranks"]
     board["ts"] = time.time()
     headers = {"authorization": f"Bearer {key}", "User-Agent": "GemRadar", "Accept": "application/json"}
@@ -157,6 +158,8 @@ def poll_board(state, log, http_timeout=20):
             data = json.loads(r.read().decode("utf-8", "replace"))
             board["etag"] = r.headers.get("ETag")
     except urllib.error.HTTPError as e:
+        if e.code in (402, 429):  # free credits used up / rate limited: stop until tomorrow
+            board["paused_until"] = time.time() + 86400
         if e.code != 304:
             log(f"  FOMO board http {e.code}")
         return board["ranks"]

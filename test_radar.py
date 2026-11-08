@@ -213,6 +213,41 @@ class FomoTests(unittest.TestCase):
         self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
 
 
+class FakeHttp:
+    def __init__(self, pairs):
+        self.pairs = pairs
+
+    def get_json(self, url, **kw):
+        return self.pairs
+
+
+class LimitTests(unittest.TestCase):
+    def test_crashed_alert_is_removed_but_never_realerted(self):
+        state = radar.fresh_state({})
+        for key, mc in (("dead", 500_000), ("alive", 500_000)):
+            state["alerts"].append({"key": f"solana:{key}", "chain": "solana", "address": key, "symbol": key,
+                                    "mcap": mc})
+            state["alerted"][f"solana:{key}"] = {"ts": time.time()}
+        pairs = [{"baseToken": {"address": "dead"}, "marketCap": 20_000, "liquidity": {"usd": 3000}},
+                 {"baseToken": {"address": "alive"}, "marketCap": 2_000_000, "liquidity": {"usd": 90000}}]
+        radar.refresh_alerts(FakeHttp(pairs), state)
+        self.assertEqual([a["symbol"] for a in state["alerts"]], ["alive"])
+        self.assertEqual(state["alerts"][0]["peak_mcap"], 2_000_000)
+        self.assertIn("solana:dead", state["alerted"])
+
+    def test_ntfy_ceiling_cannot_be_exceeded(self):
+        state = radar.fresh_state({})
+        cfg = {**CFG, "max_alerts_per_day": 1000, "max_alerts_per_cycle": 1000}
+        t = token(age_h=20)
+        sent = 0
+        for i in range(radar.NTFY_DAILY_CEILING + 10):
+            e = {**t, "key": f"k{i}", "address": f"k{i}", "score": 99, "why": [], "warnings": [], "rejects": [],
+                 "verified": True, "safety": SAFE, "links": radar.links_for(t), "gates": OK_GATES,
+                 "fast_gates": None, "fomo": None, "buzz": 0, "parts": {"staying": 20}}
+            sent += radar.maybe_alert(e, state, cfg, 0)
+        self.assertEqual(sent, radar.NTFY_DAILY_CEILING)
+
+
 class ParsingTests(unittest.TestCase):
     def test_x_handle(self):
         self.assertEqual(radar.parse_x_handle("https://x.com/gemcoin"), "gemcoin")
