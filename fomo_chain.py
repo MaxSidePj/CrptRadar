@@ -13,6 +13,8 @@ Free public RPC, no key. Calls are paced (one every 2.5 s, max ~16 per cycle) an
 """
 from __future__ import annotations
 
+VERSION = 1  # radar.py checks this, so an outdated upload is reported instead of failing silently
+
 import json
 import time
 import urllib.error

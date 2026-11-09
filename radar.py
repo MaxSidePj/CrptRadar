@@ -1533,7 +1533,7 @@ def scan_cycle(http, state, cfg, ctx):
             continue
         built[k] = t
         fsk = fomo.stats(state, k)
-        reason = prefilter(t, cfg, quiet_ok=fomo.has_signal(fsk) or bool(fsk and fsk["named_holders"] >= 1))
+        reason = prefilter(t, cfg, quiet_ok=fomo.has_signal(fsk) or bool(fsk and fsk.get("named_holders", 0) >= 1))
         if reason:
             skipped[reason] = skipped.get(reason, 0) + 1
             if reason in ("few trades", "low volume") and t["chain"] == "solana":
@@ -1749,6 +1749,28 @@ def publish_alerts(state):
         log(f"  alert publish skipped ({type(e).__name__}); dashboard updates at the end of the run")
 
 
+NEEDED_VERSIONS = {"fomo.py": (fomo, 4), "fomo_chain.py": (fomo_chain, 1)}
+
+
+def outdated_files():
+    return [name for name, (mod, ver) in NEEDED_VERSIONS.items() if getattr(mod, "VERSION", 0) < ver]
+
+
+def report_failure(state, error):
+    """Scans that keep failing would otherwise be silent. After 3 failed scans in a row, send one ntfy
+    warning (max once a day) so a missing or outdated file is noticed quickly."""
+    st = state["stats"]
+    st["failed_cycles"] = st.get("failed_cycles", 0) + 1
+    st["last_error"] = f"{type(error).__name__}: {error}"[:200]
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    if st["failed_cycles"] >= 3 and st.get("error_notified") != day:
+        if push("⚠️ GemRadar has a problem",
+                f"Scans are failing: {st['last_error']}. Most likely a file was not uploaded or is outdated. "
+                "Re-upload all files from the latest update.", click=os.environ.get("DASHBOARD_URL") or None,
+                tags=["warning"], priority=4):
+            st["error_notified"] = day
+
+
 def heartbeat(state):
     """Change state/alerts.json once a week so GitHub never pauses the schedule for inactivity (60 days)."""
     week = datetime.now(timezone.utc).strftime("%G-W%V")
@@ -1783,6 +1805,15 @@ def main():
                 f"{cfg['alert_min_score']}+ and passes the scam checks (max {cfg['max_alerts_per_day']}/day).",
                 click=os.environ.get("DASHBOARD_URL") or None, tags=["satellite"], priority=3):
             state["welcomed"] = True
+    old = outdated_files()
+    if old:
+        log(f"OUTDATED FILES: {', '.join(old)} - upload the latest version")
+        day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        if state["stats"].get("outdated_notified") != day and push(
+                "⚠️ GemRadar: file out of date",
+                f"Upload the latest {', '.join(old)} to your repository. Until then scans may fail.",
+                click=os.environ.get("DASHBOARD_URL") or None, tags=["warning"], priority=4):
+            state["stats"]["outdated_notified"] = day
     ctx["rpc"] = fomo_chain.Rpc(log)
     stream = fomo.FomoStream(log)
     stream.start()
@@ -1798,10 +1829,12 @@ def main():
             scan_cycle(http, state, cfg, ctx)
             refresh_alerts(http, state)
             heartbeat(state)
+            state["stats"]["failed_cycles"] = 0
         except Exception as e:  # one bad cycle must not kill the run
             import traceback
             traceback.print_exc()
             log(f"cycle failed: {e}")
+            report_failure(state, e)
         prune_state(state, cfg)
         state["stats"]["api_calls"] = http.calls
         save_state(state)

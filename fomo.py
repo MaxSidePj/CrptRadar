@@ -10,6 +10,8 @@ keeps this at or below 900 of the 1,000 free calls. The free plan has no card, s
 """
 from __future__ import annotations
 
+VERSION = 4  # radar.py checks this, so an outdated upload is reported instead of failing silently
+
 import json
 import os
 import threading
@@ -311,14 +313,21 @@ def stats(state, key, now=None):
         return {x[1] for x in rows if now - x[0] <= hours * 3600}
 
     b1, b2, b6, b24, b7d = (traders(r["buys"], h) for h in (1, 2, 6, 24, 24 * 7))
-    s6 = traders(r["sells"], 6)
+    s6, s24 = traders(r["sells"], 6), traders(r["sells"], 24)
     holders = sorted(set(stream_holders(r)) | set(api_holders))
     leaders = set(rest.get("leaders") or [])
     good = [h for h in holders if h in leaders]
+    good_recent = sorted(traders(r["buys"], 48) & leaders)        # top traders who bought in the last 48h
+    fresh_chain = chain if chain and now - chain.get("ts", 0) < 3 * 3600 else {}
     board_holders = max(trend.get("holders") or 0, (grad or {}).get("holders") or 0)
     return {
         "buyers_1h": len(b1), "buyers_2h": len(b2), "buyers_6h": len(b6), "buyers_24h": len(b24),
-        "buyers_7d": len(b7d), "sellers_6h": len(s6),
+        "buyers_7d": len(b7d), "sellers_6h": len(s6), "sellers_24h": len(s24),
+        # FOMO traders we can see by name or wallet (not FOMO's popularity count of all its users)
+        "named_holders": max(len(holders), len(chain.get("holders") or [])),
+        "good_recent": good_recent[:10],
+        "fresh_buyers": max(len(b24), fresh_chain.get("buyers", 0)),
+        "fresh_sellers": max(len(s24), fresh_chain.get("sellers", 0)),
         "buy_usd_6h": sum(x[2] for x in r["buys"] if now - x[0] <= 6 * 3600),
         "theses_24h": len([x for x in r["theses"] if now - x[0] <= 86400]),
         "top_buyers": sorted(b6)[:5],

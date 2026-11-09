@@ -623,6 +623,32 @@ class EarlyLaunchTests(unittest.TestCase):
         self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
 
 
+class FailureReportTests(unittest.TestCase):
+    def test_all_files_match(self):
+        self.assertEqual(radar.outdated_files(), [])
+
+    def test_outdated_fomo_file_is_detected(self):
+        old = radar.fomo.VERSION
+        radar.fomo.VERSION = 3
+        try:
+            self.assertEqual(radar.outdated_files(), ["fomo.py"])
+        finally:
+            radar.fomo.VERSION = old
+
+    def test_warning_after_three_failed_scans_once_a_day(self):
+        state = radar.fresh_state({})
+        sent = []
+        orig = radar.push
+        radar.push = lambda *a, **k: sent.append(a[0]) or True
+        try:
+            for _ in range(6):
+                radar.report_failure(state, KeyError("named_holders"))
+        finally:
+            radar.push = orig
+        self.assertEqual(len(sent), 1)
+        self.assertIn("named_holders", state["stats"]["last_error"])
+
+
 class ParsingTests(unittest.TestCase):
     def test_x_handle(self):
         self.assertEqual(radar.parse_x_handle("https://x.com/gemcoin"), "gemcoin")
