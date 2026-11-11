@@ -409,7 +409,223 @@
     }
    ],
    "quality": 0,
-   "quality_why": []
+   "quality_why": [],
+   "now_mcap": 9192709.0,
+   "now_liq": 339419.64,
+   "live": {
+    "ts": 1794436187.1418796,
+    "mcap": 9192709.0,
+    "liq": 339419.64,
+    "price": 0.009215,
+    "vol": {
+     "m5": 479391.96,
+     "h1": 21123018.98,
+     "h6": 35327763.66,
+     "h24": 35327763.66
+    },
+    "pc": {
+     "m5": 6.13,
+     "h1": -17.59,
+     "h6": 24772.0,
+     "h24": 24772.0
+    },
+    "buys_h1": 87105,
+    "sells_h1": 63560,
+    "age_h": 1.4883727460394964
+   },
+   "peak_mcap": 9192709.0,
+   "now": {
+    "score": 55.2,
+    "parts": {
+     "traction": 20.0,
+     "holders": 13.0,
+     "social": 4.8,
+     "momentum": 4.8,
+     "fomo": 15.0,
+     "staying": 1.6,
+     "upside": 2
+    },
+    "why": [
+     "$297k liquidity",
+     "218 FOMO traders bought (0xAMIIGO, 0xChadLee, 0xKimJihoon)",
+     "158 FOMO traders hold it",
+     "top FOMO traders hold: BasedShillBH, MuddyCyanTrout, awtorkowski7",
+     "7 FOMO thesis posts",
+     "buyers dominate (1.3x more buys)"
+    ],
+    "safety": {
+     "top10_pct": 8.94,
+     "max_holder_pct": 1.26,
+     "creator_pct": 0.0,
+     "insider_pct": 1.82,
+     "insider_networks": 77,
+     "cluster_pct": 2.44,
+     "holders": 22452,
+     "mint_authority": false,
+     "freeze_authority": false,
+     "transfer_fee_pct": 0.0,
+     "lp_locked_pct": 99.7,
+     "rugged": false,
+     "rugcheck_score": 29,
+     "risks": [
+      {
+       "name": "Copycat token",
+       "level": "warn"
+      }
+     ],
+     "launchpad": "Pump.Fun",
+     "source": "RugCheck"
+    },
+    "verified": true,
+    "rejects": [],
+    "warnings": [
+     "Copycat ticker"
+    ],
+    "gates": [
+     {
+      "ok": false,
+      "text": "Survived 1.6h (needs 6h+)"
+     },
+     {
+      "ok": false,
+      "text": "Watched by GemRadar for 1.2h (needs 3h+)"
+     },
+     {
+      "ok": true,
+      "text": "34% below its peak (max 45%)"
+     },
+     {
+      "ok": true,
+      "text": "Trading still active: last hour = 2.7x the 6h average"
+     },
+     {
+      "ok": false,
+      "text": "Not spiking: 1h +17%, 6h +18095% (max +100% / +200%)"
+     }
+    ],
+    "fast_gates": [
+     {
+      "ok": true,
+      "text": "218 FOMO traders bought in 2h (needs 3+)"
+     },
+     {
+      "ok": true,
+      "text": "Age 1.6h (needs 20m+)"
+     },
+     {
+      "ok": true,
+      "text": "FOMO buyers 218 vs sellers 157"
+     },
+     {
+      "ok": true,
+      "text": "34% below its peak (max 45%)"
+     }
+    ],
+    "smart_gates": [
+     {
+      "ok": true,
+      "text": "3 top FOMO trader(s) hold it (BasedShillBH, MuddyCyanTrout, awtorkowski7), 158 FOMO holders (needs 1+ top trader and 2+ holders)"
+     },
+     {
+      "ok": true,
+      "text": "Fresh FOMO buying: 218 bought vs 157 sold in 24h, 4 top trader(s) bought in 48h"
+     },
+     {
+      "ok": true,
+      "text": "Not too late: FOMO traders spotted it at $10.27M, now 0.7x (max 2.5x)"
+     },
+     {
+      "ok": false,
+      "text": "Not run up yet: 6h +18095% (max +100%)"
+     },
+     {
+      "ok": true,
+      "text": "Age 1.6h (1h to 14d)"
+     },
+     {
+      "ok": false,
+      "text": "Market cap $6.72M (max $1.00M)"
+     }
+    ],
+    "project_gates": null,
+    "early_gates": null,
+    "quality": 0,
+    "quality_why": [],
+    "buzz": 48,
+    "fomo": {
+     "buyers_1h": 53,
+     "buyers_2h": 218,
+     "buyers_6h": 218,
+     "buyers_24h": 218,
+     "buyers_7d": 218,
+     "sellers_6h": 157,
+     "sellers_24h": 157,
+     "named_holders": 158,
+     "good_recent": [
+      "0xsneakky",
+      "BasedShillBH",
+      "MuddyCyanTrout",
+      "awtorkowski7"
+     ],
+     "fresh_buyers": 218,
+     "fresh_sellers": 157,
+     "buy_usd_6h": 2317249,
+     "theses_24h": 7,
+     "top_buyers": [
+      "0xAMIIGO",
+      "0xChadLee",
+      "0xKimJihoon",
+      "0xNami",
+      "0xNewSin"
+     ],
+     "holders": [
+      "0xAMIIGO",
+      "0xChadLee",
+      "0xKimJihoon",
+      "0xNami",
+      "0xNewSin",
+      "0xstanczyk",
+      "4colton",
+      "AckrTrades",
+      "Actionisthejuice",
+      "Apelsenya",
+      "Aspergillus",
+      "Aurelius0121",
+      "BasedShillBH",
+      "Blizzardkicks_",
+      "BryBuysBread",
+      "BullCartel",
+      "CryptoGorilla",
+      "CryptoMikli",
+      "Cryptobarba_",
+      "Darkraii"
+     ],
+     "holders_n": 158,
+     "wallets_holding": 0,
+     "onchain_trades": 0,
+     "onchain_span_h": 0.0,
+     "good_holders": [
+      "BasedShillBH",
+      "MuddyCyanTrout",
+      "awtorkowski7"
+     ],
+     "graduated": false,
+     "rank": null,
+     "first_seen_h": 1.3,
+     "spotted_mcap": 10266605.0,
+     "spotted_h": 1.1
+    },
+    "x": null,
+    "biz": 0,
+    "cg_trending": false,
+    "trending": true,
+    "cto": true,
+    "boosts": 0,
+    "socials": {
+     "x": "https://x.com/chainchomp131/status/2120629501805961561"
+    },
+    "checked": 1794436595.7251287
+   }
   },
   {
    "key": "solana:GexThZHgaswpAQ7Fi8QrHFubjPimUNSYhJiAA7XZpump",
@@ -577,46 +793,46 @@
    ],
    "quality": 0,
    "quality_why": [],
-   "now_mcap": 1260873.0,
-   "now_liq": 109506.81,
+   "now_mcap": 1204677.0,
+   "now_liq": 106808.13,
    "live": {
-    "ts": 1794432548.673033,
-    "mcap": 1260873.0,
-    "liq": 109506.81,
-    "price": 0.001285,
+    "ts": 1794436187.1418939,
+    "mcap": 1204677.0,
+    "liq": 106808.13,
+    "price": 0.001227,
     "vol": {
-     "m5": 111.18,
-     "h1": 4818.11,
-     "h6": 54342.41,
-     "h24": 298020.77
+     "m5": 259.63,
+     "h1": 9643.53,
+     "h6": 41752.69,
+     "h24": 301162.16
     },
     "pc": {
-     "m5": 0.4,
-     "h1": 4.46,
-     "h6": -5.2,
-     "h24": -4.02
+     "m5": 1.35,
+     "h1": -3.68,
+     "h6": -16.6,
+     "h24": -15.86
     },
-    "buys_h1": 26,
-    "sells_h1": 63,
-    "age_h": 291.3260202894423
+    "buys_h1": 39,
+    "sells_h1": 104,
+    "age_h": 292.33670608262804
    },
    "peak_mcap": 1383036.0,
    "now": {
-    "score": 29.7,
+    "score": 28.9,
     "parts": {
      "traction": 6.5,
      "holders": 8.0,
      "social": 4.3,
-     "momentum": 2.5,
+     "momentum": 2.4,
      "fomo": 5.3,
-     "staying": 11.6,
+     "staying": 10.9,
      "upside": 3.5
     },
     "why": [
-     "$107k liquidity",
+     "$104k liquidity",
      "holding up after 12d",
      "7 FOMO traders hold it",
-     "20 FOMO thesis posts",
+     "19 FOMO thesis posts",
      "1 mentions on 4chan /biz/",
      "14,943 holders"
     ],
@@ -651,11 +867,11 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 95.0h (needs 3h+)"
+      "text": "Watched by GemRadar for 95.1h (needs 3h+)"
      },
      {
       "ok": true,
-      "text": "21% below its peak (max 45%)"
+      "text": "24% below its peak (max 45%)"
      },
      {
       "ok": true,
@@ -663,15 +879,15 @@
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -4%, 6h -15% (max +100% / +200%)"
+      "text": "Not spiking: 1h -5%, 6h -18% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -1% in 3h"
+      "text": "Liquidity -3% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -2% in 3h"
+      "text": "Market cap -6% in 3h"
      },
      {
       "ok": true,
@@ -693,7 +909,7 @@
      },
      {
       "ok": true,
-      "text": "21% below its peak (max 45%)"
+      "text": "24% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -707,11 +923,11 @@
      },
      {
       "ok": true,
-      "text": "Not too late: FOMO traders spotted it at $955k, now 1.3x (max 2.5x)"
+      "text": "Not too late: FOMO traders spotted it at $955k, now 1.2x (max 2.5x)"
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -15% (max +100%)"
+      "text": "Not run up yet: 6h -18% (max +100%)"
      },
      {
       "ok": true,
@@ -719,22 +935,22 @@
      },
      {
       "ok": false,
-      "text": "Market cap $1.20M (max $1.00M)"
+      "text": "Market cap $1.16M (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -1% in 3h"
+      "text": "Liquidity -3% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -2% in 3h"
+      "text": "Market cap -6% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 22,
+    "buzz": 21,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -748,7 +964,7 @@
      "fresh_buyers": 3,
      "fresh_sellers": 0,
      "buy_usd_6h": 0,
-     "theses_24h": 20,
+     "theses_24h": 19,
      "top_buyers": [],
      "holders": [
       "BullCartel",
@@ -766,9 +982,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 98.2,
+     "first_seen_h": 98.3,
      "spotted_mcap": 955184.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 1,
@@ -780,7 +996,7 @@
      "x": "https://x.com/i/communities/2016842587168972856",
      "website": "https://wastedonsolana.cc/"
     },
-    "checked": 1794436157.9037054
+    "checked": 1794436609.425122
    }
   },
   {
@@ -973,18 +1189,18 @@
    "quality": 0,
    "quality_why": [],
    "now": {
-    "score": 54.6,
+    "score": 53.6,
     "parts": {
-     "traction": 17.4,
+     "traction": 17.3,
      "holders": 11.7,
      "social": 5.8,
-     "momentum": 3.8,
+     "momentum": 3.2,
      "fomo": 7.5,
-     "staying": 3.4,
+     "staying": 3.1,
      "upside": 5
     },
     "why": [
-     "$54k liquidity",
+     "$53k liquidity",
      "9 FOMO traders hold it",
      "3 FOMO thesis posts",
      "buyers dominate (1.4x more buys)",
@@ -992,13 +1208,13 @@
      "6 mentions on 4chan /biz/"
     ],
     "safety": {
-     "top10_pct": 19.85,
+     "top10_pct": 20.31,
      "max_holder_pct": 4.31,
      "creator_pct": 0.0,
      "insider_pct": 0.12,
      "insider_networks": 6,
-     "cluster_pct": 2.04,
-     "holders": 9864,
+     "cluster_pct": 0.0,
+     "holders": 9814,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -1015,35 +1231,35 @@
     "gates": [
      {
       "ok": true,
-      "text": "Survived 25.3h (needs 6h+)"
+      "text": "Survived 25.4h (needs 6h+)"
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 23.8h (needs 3h+)"
+      "text": "Watched by GemRadar for 23.9h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "64% below its peak (max 45%)"
+      "text": "67% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.1x the 6h average"
+      "text": "Trading still active: last hour = 0.8x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -14%, 6h -44% (max +100% / +200%)"
+      "text": "Not spiking: 1h -24%, 6h -46% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -10% in 3h"
+      "text": "Liquidity -13% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -19% in 3h"
+      "text": "Market cap -24% in 3h"
      },
      {
       "ok": false,
-      "text": "Holders -1% in 3h"
+      "text": "Holders -2% in 3h"
      }
     ],
     "fast_gates": [
@@ -1053,7 +1269,7 @@
      },
      {
       "ok": true,
-      "text": "Age 25.3h (needs 20m+)"
+      "text": "Age 25.4h (needs 20m+)"
      },
      {
       "ok": true,
@@ -1061,7 +1277,7 @@
      },
      {
       "ok": false,
-      "text": "64% below its peak (max 45%)"
+      "text": "67% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -1079,30 +1295,30 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -44% (max +100%)"
+      "text": "Not run up yet: 6h -46% (max +100%)"
      },
      {
       "ok": true,
-      "text": "Age 25.3h (1h to 14d)"
+      "text": "Age 25.4h (1h to 14d)"
      },
      {
       "ok": true,
-      "text": "Market cap $340k (max $1.00M)"
+      "text": "Market cap $318k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -10% in 3h"
+      "text": "Liquidity -13% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -19% in 3h"
+      "text": "Market cap -24% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 41,
+    "buzz": 36,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -1138,9 +1354,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 20.3,
+     "first_seen_h": 20.4,
      "spotted_mcap": 702630.0,
-     "spotted_h": 20.1
+     "spotted_h": 20.2
     },
     "x": null,
     "biz": 6,
@@ -1152,30 +1368,30 @@
      "x": "https://x.com/hold_launchpad",
      "website": "https://holdpays.fun/"
     },
-    "checked": 1794436155.83425
+    "checked": 1794436595.7389574
    },
-   "now_mcap": 404596.0,
-   "now_liq": 59602.99,
+   "now_mcap": 333882.0,
+   "now_liq": 54011.77,
    "live": {
-    "ts": 1794432548.6730537,
-    "mcap": 404596.0,
-    "liq": 59602.99,
-    "price": 0.0004298,
+    "ts": 1794436187.1419024,
+    "mcap": 333882.0,
+    "liq": 54011.77,
+    "price": 0.0003547,
     "vol": {
-     "m5": 11567.26,
-     "h1": 117666.29,
-     "h6": 457014.06,
-     "h24": 5231124.85
+     "m5": 1922.25,
+     "h1": 72423.53,
+     "h6": 431501.87,
+     "h24": 4974708.58
     },
     "pc": {
-     "m5": -9.87,
-     "h1": -6.64,
-     "h6": -49.82,
-     "h24": 1121.0
+     "m5": 2.57,
+     "h1": -11.33,
+     "h6": -46.41,
+     "h24": 38.12
     },
-    "buys_h1": 882,
-    "sells_h1": 786,
-    "age_h": 24.309075849541557
+    "buys_h1": 816,
+    "sells_h1": 577,
+    "age_h": 25.319761640285915
    },
    "peak_mcap": 845666.0
   },
@@ -1352,55 +1568,55 @@
    ],
    "quality": 0,
    "quality_why": [],
-   "now_mcap": 188500.0,
-   "now_liq": 35634.88,
+   "now_mcap": 142685.0,
+   "now_liq": 30786.4,
    "live": {
-    "ts": 1794432548.6730642,
-    "mcap": 188500.0,
-    "liq": 35634.88,
-    "price": 0.0001945,
+    "ts": 1794436187.1419086,
+    "mcap": 142685.0,
+    "liq": 30786.4,
+    "price": 0.0001472,
     "vol": {
-     "m5": 654.83,
-     "h1": 18050.93,
-     "h6": 120358.3,
-     "h24": 1697282.78
+     "m5": 1274.42,
+     "h1": 17911.14,
+     "h6": 123587.26,
+     "h24": 1713831.39
     },
     "pc": {
-     "m5": -5.59,
-     "h1": -12.15,
-     "h6": -31.92,
-     "h24": 545.0
+     "m5": 4.75,
+     "h1": -18.46,
+     "h6": -41.75,
+     "h24": 480.0
     },
-    "buys_h1": 176,
-    "sells_h1": 125,
-    "age_h": 50.47046474100749
+    "buys_h1": 208,
+    "sells_h1": 153,
+    "age_h": 51.481150530870224
    },
    "peak_mcap": 688208.0,
    "now": {
-    "score": 38.8,
+    "score": 33.1,
     "parts": {
-     "traction": 14.2,
+     "traction": 14.1,
      "holders": 9.8,
-     "social": 2.9,
-     "momentum": 3.8,
+     "social": 3.5,
+     "momentum": 3.7,
      "fomo": 5.1,
-     "staying": 4.0,
+     "staying": 3.9,
      "upside": 5
     },
     "why": [
      "6 FOMO traders hold it",
      "2 FOMO thesis posts",
-     "buyers dominate (1.4x more buys)",
-     "4,832 holders"
+     "buyers dominate (1.3x more buys)",
+     "4,808 holders"
     ],
     "safety": {
-     "top10_pct": 28.74,
+     "top10_pct": 28.75,
      "max_holder_pct": 3.63,
      "creator_pct": 0.0,
      "insider_pct": 0.55,
      "insider_networks": 4,
-     "cluster_pct": 20.42,
-     "holders": 4832,
+     "cluster_pct": 14.53,
+     "holders": 4808,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -1412,11 +1628,10 @@
      "source": "RugCheck"
     },
     "verified": true,
-    "rejects": [
-     "Same-size wallet cluster holds 20% (likely bundle)"
-    ],
+    "rejects": [],
     "warnings": [
-     "Top 10 wallets hold 29%"
+     "Top 10 wallets hold 29%",
+     "Same-size wallets hold 15% (possible bundle)"
     ],
     "gates": [
      {
@@ -1425,27 +1640,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 51.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 51.4h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "79% below its peak (max 45%)"
+      "text": "80% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 0.9x the 6h average"
+      "text": "Trading still active: last hour = 0.7x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -17%, 6h -38% (max +100% / +200%)"
+      "text": "Not spiking: 1h -10%, 6h -45% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -18% in 3h"
+      "text": "Liquidity -20% in 3h"
      },
      {
       "ok": false,
-      "text": "Market cap -32% in 3h"
+      "text": "Market cap -35% in 3h"
      },
      {
       "ok": false,
@@ -1467,7 +1682,7 @@
      },
      {
       "ok": false,
-      "text": "79% below its peak (max 45%)"
+      "text": "80% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -1485,7 +1700,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -38% (max +100%)"
+      "text": "Not run up yet: 6h -45% (max +100%)"
      },
      {
       "ok": true,
@@ -1493,22 +1708,22 @@
      },
      {
       "ok": true,
-      "text": "Market cap $146k (max $1.00M)"
+      "text": "Market cap $140k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -18% in 3h"
+      "text": "Liquidity -20% in 3h"
      },
      {
       "ok": false,
-      "text": "Market cap -32% in 3h"
+      "text": "Market cap -35% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 25,
+    "buzz": 23,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -1539,11 +1754,15 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 18.2,
+     "first_seen_h": 18.3,
      "spotted_mcap": 491797.0,
-     "spotted_h": 18.0
+     "spotted_h": 18.1
     },
-    "x": null,
+    "x": {
+     "followers": 506,
+     "tweets": 54,
+     "age_days": 2
+    },
     "biz": 0,
     "cg_trending": false,
     "trending": false,
@@ -1553,7 +1772,7 @@
      "x": "https://x.com/Payday_Direct",
      "website": "https://payday.direct/"
     },
-    "checked": 1794436157.8658514
+    "checked": 1794436598.631449
    }
   },
   {
@@ -1742,28 +1961,28 @@
     "on CoinGecko",
     "new chain (robinhood)"
    ],
-   "now_mcap": 465565.0,
-   "now_liq": 57573.76,
+   "now_mcap": 462607.0,
+   "now_liq": 57351.54,
    "live": {
-    "ts": 1794432548.673072,
-    "mcap": 465565.0,
-    "liq": 57573.76,
-    "price": 0.0004655,
+    "ts": 1794436187.1419137,
+    "mcap": 462607.0,
+    "liq": 57351.54,
+    "price": 0.0004626,
     "vol": {
-     "m5": 0.0,
-     "h1": 1325.47,
-     "h6": 3875.79,
-     "h24": 11145.73
+     "m5": 5.74,
+     "h1": 71.9,
+     "h6": 3913.83,
+     "h24": 10934.05
     },
     "pc": {
-     "m5": 0.0,
-     "h1": 6.45,
-     "h6": -1.94,
-     "h24": 8.6
+     "m5": 0.16,
+     "h1": -0.64,
+     "h6": -4.01,
+     "h24": 8.53
     },
-    "buys_h1": 4,
-    "sells_h1": 7,
-    "age_h": 664.9654647431098
+    "buys_h1": 0,
+    "sells_h1": 3,
+    "age_h": 665.9761505320231
    },
    "peak_mcap": 500455.0,
    "now": {
@@ -1822,7 +2041,7 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 51.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 51.4h (needs 3h+)"
      },
      {
       "ok": true,
@@ -1890,7 +2109,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $462k (max $1.00M)"
+      "text": "Market cap $463k (max $1.00M)"
      },
      {
       "ok": true,
@@ -1912,7 +2131,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $462k (max $1.50M)"
+      "text": "Market cap $463k (max $1.50M)"
      },
      {
       "ok": true,
@@ -1924,7 +2143,7 @@
      },
      {
       "ok": false,
-      "text": "Recovering: +8% from its 24h low $426k (needs +15%)"
+      "text": "Recovering: +9% from its 24h low $426k (needs +15%)"
      },
      {
       "ok": true,
@@ -1958,11 +2177,11 @@
      },
      {
       "ok": true,
-      "text": "Holding its gains: watched 3078 min, 16% below peak, 1h -1% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 3086 min, 16% below peak, 1h -1% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $462k (max $5.00M)"
+      "text": "Market cap $463k (max $5.00M)"
      }
     ],
     "quality": 5.0,
@@ -1998,9 +2217,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 89.7,
+     "first_seen_h": 89.8,
      "spotted_mcap": 497651.0,
-     "spotted_h": 51.2
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 0,
@@ -2013,7 +2232,7 @@
      "telegram": "https://telegram.me/aligningsi",
      "website": "https://aligning.si/"
     },
-    "checked": 1794436157.895591
+    "checked": 1794436608.9469175
    }
   },
   {
@@ -2191,18 +2410,18 @@
     "tech theme (launch, pay)"
    ],
    "now": {
-    "score": 46.2,
+    "score": 44.7,
     "parts": {
      "traction": 10.7,
      "holders": 8.2,
      "social": 4.7,
-     "momentum": 2.2,
+     "momentum": 2.0,
      "fomo": 2.3,
-     "staying": 13.1,
+     "staying": 11.8,
      "upside": 5
     },
     "why": [
-     "$59k liquidity",
+     "$56k liquidity",
      "2 FOMO traders hold it",
      "1 mentions on 4chan /biz/",
      "8,217 holders"
@@ -2235,27 +2454,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 49.7h (needs 3h+)"
-     },
-     {
-      "ok": true,
-      "text": "43% below its peak (max 45%)"
+      "text": "Watched by GemRadar for 49.8h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "Trading still active: last hour = 0.4x the 6h average"
+      "text": "48% below its peak (max 45%)"
+     },
+     {
+      "ok": false,
+      "text": "Trading still active: last hour = 0.3x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -9%, 6h +14% (max +100% / +200%)"
+      "text": "Not spiking: 1h -9%, 6h +3% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -5% in 3h"
+      "text": "Liquidity -9% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -11% in 3h"
+      "text": "Market cap -18% in 3h"
      },
      {
       "ok": true,
@@ -2276,8 +2495,8 @@
       "text": "FOMO buyers 0 vs sellers 0"
      },
      {
-      "ok": true,
-      "text": "43% below its peak (max 45%)"
+      "ok": false,
+      "text": "48% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -2291,11 +2510,11 @@
      },
      {
       "ok": true,
-      "text": "Not too late: FOMO traders spotted it at $515k, now 0.7x (max 2.5x)"
+      "text": "Not too late: FOMO traders spotted it at $515k, now 0.6x (max 2.5x)"
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h +14% (max +100%)"
+      "text": "Not run up yet: 6h +3% (max +100%)"
      },
      {
       "ok": false,
@@ -2303,15 +2522,15 @@
      },
      {
       "ok": true,
-      "text": "Market cap $350k (max $1.00M)"
+      "text": "Market cap $323k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -5% in 3h"
+      "text": "Liquidity -9% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -11% in 3h"
+      "text": "Market cap -18% in 3h"
      }
     ],
     "project_gates": [
@@ -2325,7 +2544,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $350k (max $1.50M)"
+      "text": "Market cap $323k (max $1.50M)"
      },
      {
       "ok": true,
@@ -2333,19 +2552,19 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h -9%, 6h +14% (max +60% / +100%)"
+      "text": "Before the spike: 1h -9%, 6h +3% (max +60% / +100%)"
      },
      {
       "ok": true,
-      "text": "Recovering: +29% from its 24h low $271k (needs +15%)"
+      "text": "Recovering: +19% from its 24h low $271k (needs +15%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -5% in 3h"
+      "text": "Liquidity -9% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -11% in 3h"
+      "text": "Market cap -18% in 3h"
      }
     ],
     "early_gates": [
@@ -2363,19 +2582,19 @@
      },
      {
       "ok": true,
-      "text": "Deep liquidity $59k = 17% of market cap (needs $40k and 5%)"
+      "text": "Deep liquidity $56k = 17% of market cap (needs $40k and 5%)"
      },
      {
       "ok": false,
-      "text": "Organic demand: ~23 buyers in 1h, 1.0x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~18 buyers in 1h, 1.0x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 2982 min, 43% below peak, 1h -9% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 2990 min, 48% below peak, 1h -9% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $350k (max $5.00M)"
+      "text": "Market cap $323k (max $5.00M)"
      }
     ],
     "quality": 7.5,
@@ -2413,9 +2632,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 74.7,
+     "first_seen_h": 74.9,
      "spotted_mcap": 515454.0,
-     "spotted_h": 49.7
+     "spotted_h": 49.8
     },
     "x": {
      "followers": 1810,
@@ -2431,30 +2650,30 @@
      "x": "https://x.com/LaunchOnPeak",
      "website": "https://www.launchonpeak.fun/"
     },
-    "checked": 1794436155.8284485
+    "checked": 1794436595.7416224
    },
-   "now_mcap": 385329.0,
-   "now_liq": 61578.97,
+   "now_mcap": 350037.0,
+   "now_liq": 58597.43,
    "live": {
-    "ts": 1794432548.6730795,
-    "mcap": 385329.0,
-    "liq": 61578.97,
-    "price": 0.0003853,
+    "ts": 1794436187.1419182,
+    "mcap": 350037.0,
+    "liq": 58597.43,
+    "price": 0.00035,
     "vol": {
-     "m5": 96.53,
-     "h1": 25535.51,
-     "h6": 116025.65,
-     "h24": 236968.11
+     "m5": 14.58,
+     "h1": 8666.45,
+     "h6": 115375.3,
+     "h24": 242563.1
     },
     "pc": {
-     "m5": 0.73,
-     "h1": -2.68,
-     "h6": 26.16,
-     "h24": -3.41
+     "m5": -0.1,
+     "h1": -9.16,
+     "h6": 11.98,
+     "h24": -7.65
     },
-    "buys_h1": 146,
-    "sells_h1": 105,
-    "age_h": 380.7060203007677
+    "buys_h1": 47,
+    "sells_h1": 45,
+    "age_h": 381.71670608886717
    },
    "peak_mcap": 396151.0
   },
@@ -2634,44 +2853,45 @@
     "GeckoTerminal score 70",
     "tech theme (launch, exchange, chain)"
    ],
-   "now_mcap": 344503.0,
-   "now_liq": 48690.31,
+   "now_mcap": 316194.0,
+   "now_liq": 46576.4,
    "live": {
-    "ts": 1794432548.6730871,
-    "mcap": 344503.0,
-    "liq": 48690.31,
-    "price": 0.0003549,
+    "ts": 1794436187.1419225,
+    "mcap": 316194.0,
+    "liq": 46576.4,
+    "price": 0.0003257,
     "vol": {
-     "m5": 321.32,
-     "h1": 9999.1,
-     "h6": 87823.6,
-     "h24": 292239.36
+     "m5": 1152.4,
+     "h1": 21861.01,
+     "h6": 89526.4,
+     "h24": 290607.66
     },
     "pc": {
-     "m5": 0.31,
-     "h1": 9.48,
-     "h6": -4.39,
-     "h24": -8.04
+     "m5": -9.82,
+     "h1": -8.47,
+     "h6": -22.19,
+     "h24": -27.8
     },
-    "buys_h1": 88,
-    "sells_h1": 116,
-    "age_h": 145.79852030300563
+    "buys_h1": 245,
+    "sells_h1": 235,
+    "age_h": 146.8092060901557
    },
    "peak_mcap": 441625.0,
    "now": {
-    "score": 40.0,
+    "score": 42.8,
     "parts": {
-     "traction": 11.7,
+     "traction": 11.8,
      "holders": 9.9,
      "social": 4.5,
-     "momentum": 2.2,
+     "momentum": 3.0,
      "fomo": 2.3,
-     "staying": 12.4,
+     "staying": 14.3,
      "upside": 5
     },
     "why": [
+     "holding up after 6d",
      "2 FOMO traders hold it",
-     "5,450 holders"
+     "5,457 holders"
     ],
     "safety": {
      "top10_pct": 22.09,
@@ -2680,7 +2900,7 @@
      "insider_pct": 8.79,
      "insider_networks": 8,
      "cluster_pct": 0.0,
-     "holders": 5450,
+     "holders": 5457,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -2703,31 +2923,31 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 37.8h (needs 3h+)"
+      "text": "Watched by GemRadar for 37.9h (needs 3h+)"
      },
      {
       "ok": true,
-      "text": "30% below its peak (max 45%)"
+      "text": "22% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.5x the 6h average"
+      "text": "Trading still active: last hour = 1.4x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -8%, 6h -20% (max +100% / +200%)"
+      "text": "Not spiking: 1h +14%, 6h -10% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -3% in 3h"
+      "text": "Liquidity +2% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -6% in 3h"
+      "text": "Market cap +4% in 3h"
      },
      {
       "ok": true,
-      "text": "Holders -0% in 3h"
+      "text": "Holders +0% in 3h"
      }
     ],
     "fast_gates": [
@@ -2745,7 +2965,7 @@
      },
      {
       "ok": true,
-      "text": "30% below its peak (max 45%)"
+      "text": "22% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -2759,11 +2979,11 @@
      },
      {
       "ok": true,
-      "text": "Not too late: FOMO traders spotted it at $411k, now 0.8x (max 2.5x)"
+      "text": "Not too late: FOMO traders spotted it at $411k, now 0.9x (max 2.5x)"
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -20% (max +100%)"
+      "text": "Not run up yet: 6h -10% (max +100%)"
      },
      {
       "ok": true,
@@ -2771,15 +2991,15 @@
      },
      {
       "ok": true,
-      "text": "Market cap $316k (max $1.00M)"
+      "text": "Market cap $353k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -3% in 3h"
+      "text": "Liquidity +2% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -6% in 3h"
+      "text": "Market cap +4% in 3h"
      }
     ],
     "project_gates": [
@@ -2793,7 +3013,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $316k (max $1.50M)"
+      "text": "Market cap $353k (max $1.50M)"
      },
      {
       "ok": true,
@@ -2801,19 +3021,19 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h -8%, 6h -20% (max +60% / +100%)"
-     },
-     {
-      "ok": false,
-      "text": "Recovering: +6% from its 24h low $298k (needs +15%)"
+      "text": "Before the spike: 1h +14%, 6h -10% (max +60% / +100%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -3% in 3h"
+      "text": "Recovering: +18% from its 24h low $298k (needs +15%)"
      },
      {
       "ok": true,
-      "text": "Market cap -6% in 3h"
+      "text": "Liquidity +2% in 3h"
+     },
+     {
+      "ok": true,
+      "text": "Market cap +4% in 3h"
      }
     ],
     "early_gates": [
@@ -2831,19 +3051,19 @@
      },
      {
       "ok": true,
-      "text": "Deep liquidity $47k = 15% of market cap (needs $40k and 5%)"
-     },
-     {
-      "ok": true,
-      "text": "Organic demand: ~123 buyers in 1h, 1.1x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Deep liquidity $49k = 14% of market cap (needs $40k and 5%)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 2268 min, 30% below peak, 1h -8% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Organic demand: ~109 buyers in 1h, 0.9x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": true,
-      "text": "Market cap $316k (max $5.00M)"
+      "text": "Holding its gains: watched 2276 min, 22% below peak, 1h +14% (needs 30+ min, max 30% below, max +150%)"
+     },
+     {
+      "ok": true,
+      "text": "Market cap $353k (max $5.00M)"
      }
     ],
     "quality": 8.0,
@@ -2853,7 +3073,7 @@
      "GeckoTerminal score 66",
      "tech theme (launch, exchange, chain)"
     ],
-    "buzz": 16,
+    "buzz": 15,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -2879,7 +3099,7 @@
      "rank": null,
      "first_seen_h": 0.0,
      "spotted_mcap": 411118.0,
-     "spotted_h": 24.4
+     "spotted_h": 24.5
     },
     "x": {
      "followers": 604,
@@ -2896,7 +3116,7 @@
      "telegram": "https://t.me/StateOfLeonidaGTA",
      "website": "https://stateofleonida.xyz/"
     },
-    "checked": 1794436150.587445
+    "checked": 1794436595.6976268
    }
   },
   {
@@ -3102,39 +3322,39 @@
     "GeckoTerminal score 63",
     "on CoinGecko"
    ],
-   "now_mcap": 662139.0,
-   "now_liq": 47151.31,
+   "now_mcap": 506154.0,
+   "now_liq": 41175.99,
    "live": {
-    "ts": 1794432548.673095,
-    "mcap": 662139.0,
-    "liq": 47151.31,
-    "price": 0.0006621,
+    "ts": 1794436187.1419272,
+    "mcap": 506154.0,
+    "liq": 41175.99,
+    "price": 0.0005061,
     "vol": {
-     "m5": 17483.3,
-     "h1": 32701.68,
-     "h6": 127545.58,
-     "h24": 983833.18
+     "m5": 3372.47,
+     "h1": 67237.44,
+     "h6": 168525.55,
+     "h24": 1043811.91
     },
     "pc": {
-     "m5": -15.97,
-     "h1": -24.97,
-     "h6": -23.62,
-     "h24": 9.5
+     "m5": -3.55,
+     "h1": -23.49,
+     "h6": -27.54,
+     "h24": -14.91
     },
-    "buys_h1": 191,
-    "sells_h1": 108,
-    "age_h": 267.90463141615123
+    "buys_h1": 509,
+    "sells_h1": 393,
+    "age_h": 268.91531720255534
    },
    "peak_mcap": 1044321.0,
    "now": {
     "score": 50.1,
     "parts": {
-     "traction": 14.2,
+     "traction": 14.1,
      "holders": 9.6,
      "social": 3.8,
-     "momentum": 3.1,
+     "momentum": 3.0,
      "fomo": 6.0,
-     "staying": 8.4,
+     "staying": 8.6,
      "upside": 5
     },
     "why": [
@@ -3171,27 +3391,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 94.4h (needs 3h+)"
+      "text": "Watched by GemRadar for 94.5h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "53% below its peak (max 45%)"
+      "text": "49% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 2.4x the 6h average"
+      "text": "Trading still active: last hour = 2.3x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -26%, 6h -31% (max +100% / +200%)"
+      "text": "Not spiking: 1h -24%, 6h -25% (max +100% / +200%)"
+     },
+     {
+      "ok": true,
+      "text": "Liquidity -22% in 3h"
      },
      {
       "ok": false,
-      "text": "Liquidity -25% in 3h"
-     },
-     {
-      "ok": false,
-      "text": "Market cap -44% in 3h"
+      "text": "Market cap -40% in 3h"
      },
      {
       "ok": true,
@@ -3213,7 +3433,7 @@
      },
      {
       "ok": false,
-      "text": "53% below its peak (max 45%)"
+      "text": "49% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -3227,11 +3447,11 @@
      },
      {
       "ok": true,
-      "text": "Not too late: FOMO traders spotted it at $421k, now 1.2x (max 2.5x)"
+      "text": "Not too late: FOMO traders spotted it at $421k, now 1.3x (max 2.5x)"
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -31% (max +100%)"
+      "text": "Not run up yet: 6h -25% (max +100%)"
      },
      {
       "ok": true,
@@ -3239,22 +3459,22 @@
      },
      {
       "ok": true,
-      "text": "Market cap $493k (max $1.00M)"
+      "text": "Market cap $530k (max $1.00M)"
+     },
+     {
+      "ok": true,
+      "text": "Liquidity -22% in 3h"
      },
      {
       "ok": false,
-      "text": "Liquidity -25% in 3h"
-     },
-     {
-      "ok": false,
-      "text": "Market cap -44% in 3h"
+      "text": "Market cap -40% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 37,
+    "buzz": 34,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -3299,9 +3519,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 28.2,
+     "first_seen_h": 28.3,
      "spotted_mcap": 421234.0,
-     "spotted_h": 44.1
+     "spotted_h": 44.2
     },
     "x": null,
     "biz": 0,
@@ -3314,7 +3534,7 @@
      "telegram": "https://t.me/returntotimmy",
      "website": "https://www.timmycoin.fun/"
     },
-    "checked": 1794436152.7456756
+    "checked": 1794436595.710912
    }
   },
   {
@@ -3513,22 +3733,22 @@
    "quality": 0,
    "quality_why": [],
    "now": {
-    "score": 66.2,
+    "score": 69.4,
     "parts": {
      "traction": 18.9,
      "holders": 11.7,
      "social": 4.3,
-     "momentum": 4.8,
-     "fomo": 12.0,
-     "staying": 15.5,
+     "momentum": 4.3,
+     "fomo": 15.0,
+     "staying": 16.2,
      "upside": 2
     },
     "why": [
-     "$456k liquidity",
+     "$466k liquidity",
      "holders +12% in 3h",
      "holding up after 17d",
-     "27 FOMO traders bought (CHIEF_117, JuniorCuriousTrout, KingWabi)",
-     "100 FOMO traders hold it",
+     "34 FOMO traders bought (AlanWasUp, Baboshi, CHIEF_117)",
+     "108 FOMO traders hold it",
      "top FOMO traders hold: Lordeddy, hahahalol, jeetnumber1"
     ],
     "safety": {
@@ -3561,27 +3781,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 42.1h (needs 3h+)"
+      "text": "Watched by GemRadar for 42.2h (needs 3h+)"
      },
      {
       "ok": true,
-      "text": "28% below its peak (max 45%)"
+      "text": "25% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.7x the 6h average"
+      "text": "Trading still active: last hour = 1.2x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h +6%, 6h -15% (max +100% / +200%)"
+      "text": "Not spiking: 1h +2%, 6h -13% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -9% in 3h"
+      "text": "Liquidity -7% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -21% in 3h"
+      "text": "Market cap -17% in 3h"
      },
      {
       "ok": true,
@@ -3591,7 +3811,7 @@
     "fast_gates": [
      {
       "ok": true,
-      "text": "14 FOMO traders bought in 2h (needs 3+)"
+      "text": "21 FOMO traders bought in 2h (needs 3+)"
      },
      {
       "ok": true,
@@ -3599,29 +3819,29 @@
      },
      {
       "ok": false,
-      "text": "FOMO buyers 27 vs sellers 67"
+      "text": "FOMO buyers 34 vs sellers 66"
      },
      {
       "ok": true,
-      "text": "28% below its peak (max 45%)"
+      "text": "25% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
      {
       "ok": true,
-      "text": "7 top FOMO trader(s) hold it (Lordeddy, hahahalol, jeetnumber1), 100 FOMO holders (needs 1+ top trader and 2+ holders)"
+      "text": "7 top FOMO trader(s) hold it (Lordeddy, hahahalol, jeetnumber1), 108 FOMO holders (needs 1+ top trader and 2+ holders)"
      },
      {
       "ok": false,
-      "text": "Fresh FOMO buying: 173 bought vs 227 sold in 24h, 10 top trader(s) bought in 48h"
+      "text": "Fresh FOMO buying: 179 bought vs 226 sold in 24h, 10 top trader(s) bought in 48h"
      },
      {
       "ok": false,
-      "text": "Not too late: FOMO traders spotted it at $541k, now 31.4x (max 2.5x)"
+      "text": "Not too late: FOMO traders spotted it at $541k, now 33.0x (max 2.5x)"
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -15% (max +100%)"
+      "text": "Not run up yet: 6h -13% (max +100%)"
      },
      {
       "ok": false,
@@ -3629,31 +3849,31 @@
      },
      {
       "ok": false,
-      "text": "Market cap $17.00M (max $1.00M)"
+      "text": "Market cap $17.84M (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -9% in 3h"
+      "text": "Liquidity -7% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -21% in 3h"
+      "text": "Market cap -17% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 41,
+    "buzz": 35,
     "fomo": {
-     "buyers_1h": 10,
-     "buyers_2h": 14,
-     "buyers_6h": 27,
-     "buyers_24h": 173,
-     "buyers_7d": 184,
-     "sellers_6h": 67,
-     "sellers_24h": 227,
-     "named_holders": 100,
+     "buyers_1h": 9,
+     "buyers_2h": 21,
+     "buyers_6h": 34,
+     "buyers_24h": 179,
+     "buyers_7d": 190,
+     "sellers_6h": 66,
+     "sellers_24h": 226,
+     "named_holders": 108,
      "good_recent": [
       "BasedShillBH",
       "Lordeddy",
@@ -3666,26 +3886,28 @@
       "sosababy300",
       "trenches_eth"
      ],
-     "fresh_buyers": 173,
-     "fresh_sellers": 227,
-     "buy_usd_6h": 403281,
+     "fresh_buyers": 179,
+     "fresh_sellers": 226,
+     "buy_usd_6h": 434764,
      "theses_24h": 31,
      "top_buyers": [
+      "AlanWasUp",
+      "Baboshi",
       "CHIEF_117",
       "JuniorCuriousTrout",
-      "KingWabi",
-      "Lordeddy",
-      "NinetyWon"
+      "KingWabi"
      ],
      "holders": [
       "0xBarrry",
       "1881",
       "1Bprice",
       "4colton",
+      "AlanWasUp",
       "Alan_new",
       "AloneSourFlea",
       "AwareSafeLlama",
       "AwfulIdealSkink",
+      "Baboshi",
       "BobaDebt",
       "BullCartel",
       "CryptoGorilla",
@@ -3695,11 +3917,9 @@
       "ElonMuskCallz",
       "GibTheBull",
       "Jangfr",
-      "Jaqor",
-      "JiZai",
-      "KingWabi"
+      "Jaqor"
      ],
-     "holders_n": 100,
+     "holders_n": 108,
      "wallets_holding": 4,
      "onchain_trades": 15,
      "onchain_span_h": 0.2,
@@ -3714,9 +3934,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 85.8,
+     "first_seen_h": 86.0,
      "spotted_mcap": 540657.0,
-     "spotted_h": 41.0
+     "spotted_h": 41.2
     },
     "x": null,
     "biz": 0,
@@ -3729,30 +3949,30 @@
      "instagram": "https://www.instagram.com/imnihaocat?rpxt=czFnNGZzamh0a2gz&utm_source=qr",
      "website": "https://mihao.fun/"
     },
-    "checked": 1794436147.811258
+    "checked": 1794436595.6920757
    },
-   "now_mcap": 16577641.0,
-   "now_liq": 447401.81,
+   "now_mcap": 17294012.0,
+   "now_liq": 459878.31,
    "live": {
-    "ts": 1794432548.673103,
-    "mcap": 16577641.0,
-    "liq": 447401.81,
-    "price": 0.01761,
+    "ts": 1794436187.1419322,
+    "mcap": 17294012.0,
+    "liq": 459878.31,
+    "price": 0.01838,
     "vol": {
-     "m5": 237729.57,
-     "h1": 1306250.38,
-     "h6": 5851266.56,
-     "h24": 34933003.96
+     "m5": 21726.72,
+     "h1": 1819017.66,
+     "h6": 6858407.28,
+     "h24": 36509827.16
     },
     "pc": {
-     "m5": -12.07,
-     "h1": -13.78,
-     "h6": -31.18,
-     "h24": 1109.0
+     "m5": 1.34,
+     "h1": 10.43,
+     "h6": -14.44,
+     "h24": 670.0
     },
-    "buys_h1": 6284,
-    "sells_h1": 5776,
-    "age_h": 412.76518697380914
+    "buys_h1": 6057,
+    "sells_h1": 5919,
+    "age_h": 413.77587275953505
    },
    "peak_mcap": 23383806.0
   },
@@ -3954,14 +4174,14 @@
     "tech theme (launchpad, launch)"
    ],
    "now": {
-    "score": 30.5,
+    "score": 30.6,
     "parts": {
      "traction": 6.3,
      "holders": 8.9,
      "social": 2.9,
      "momentum": 1.7,
      "fomo": 7.0,
-     "staying": 7.7,
+     "staying": 7.8,
      "upside": 5
     },
     "why": [
@@ -4000,23 +4220,23 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 97.9h (needs 3h+)"
+      "text": "Watched by GemRadar for 98.0h (needs 3h+)"
      },
      {
       "ok": false,
       "text": "96% below its peak (max 45%)"
      },
      {
-      "ok": true,
-      "text": "Trading still active: last hour = 0.7x the 6h average"
+      "ok": false,
+      "text": "Trading still active: last hour = 0.5x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -11%, 6h -28% (max +100% / +200%)"
+      "text": "Not spiking: 1h -6%, 6h -28% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -18% in 3h"
+      "text": "Liquidity -17% in 3h"
      },
      {
       "ok": false,
@@ -4072,7 +4292,7 @@
      },
      {
       "ok": true,
-      "text": "Liquidity -18% in 3h"
+      "text": "Liquidity -17% in 3h"
      },
      {
       "ok": false,
@@ -4098,15 +4318,15 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h -11%, 6h -28% (max +60% / +100%)"
+      "text": "Before the spike: 1h -6%, 6h -28% (max +60% / +100%)"
      },
      {
       "ok": false,
-      "text": "Recovering: +0% from its 24h low $33k (needs +15%)"
+      "text": "Recovering: +1% from its 24h low $33k (needs +15%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -18% in 3h"
+      "text": "Liquidity -17% in 3h"
      },
      {
       "ok": false,
@@ -4132,11 +4352,11 @@
      },
      {
       "ok": false,
-      "text": "Organic demand: ~4 buyers in 1h, 0.3x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~4 buyers in 1h, 0.6x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 5875 min, 96% below peak, 1h -11% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 5883 min, 96% below peak, 1h -6% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
@@ -4196,9 +4416,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 98.2,
+     "first_seen_h": 98.4,
      "spotted_mcap": 120799.0,
-     "spotted_h": 51.2
+     "spotted_h": 51.3
     },
     "x": null,
     "biz": 0,
@@ -4210,30 +4430,30 @@
      "x": "https://x.com/intelligentdog9/status/2118822729751085164",
      "website": "https://raydium.io/launchpad/token/?mint=2JCncYPQzDB1qVQ5Lk5ndDyLL7saqRou48uHvDQGwc8p"
     },
-    "checked": 1794436163.7908006
+    "checked": 1794436609.462603
    },
-   "now_mcap": 36885.0,
-   "now_liq": 36271.82,
+   "now_mcap": 32875.0,
+   "now_liq": 34236.8,
    "live": {
-    "ts": 1794432548.6731102,
-    "mcap": 36885.0,
-    "liq": 36271.82,
-    "price": 3.688e-05,
+    "ts": 1794436187.1419373,
+    "mcap": 32875.0,
+    "liq": 34236.8,
+    "price": 3.287e-05,
     "vol": {
-     "m5": 1002.61,
-     "h1": 2563.6,
-     "h6": 16393.78,
-     "h24": 42891.3
+     "m5": 1.16,
+     "h1": 1884.87,
+     "h6": 17129.62,
+     "h24": 41142.36
     },
     "pc": {
-     "m5": -10.35,
-     "h1": -18.6,
-     "h6": -8.46,
-     "h24": -48.31
+     "m5": -0.19,
+     "h1": -10.87,
+     "h6": -28.3,
+     "h24": -53.76
     },
-    "buys_h1": 10,
-    "sells_h1": 19,
-    "age_h": 119.6604647535536
+    "buys_h1": 9,
+    "sells_h1": 29,
+    "age_h": 120.67115053853352
    },
    "peak_mcap": 74213.0
   },
@@ -4434,22 +4654,23 @@
    "quality": 0,
    "quality_why": [],
    "now": {
-    "score": 50.7,
+    "score": 50.3,
     "parts": {
-     "traction": 9.7,
+     "traction": 10.2,
      "holders": 9.2,
      "social": 2.9,
-     "momentum": 2.5,
+     "momentum": 2.3,
      "fomo": 8.0,
-     "staying": 13.4,
+     "staying": 12.7,
      "upside": 5
     },
     "why": [
-     "$106k liquidity",
+     "$103k liquidity",
      "55 FOMO traders hold it",
      "top FOMO traders hold: ResellCalendar",
      "2 FOMO thesis posts",
-     "23,854 holders"
+     "buyers dominate (1.1x more buys)",
+     "23,822 holders"
     ],
     "safety": {
      "top10_pct": 19.99,
@@ -4457,8 +4678,8 @@
      "creator_pct": 0.0,
      "insider_pct": 1.08,
      "insider_networks": 77,
-     "cluster_pct": 6.91,
-     "holders": 23854,
+     "cluster_pct": 6.85,
+     "holders": 23822,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -4479,31 +4700,31 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 86.0h (needs 3h+)"
+      "text": "Watched by GemRadar for 86.1h (needs 3h+)"
      },
      {
       "ok": true,
-      "text": "34% below its peak (max 45%)"
+      "text": "37% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.9x the 6h average"
+      "text": "Trading still active: last hour = 1.5x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -1%, 6h +2% (max +100% / +200%)"
+      "text": "Not spiking: 1h -4%, 6h -3% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity +0% in 3h"
+      "text": "Liquidity -2% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap +0% in 3h"
+      "text": "Market cap -4% in 3h"
      },
      {
       "ok": true,
-      "text": "Holders -0% in 3h"
+      "text": "Holders -1% in 3h"
      }
     ],
     "fast_gates": [
@@ -4521,7 +4742,7 @@
      },
      {
       "ok": true,
-      "text": "34% below its peak (max 45%)"
+      "text": "37% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -4535,11 +4756,11 @@
      },
      {
       "ok": true,
-      "text": "Not too late: FOMO traders spotted it at $892k, now 1.0x (max 2.5x)"
+      "text": "Not too late: FOMO traders spotted it at $892k, now 0.9x (max 2.5x)"
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h +2% (max +100%)"
+      "text": "Not run up yet: 6h -3% (max +100%)"
      },
      {
       "ok": false,
@@ -4547,22 +4768,22 @@
      },
      {
       "ok": true,
-      "text": "Market cap $871k (max $1.00M)"
+      "text": "Market cap $838k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity +0% in 3h"
+      "text": "Liquidity -2% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap +0% in 3h"
+      "text": "Market cap -4% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 21,
+    "buzz": 18,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -4609,9 +4830,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 92.3,
+     "first_seen_h": 92.4,
      "spotted_mcap": 892378.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 0,
@@ -4623,30 +4844,30 @@
      "x": "https://x.com/idofentanyl/status/2087206048780157268",
      "website": "https://niggaitsover.vercel.app/"
     },
-    "checked": 1794436155.8289037
+    "checked": 1794436595.7163844
    },
-   "now_mcap": 876763.0,
-   "now_liq": 106146.46,
+   "now_mcap": 871282.0,
+   "now_liq": 105629.38,
    "live": {
-    "ts": 1794432548.673117,
-    "mcap": 876763.0,
-    "liq": 106146.46,
-    "price": 0.0009201,
+    "ts": 1794436187.1419413,
+    "mcap": 871282.0,
+    "liq": 105629.38,
+    "price": 0.0009144,
     "vol": {
-     "m5": 1687.05,
-     "h1": 7094.87,
-     "h6": 59906.75,
-     "h24": 356370.57
+     "m5": 97.67,
+     "h1": 17162.48,
+     "h6": 57975.47,
+     "h24": 355835.63
     },
     "pc": {
-     "m5": 2.95,
-     "h1": -5.61,
-     "h6": -2.85,
-     "h24": -20.16
+     "m5": 0.83,
+     "h1": 1.91,
+     "h6": 2.33,
+     "h24": -17.56
     },
-    "buys_h1": 29,
-    "sells_h1": 53,
-    "age_h": 509.5118536444092
+    "buys_h1": 97,
+    "sells_h1": 95,
+    "age_h": 510.5225394285075
    },
    "peak_mcap": 1271249.0
   },
@@ -4856,46 +5077,46 @@
    ],
    "quality": 0,
    "quality_why": [],
-   "now_mcap": 1467070.0,
-   "now_liq": 174395.27,
+   "now_mcap": 1417295.0,
+   "now_liq": 171092.66,
    "live": {
-    "ts": 1794432548.6731224,
-    "mcap": 1467070.0,
-    "liq": 174395.27,
-    "price": 3.487e-09,
+    "ts": 1794436187.141945,
+    "mcap": 1417295.0,
+    "liq": 171092.66,
+    "price": 3.368e-09,
     "vol": {
-     "m5": 248.71,
-     "h1": 2464.19,
-     "h6": 39236.11,
-     "h24": 507772.63
+     "m5": 291.38,
+     "h1": 5392.38,
+     "h6": 28516.87,
+     "h24": 501615.86
     },
     "pc": {
-     "m5": -0.03,
-     "h1": -0.1,
-     "h6": -1.82,
-     "h24": -45.11
+     "m5": -0.18,
+     "h1": -3.4,
+     "h6": -6.05,
+     "h24": -47.09
     },
-    "buys_h1": 21,
-    "sells_h1": 20,
-    "age_h": 579.1571314232042
+    "buys_h1": 229,
+    "sells_h1": 46,
+    "age_h": 580.1678172072347
    },
    "peak_mcap": 2730367.0,
    "now": {
-    "score": 47.2,
+    "score": 45.4,
     "parts": {
-     "traction": 10.7,
+     "traction": 9.1,
      "holders": 10.1,
      "social": 6.0,
-     "momentum": 2.7,
+     "momentum": 2.6,
      "fomo": 5.0,
-     "staying": 9.2,
+     "staying": 9.1,
      "upside": 3.5
     },
     "why": [
      "$171k liquidity",
      "50 FOMO traders hold it",
      "trending on GeckoTerminal",
-     "3,042 holders"
+     "3,035 holders"
     ],
     "safety": {
      "top10_pct": 0.4,
@@ -4906,7 +5127,7 @@
      "insider_pct": 0.0,
      "contract_pct": 66.5,
      "holder_data_suspect": false,
-     "holders": 3042,
+     "holders": 3035,
      "honeypot": false,
      "buy_tax_pct": 3.0,
      "sell_tax_pct": 3.0,
@@ -4937,7 +5158,7 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 86.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 86.4h (needs 3h+)"
      },
      {
       "ok": false,
@@ -4945,11 +5166,11 @@
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.1x the 6h average"
+      "text": "Trading still active: last hour = 0.9x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -3%, 6h -6% (max +100% / +200%)"
+      "text": "Not spiking: 1h -1%, 6h -5% (max +100% / +200%)"
      },
      {
       "ok": true,
@@ -4997,7 +5218,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -6% (max +100%)"
+      "text": "Not run up yet: 6h -5% (max +100%)"
      },
      {
       "ok": false,
@@ -5005,7 +5226,7 @@
      },
      {
       "ok": false,
-      "text": "Market cap $1.42M (max $1.00M)"
+      "text": "Market cap $1.41M (max $1.00M)"
      },
      {
       "ok": true,
@@ -5027,7 +5248,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $1.42M (max $1.50M)"
+      "text": "Market cap $1.41M (max $1.50M)"
      },
      {
       "ok": true,
@@ -5035,7 +5256,7 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h -3%, 6h -6% (max +60% / +100%)"
+      "text": "Before the spike: 1h -1%, 6h -5% (max +60% / +100%)"
      },
      {
       "ok": false,
@@ -5069,15 +5290,15 @@
      },
      {
       "ok": false,
-      "text": "Organic demand: ~40 buyers in 1h, 4.8x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~48 buyers in 1h, 5.9x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 5178 min, 49% below peak, 1h -3% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 5186 min, 49% below peak, 1h -1% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $1.42M (max $5.00M)"
+      "text": "Market cap $1.41M (max $5.00M)"
      }
     ],
     "quality": 6.0,
@@ -5087,7 +5308,7 @@
      "GeckoTerminal score 68",
      "tech theme (ai, wallet, trading)"
     ],
-    "buzz": 27,
+    "buzz": 24,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -5132,9 +5353,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 82.4,
+     "first_seen_h": 82.5,
      "spotted_mcap": 1576176.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": {
      "followers": 615,
@@ -5151,7 +5372,7 @@
      "telegram": "https://t.me/SpaceXinuSI",
      "website": "https://spacexinu.dog/"
     },
-    "checked": 1794436157.7663937
+    "checked": 1794436597.9218142
    }
   },
   {
@@ -5340,45 +5561,45 @@
    ],
    "quality": 0,
    "quality_why": [],
-   "now_mcap": 5723544.0,
-   "now_liq": 351765.16,
+   "now_mcap": 6314211.0,
+   "now_liq": 369959.18,
    "live": {
-    "ts": 1794432548.6731277,
-    "mcap": 5723544.0,
-    "liq": 351765.16,
-    "price": 0.005898,
+    "ts": 1794436187.141949,
+    "mcap": 6314211.0,
+    "liq": 369959.18,
+    "price": 0.006507,
     "vol": {
-     "m5": 24098.84,
-     "h1": 130255.31,
-     "h6": 1836256.95,
-     "h24": 5616544.05
+     "m5": 5544.5,
+     "h1": 235947.76,
+     "h6": 1507990.45,
+     "h24": 5780887.74
     },
     "pc": {
-     "m5": -3.44,
-     "h1": -14.15,
-     "h6": -9.12,
-     "h24": 95.44
+     "m5": 2.11,
+     "h1": 13.56,
+     "h6": 14.12,
+     "h24": 126.0
     },
-    "buys_h1": 547,
-    "sells_h1": 435,
-    "age_h": 656.0329647587076
+    "buys_h1": 767,
+    "sells_h1": 782,
+    "age_h": 657.0436505417888
    },
    "peak_mcap": 7435271.0,
    "now": {
-    "score": 63.1,
+    "score": 62.3,
     "parts": {
-     "traction": 18.1,
+     "traction": 18.2,
      "holders": 11.6,
      "social": 5.6,
-     "momentum": 4.8,
+     "momentum": 4.5,
      "fomo": 15.0,
-     "staying": 14.0,
+     "staying": 13.4,
      "upside": 2
     },
     "why": [
-     "$371k liquidity",
+     "$365k liquidity",
      "holding up after 27d",
-     "14 FOMO traders bought (67hears, EFIVE, Nimma_eth)",
+     "13 FOMO traders bought (67hears, EFIVE, Richi3Rich)",
      "39 FOMO traders hold it",
      "top FOMO traders hold: DacityCoin, mowtari",
      "20 FOMO thesis posts"
@@ -5413,27 +5634,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 31.7h (needs 3h+)"
+      "text": "Watched by GemRadar for 31.8h (needs 3h+)"
      },
      {
       "ok": true,
-      "text": "19% below its peak (max 45%)"
+      "text": "22% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.0x the 6h average"
+      "text": "Trading still active: last hour = 0.8x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h +13%, 6h +16% (max +100% / +200%)"
+      "text": "Not spiking: 1h +11%, 6h +9% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -6% in 3h"
+      "text": "Liquidity -8% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -13% in 3h"
+      "text": "Market cap -16% in 3h"
      },
      {
       "ok": true,
@@ -5451,11 +5672,11 @@
      },
      {
       "ok": false,
-      "text": "FOMO buyers 14 vs sellers 25"
+      "text": "FOMO buyers 13 vs sellers 25"
      },
      {
       "ok": true,
-      "text": "19% below its peak (max 45%)"
+      "text": "22% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -5469,11 +5690,11 @@
      },
      {
       "ok": true,
-      "text": "Not too late: FOMO traders spotted it at $2.63M, now 2.4x (max 2.5x)"
+      "text": "Not too late: FOMO traders spotted it at $2.63M, now 2.3x (max 2.5x)"
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h +16% (max +100%)"
+      "text": "Not run up yet: 6h +9% (max +100%)"
      },
      {
       "ok": false,
@@ -5481,26 +5702,26 @@
      },
      {
       "ok": false,
-      "text": "Market cap $6.35M (max $1.00M)"
+      "text": "Market cap $6.14M (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -6% in 3h"
+      "text": "Liquidity -8% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -13% in 3h"
+      "text": "Market cap -16% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 29,
+    "buzz": 28,
     "fomo": {
      "buyers_1h": 2,
      "buyers_2h": 2,
-     "buyers_6h": 14,
+     "buyers_6h": 13,
      "buyers_24h": 39,
      "buyers_7d": 63,
      "sellers_6h": 25,
@@ -5513,14 +5734,14 @@
      ],
      "fresh_buyers": 39,
      "fresh_sellers": 50,
-     "buy_usd_6h": 61665,
+     "buy_usd_6h": 57171,
      "theses_24h": 20,
      "top_buyers": [
       "67hears",
       "EFIVE",
-      "Nimma_eth",
       "Richi3Rich",
-      "TightTenseUrial"
+      "TightTenseUrial",
+      "fvni"
      ],
      "holders": [
       "67hears",
@@ -5554,9 +5775,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 97.8,
+     "first_seen_h": 97.9,
      "spotted_mcap": 2627725.0,
-     "spotted_h": 31.6
+     "spotted_h": 31.8
     },
     "x": {
      "followers": 353,
@@ -5575,7 +5796,7 @@
      "instagram": "https://www.instagram.com/gtacommunity",
      "website": "https://audacity.meme/"
     },
-    "checked": 1794436146.437496
+    "checked": 1794436595.6890008
    }
   },
   {
@@ -5744,54 +5965,54 @@
    ],
    "quality": 0,
    "quality_why": [],
-   "now_mcap": 133211.0,
-   "now_liq": 33707.92,
+   "now_mcap": 81406.0,
+   "now_liq": 26398.18,
    "live": {
-    "ts": 1794432548.6731355,
-    "mcap": 133211.0,
-    "liq": 33707.92,
-    "price": 0.0001332,
+    "ts": 1794436187.141953,
+    "mcap": 81406.0,
+    "liq": 26398.18,
+    "price": 8.14e-05,
     "vol": {
-     "m5": 1186.14,
-     "h1": 10978.81,
-     "h6": 103954.63,
-     "h24": 274620.2
+     "m5": 228.45,
+     "h1": 24049.92,
+     "h6": 96551.54,
+     "h24": 281761.15
     },
     "pc": {
-     "m5": -3.28,
-     "h1": -19.18,
-     "h6": -59.12,
-     "h24": -65.71
+     "m5": 0.09,
+     "h1": -39.02,
+     "h6": -67.24,
+     "h24": -81.34
     },
-    "buys_h1": 103,
-    "sells_h1": 81,
-    "age_h": 145.8132425385878
+    "buys_h1": 215,
+    "sells_h1": 137,
+    "age_h": 146.82392832078722
    },
    "peak_mcap": 780354.0,
    "now": {
-    "score": 44.9,
+    "score": 43.6,
     "parts": {
-     "traction": 11.9,
-     "holders": 8.9,
+     "traction": 11.2,
+     "holders": 8.8,
      "social": 4.5,
-     "momentum": 2.5,
+     "momentum": 2.0,
      "fomo": 4.3,
      "staying": 7.8,
      "upside": 5
     },
     "why": [
      "7 FOMO traders hold it",
-     "buyers dominate (1.6x more buys)",
-     "2,437 holders"
+     "buyers dominate (1.3x more buys)",
+     "2,410 holders"
     ],
     "safety": {
-     "top10_pct": 21.79,
-     "max_holder_pct": 3.04,
+     "top10_pct": 22.59,
+     "max_holder_pct": 3.05,
      "creator_pct": 0.0,
      "insider_pct": 1.84,
      "insider_networks": 4,
      "cluster_pct": 0.0,
-     "holders": 2437,
+     "holders": 2410,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -5812,7 +6033,7 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 30.8h (needs 3h+)"
+      "text": "Watched by GemRadar for 30.9h (needs 3h+)"
      },
      {
       "ok": false,
@@ -5820,23 +6041,23 @@
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.5x the 6h average"
+      "text": "Trading still active: last hour = 0.9x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -39%, 6h -66% (max +100% / +200%)"
-     },
-     {
-      "ok": true,
-      "text": "Liquidity -25% in 3h"
+      "text": "Not spiking: 1h -12%, 6h -69% (max +100% / +200%)"
      },
      {
       "ok": false,
-      "text": "Market cap -44% in 3h"
+      "text": "Liquidity -26% in 3h"
+     },
+     {
+      "ok": false,
+      "text": "Market cap -46% in 3h"
      },
      {
       "ok": true,
-      "text": "Holders +0% in 3h"
+      "text": "Holders -1% in 3h"
      }
     ],
     "fast_gates": [
@@ -5872,7 +6093,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -66% (max +100%)"
+      "text": "Not run up yet: 6h -69% (max +100%)"
      },
      {
       "ok": true,
@@ -5880,22 +6101,22 @@
      },
      {
       "ok": true,
-      "text": "Market cap $82k (max $1.00M)"
-     },
-     {
-      "ok": true,
-      "text": "Liquidity -25% in 3h"
+      "text": "Market cap $78k (max $1.00M)"
      },
      {
       "ok": false,
-      "text": "Market cap -44% in 3h"
+      "text": "Liquidity -26% in 3h"
+     },
+     {
+      "ok": false,
+      "text": "Market cap -46% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 23,
+    "buzz": 11,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -5923,9 +6144,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 30.9,
+     "first_seen_h": 31.1,
      "spotted_mcap": 780354.0,
-     "spotted_h": 30.8
+     "spotted_h": 30.9
     },
     "x": {
      "followers": 551,
@@ -5942,7 +6163,7 @@
      "telegram": "https://t.me/lamportrobotics",
      "website": "https://lamportrobotics.com/"
     },
-    "checked": 1794436157.8516722
+    "checked": 1794436597.9160566
    }
   },
   {
@@ -6121,39 +6342,39 @@
    ],
    "quality": 0,
    "quality_why": [],
-   "now_mcap": 369186.0,
-   "now_liq": 60887.62,
+   "now_mcap": 324379.0,
+   "now_liq": 56893.46,
    "live": {
-    "ts": 1794432548.6731424,
-    "mcap": 369186.0,
-    "liq": 60887.62,
-    "price": 0.0003882,
+    "ts": 1794436187.1419573,
+    "mcap": 324379.0,
+    "liq": 56893.46,
+    "price": 0.0003411,
     "vol": {
-     "m5": 481.62,
-     "h1": 23259.42,
-     "h6": 177781.05,
-     "h24": 538383.09
+     "m5": 1178.48,
+     "h1": 20906.62,
+     "h6": 147236.87,
+     "h24": 548150.85
     },
     "pc": {
-     "m5": 0.25,
-     "h1": -11.06,
-     "h6": -10.98,
-     "h24": 12.89
+     "m5": 2.01,
+     "h1": -9.85,
+     "h6": -34.4,
+     "h24": -5.3
     },
-    "buys_h1": 290,
-    "sells_h1": 160,
-    "age_h": 220.15685365152996
+    "buys_h1": 254,
+    "sells_h1": 199,
+    "age_h": 221.16753943305122
    },
    "peak_mcap": 515750.0,
    "now": {
-    "score": 47.1,
+    "score": 46.5,
     "parts": {
-     "traction": 13.2,
+     "traction": 13.1,
      "holders": 10.2,
      "social": 2.9,
-     "momentum": 2.4,
+     "momentum": 2.3,
      "fomo": 3.4,
-     "staying": 10.0,
+     "staying": 9.6,
      "upside": 5
     },
     "why": [
@@ -6190,27 +6411,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 51.2h (needs 3h+)"
+      "text": "Watched by GemRadar for 51.4h (needs 3h+)"
      },
      {
       "ok": true,
-      "text": "36% below its peak (max 45%)"
+      "text": "38% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 0.9x the 6h average"
+      "text": "Trading still active: last hour = 0.8x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -12%, 6h -33% (max +100% / +200%)"
+      "text": "Not spiking: 1h -11%, 6h -32% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -15% in 3h"
+      "text": "Liquidity -17% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -28% in 3h"
+      "text": "Market cap -30% in 3h"
      },
      {
       "ok": true,
@@ -6232,7 +6453,7 @@
      },
      {
       "ok": true,
-      "text": "36% below its peak (max 45%)"
+      "text": "38% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -6250,7 +6471,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -33% (max +100%)"
+      "text": "Not run up yet: 6h -32% (max +100%)"
      },
      {
       "ok": true,
@@ -6258,15 +6479,15 @@
      },
      {
       "ok": true,
-      "text": "Market cap $331k (max $1.00M)"
+      "text": "Market cap $322k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -15% in 3h"
+      "text": "Liquidity -17% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -28% in 3h"
+      "text": "Market cap -30% in 3h"
      }
     ],
     "project_gates": [
@@ -6280,7 +6501,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $331k (max $1.50M)"
+      "text": "Market cap $322k (max $1.50M)"
      },
      {
       "ok": true,
@@ -6288,19 +6509,19 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h -12%, 6h -33% (max +60% / +100%)"
+      "text": "Before the spike: 1h -11%, 6h -32% (max +60% / +100%)"
      },
      {
       "ok": false,
-      "text": "Recovering: +1% from its 24h low $327k (needs +15%)"
+      "text": "Recovering: -2% from its 24h low $327k (needs +15%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -15% in 3h"
+      "text": "Liquidity -17% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -28% in 3h"
+      "text": "Market cap -30% in 3h"
      }
     ],
     "early_gates": [
@@ -6318,19 +6539,19 @@
      },
      {
       "ok": true,
-      "text": "Deep liquidity $57k = 17% of market cap (needs $40k and 5%)"
+      "text": "Deep liquidity $57k = 18% of market cap (needs $40k and 5%)"
      },
      {
       "ok": true,
-      "text": "Organic demand: ~130 buyers in 1h, 1.3x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~123 buyers in 1h, 1.3x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 3075 min, 36% below peak, 1h -12% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 3082 min, 38% below peak, 1h -11% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $331k (max $5.00M)"
+      "text": "Market cap $322k (max $5.00M)"
      }
     ],
     "quality": 2.0,
@@ -6338,7 +6559,7 @@
      "website",
      "GeckoTerminal score 73"
     ],
-    "buzz": 19,
+    "buzz": 18,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -6365,9 +6586,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 34.6,
+     "first_seen_h": 34.8,
      "spotted_mcap": 515378.0,
-     "spotted_h": 33.8
+     "spotted_h": 33.9
     },
     "x": null,
     "biz": 0,
@@ -6379,7 +6600,7 @@
      "x": "https://x.com/i/communities/2034659076592832917",
      "website": "https://x.com/search?q=Pirate%20Shop%20Token&src=recent_search_click"
     },
-    "checked": 1794436156.4014623
+    "checked": 1794436595.7277684
    }
   },
   {
@@ -6580,46 +6801,46 @@
     "website",
     "GeckoTerminal score 67"
    ],
-   "now_mcap": 107215.0,
-   "now_liq": 78517.19,
+   "now_mcap": 81582.0,
+   "now_liq": 68241.52,
    "live": {
-    "ts": 1794432548.6731493,
-    "mcap": 107215.0,
-    "liq": 78517.19,
-    "price": 0.0001072,
+    "ts": 1794436187.141961,
+    "mcap": 81582.0,
+    "liq": 68241.52,
+    "price": 8.158e-05,
     "vol": {
-     "m5": 197.8,
-     "h1": 12005.95,
-     "h6": 79463.83,
-     "h24": 178104.14
+     "m5": 279.48,
+     "h1": 12653.09,
+     "h6": 82830.85,
+     "h24": 184380.41
     },
     "pc": {
-     "m5": -0.53,
-     "h1": -23.65,
-     "h6": -35.66,
-     "h24": -59.3
+     "m5": 2.5,
+     "h1": -23.88,
+     "h6": -58.9,
+     "h24": -69.34
     },
-    "buys_h1": 95,
-    "sells_h1": 63,
-    "age_h": 61.046853653564455
+    "buys_h1": 103,
+    "sells_h1": 85,
+    "age_h": 62.05753943406847
    },
    "peak_mcap": 688179.0,
    "now": {
-    "score": 45.4,
+    "score": 45.3,
     "parts": {
-     "traction": 12.2,
+     "traction": 11.9,
      "holders": 9.2,
      "social": 1.9,
-     "momentum": 1.9,
+     "momentum": 2.1,
      "fomo": 9.0,
      "staying": 6.2,
      "upside": 5
     },
     "why": [
-     "$67k liquidity",
+     "$70k liquidity",
      "60 FOMO traders hold it",
      "top FOMO traders hold: andy, okuracrypto",
-     "buyers dominate (1.2x more buys)",
+     "buyers dominate (1.6x more buys)",
      "11,273 holders"
     ],
     "safety": {
@@ -6650,7 +6871,7 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 51.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 51.4h (needs 3h+)"
      },
      {
       "ok": false,
@@ -6658,19 +6879,19 @@
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 0.9x the 6h average"
+      "text": "Trading still active: last hour = 0.8x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -25%, 6h -60% (max +100% / +200%)"
+      "text": "Not spiking: 1h -16%, 6h -58% (max +100% / +200%)"
+     },
+     {
+      "ok": true,
+      "text": "Liquidity -24% in 3h"
      },
      {
       "ok": false,
-      "text": "Liquidity -26% in 3h"
-     },
-     {
-      "ok": false,
-      "text": "Market cap -44% in 3h"
+      "text": "Market cap -41% in 3h"
      },
      {
       "ok": true,
@@ -6710,7 +6931,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -60% (max +100%)"
+      "text": "Not run up yet: 6h -58% (max +100%)"
      },
      {
       "ok": true,
@@ -6718,15 +6939,15 @@
      },
      {
       "ok": true,
-      "text": "Market cap $80k (max $1.00M)"
+      "text": "Market cap $84k (max $1.00M)"
+     },
+     {
+      "ok": true,
+      "text": "Liquidity -24% in 3h"
      },
      {
       "ok": false,
-      "text": "Liquidity -26% in 3h"
-     },
-     {
-      "ok": false,
-      "text": "Market cap -44% in 3h"
+      "text": "Market cap -41% in 3h"
      }
     ],
     "project_gates": [
@@ -6740,7 +6961,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $80k (max $1.50M)"
+      "text": "Market cap $84k (max $1.50M)"
      },
      {
       "ok": true,
@@ -6748,19 +6969,19 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h -25%, 6h -60% (max +60% / +100%)"
+      "text": "Before the spike: 1h -16%, 6h -58% (max +60% / +100%)"
      },
      {
       "ok": false,
-      "text": "Recovering: +0% from its 24h low $80k (needs +15%)"
+      "text": "Recovering: +5% from its 24h low $80k (needs +15%)"
+     },
+     {
+      "ok": true,
+      "text": "Liquidity -24% in 3h"
      },
      {
       "ok": false,
-      "text": "Liquidity -26% in 3h"
-     },
-     {
-      "ok": false,
-      "text": "Market cap -44% in 3h"
+      "text": "Market cap -41% in 3h"
      }
     ],
     "early_gates": [
@@ -6778,19 +6999,19 @@
      },
      {
       "ok": true,
-      "text": "Deep liquidity $67k = 84% of market cap (needs $40k and 5%)"
+      "text": "Deep liquidity $70k = 83% of market cap (needs $40k and 5%)"
      },
      {
       "ok": false,
-      "text": "Organic demand: ~51 buyers in 1h, 1.2x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~42 buyers in 1h, 1.6x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 3078 min, 88% below peak, 1h -25% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 3086 min, 88% below peak, 1h -16% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $80k (max $5.00M)"
+      "text": "Market cap $84k (max $5.00M)"
      }
     ],
     "quality": 1.0,
@@ -6798,7 +7019,7 @@
      "website",
      "GeckoTerminal score 26"
     ],
-    "buzz": 8,
+    "buzz": 13,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -6846,9 +7067,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 61.3,
+     "first_seen_h": 61.4,
      "spotted_mcap": 638698.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 0,
@@ -6860,7 +7081,7 @@
      "x": "https://x.com/GoldenCatDev/status/2119217720923214099",
      "instagram": "https://www.instagram.com/p/DL5H-tnPiw9/"
     },
-    "checked": 1794436157.906424
+    "checked": 1794436609.419796
    }
   },
   {
@@ -7064,14 +7285,14 @@
     "tech theme (launch, ai)"
    ],
    "now": {
-    "score": 39.3,
+    "score": 39.4,
     "parts": {
      "traction": 7.3,
      "holders": 8.2,
      "social": 6.7,
-     "momentum": 2.7,
+     "momentum": 2.9,
      "fomo": 7.0,
-     "staying": 8.4,
+     "staying": 8.3,
      "upside": 5
     },
     "why": [
@@ -7110,7 +7331,7 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 86.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 86.4h (needs 3h+)"
      },
      {
       "ok": false,
@@ -7118,19 +7339,19 @@
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.7x the 6h average"
+      "text": "Trading still active: last hour = 1.4x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h +8%, 6h -44% (max +100% / +200%)"
+      "text": "Not spiking: 1h +13%, 6h -46% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -15% in 3h"
+      "text": "Liquidity -16% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -26% in 3h"
+      "text": "Market cap -30% in 3h"
      },
      {
       "ok": true,
@@ -7170,7 +7391,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -44% (max +100%)"
+      "text": "Not run up yet: 6h -46% (max +100%)"
      },
      {
       "ok": false,
@@ -7178,15 +7399,15 @@
      },
      {
       "ok": true,
-      "text": "Market cap $105k (max $1.00M)"
+      "text": "Market cap $100k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -15% in 3h"
+      "text": "Liquidity -16% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -26% in 3h"
+      "text": "Market cap -30% in 3h"
      }
     ],
     "project_gates": [
@@ -7200,7 +7421,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $105k (max $1.50M)"
+      "text": "Market cap $100k (max $1.50M)"
      },
      {
       "ok": true,
@@ -7208,19 +7429,19 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h +8%, 6h -44% (max +60% / +100%)"
+      "text": "Before the spike: 1h +13%, 6h -46% (max +60% / +100%)"
      },
      {
       "ok": false,
-      "text": "Recovering: +7% from its 24h low $98k (needs +15%)"
+      "text": "Recovering: +2% from its 24h low $98k (needs +15%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -15% in 3h"
+      "text": "Liquidity -16% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -26% in 3h"
+      "text": "Market cap -30% in 3h"
      }
     ],
     "early_gates": [
@@ -7238,19 +7459,19 @@
      },
      {
       "ok": false,
-      "text": "Deep liquidity $29k = 28% of market cap (needs $40k and 5%)"
+      "text": "Deep liquidity $29k = 29% of market cap (needs $40k and 5%)"
      },
      {
       "ok": false,
-      "text": "Organic demand: ~25 buyers in 1h, 0.4x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~16 buyers in 1h, 0.2x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 5178 min, 97% below peak, 1h +8% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 5186 min, 97% below peak, 1h +13% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $105k (max $5.00M)"
+      "text": "Market cap $100k (max $5.00M)"
      }
     ],
     "quality": 10.0,
@@ -7261,7 +7482,7 @@
      "on CoinGecko",
      "tech theme (launch, ai)"
     ],
-    "buzz": 18,
+    "buzz": 15,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -7308,9 +7529,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 75.7,
+     "first_seen_h": 75.9,
      "spotted_mcap": 636032.0,
-     "spotted_h": 43.1
+     "spotted_h": 43.3
     },
     "x": {
      "followers": 1815,
@@ -7327,30 +7548,30 @@
      "telegram": "https://telegram.me/hellhoundmeme",
      "website": "https://hellhound.meme/"
     },
-    "checked": 1794436158.136764
+    "checked": 1794436609.4224787
    },
-   "now_mcap": 98035.0,
-   "now_liq": 27779.46,
+   "now_mcap": 100157.0,
+   "now_liq": 28285.9,
    "live": {
-    "ts": 1794432548.673157,
-    "mcap": 98035.0,
-    "liq": 27779.46,
-    "price": 0.0001027,
+    "ts": 1794436187.1419656,
+    "mcap": 100157.0,
+    "liq": 28285.9,
+    "price": 0.000105,
     "vol": {
-     "m5": 762.92,
-     "h1": 5035.51,
-     "h6": 15615.2,
-     "h24": 73460.4
+     "m5": 332.62,
+     "h1": 5122.3,
+     "h6": 18456.6,
+     "h24": 68952.44
     },
     "pc": {
-     "m5": -9.26,
-     "h1": -26.77,
-     "h6": -47.52,
-     "h24": -82.1
+     "m5": -4.26,
+     "h1": 2.22,
+     "h6": -46.64,
+     "h24": -76.28
     },
-    "buys_h1": 33,
-    "sells_h1": 157,
-    "age_h": 704.4326869887966
+    "buys_h1": 49,
+    "sells_h1": 136,
+    "age_h": 705.4433727686225
    },
    "peak_mcap": 747950.0
   },
@@ -7532,54 +7753,54 @@
     "GeckoTerminal score 61",
     "on CoinGecko"
    ],
-   "now_mcap": 43322.0,
-   "now_liq": 20093.88,
+   "now_mcap": 47210.0,
+   "now_liq": 20956.22,
    "live": {
-    "ts": 1794432548.6731634,
-    "mcap": 43322.0,
-    "liq": 20093.88,
-    "price": 4.332e-05,
+    "ts": 1794436187.1419694,
+    "mcap": 47210.0,
+    "liq": 20956.22,
+    "price": 4.721e-05,
     "vol": {
-     "m5": 32.76,
-     "h1": 1146.45,
-     "h6": 16417.18,
-     "h24": 24976.61
+     "m5": 51.16,
+     "h1": 1267.41,
+     "h6": 17420.83,
+     "h24": 25673.95
     },
     "pc": {
-     "m5": -0.56,
-     "h1": 10.11,
-     "h6": 56.97,
-     "h24": 104.0
+     "m5": 1.18,
+     "h1": 5.82,
+     "h6": 65.67,
+     "h24": 145.0
     },
-    "buys_h1": 15,
-    "sells_h1": 18,
-    "age_h": 359.8940758795844
+    "buys_h1": 10,
+    "sells_h1": 12,
+    "age_h": 360.90476165866426
    },
    "peak_mcap": 90824.0,
    "now": {
-    "score": 30.0,
+    "score": 23.9,
     "parts": {
      "traction": 7.3,
      "holders": 6.9,
      "social": 4.3,
-     "momentum": 4.7,
+     "momentum": 4.5,
      "fomo": 2.3,
-     "staying": 13.5,
+     "staying": 13.6,
      "upside": 5
     },
     "why": [
-     "market cap +66% in 6h",
+     "market cap +69% in 6h",
      "2 FOMO traders hold it",
-     "11,965 holders"
+     "11,958 holders"
     ],
     "safety": {
-     "top10_pct": 25.75,
+     "top10_pct": 25.53,
      "max_holder_pct": 6.35,
      "creator_pct": 0.0,
      "insider_pct": 17.55,
      "insider_networks": 127,
-     "cluster_pct": 4.46,
-     "holders": 11965,
+     "cluster_pct": 9.25,
+     "holders": 11958,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -7594,7 +7815,8 @@
     "rejects": [],
     "warnings": [
      "Top 10 wallets hold 26%",
-     "Linked insider wallets hold 18%"
+     "Linked insider wallets hold 18%",
+     "Same-size wallets hold 9% (possible bundle)"
     ],
     "gates": [
      {
@@ -7603,27 +7825,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 50.5h (needs 3h+)"
+      "text": "Watched by GemRadar for 50.6h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "48% below its peak (max 45%)"
+      "text": "47% below its peak (max 45%)"
      },
      {
       "ok": false,
-      "text": "Trading still active: last hour = 0.5x the 6h average"
+      "text": "Trading still active: last hour = 0.4x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h +9%, 6h +66% (max +100% / +200%)"
+      "text": "Not spiking: 1h +4%, 6h +68% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -6% in 3h"
+      "text": "Liquidity -5% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -12% in 3h"
+      "text": "Market cap -10% in 3h"
      },
      {
       "ok": true,
@@ -7645,7 +7867,7 @@
      },
      {
       "ok": false,
-      "text": "48% below its peak (max 45%)"
+      "text": "47% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -7663,7 +7885,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h +66% (max +100%)"
+      "text": "Not run up yet: 6h +68% (max +100%)"
      },
      {
       "ok": false,
@@ -7671,15 +7893,15 @@
      },
      {
       "ok": true,
-      "text": "Market cap $47k (max $1.00M)"
+      "text": "Market cap $48k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -6% in 3h"
+      "text": "Liquidity -5% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -12% in 3h"
+      "text": "Market cap -10% in 3h"
      }
     ],
     "project_gates": [
@@ -7693,7 +7915,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $47k (max $1.50M)"
+      "text": "Market cap $48k (max $1.50M)"
      },
      {
       "ok": true,
@@ -7701,19 +7923,19 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h +9%, 6h +66% (max +60% / +100%)"
+      "text": "Before the spike: 1h +4%, 6h +68% (max +60% / +100%)"
      },
      {
       "ok": true,
-      "text": "Recovering: +144% from its 24h low $19k (needs +15%)"
+      "text": "Recovering: +148% from its 24h low $19k (needs +15%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -6% in 3h"
+      "text": "Liquidity -5% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -12% in 3h"
+      "text": "Market cap -10% in 3h"
      }
     ],
     "early_gates": [
@@ -7735,15 +7957,15 @@
      },
      {
       "ok": false,
-      "text": "Organic demand: ~6 buyers in 1h, 1.0x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~5 buyers in 1h, 1.0x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 3030 min, 48% below peak, 1h +9% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 3037 min, 47% below peak, 1h +4% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $47k (max $5.00M)"
+      "text": "Market cap $48k (max $5.00M)"
      }
     ],
     "quality": 5.5,
@@ -7779,7 +8001,7 @@
      "rank": null,
      "first_seen_h": 0.0,
      "spotted_mcap": 76823.0,
-     "spotted_h": 50.5
+     "spotted_h": 50.6
     },
     "x": {
      "followers": 1858,
@@ -7795,7 +8017,7 @@
      "x": "https://x.com/useinversexyz",
      "website": "https://useinverse.xyz/"
     },
-    "checked": 1794436156.6564596
+    "checked": 1794436595.719069
    }
   },
   {
@@ -8007,57 +8229,57 @@
    ],
    "quality": 0,
    "quality_why": [],
-   "now_mcap": 242924.0,
-   "now_liq": 92972.86,
+   "now_mcap": 900738.0,
+   "now_liq": 174177.75,
    "live": {
-    "ts": 1794432548.67317,
-    "mcap": 242924.0,
-    "liq": 92972.86,
-    "price": 0.0002429,
+    "ts": 1794436187.141974,
+    "mcap": 900738.0,
+    "liq": 174177.75,
+    "price": 0.0009007,
     "vol": {
-     "m5": 61113.6,
-     "h1": 156385.86,
-     "h6": 582378.88,
-     "h24": 1033706.64
+     "m5": 148668.88,
+     "h1": 2066259.72,
+     "h6": 2593222.87,
+     "h24": 3067694.59
     },
     "pc": {
-     "m5": -33.27,
-     "h1": -62.73,
-     "h6": -56.98,
-     "h24": -72.01
+     "m5": 31.54,
+     "h1": 267.0,
+     "h6": 41.65,
+     "h24": 9.28
     },
-    "buys_h1": 568,
-    "sells_h1": 660,
-    "age_h": 73.04602032585991
+    "buys_h1": 9285,
+    "sells_h1": 7328,
+    "age_h": 74.05670610432942
    },
    "peak_mcap": 1475103.0,
    "now": {
-    "score": 50.9,
+    "score": 55.8,
     "parts": {
-     "traction": 17.5,
-     "holders": 8.7,
+     "traction": 17.4,
+     "holders": 10.5,
      "social": 3.4,
-     "momentum": 1.2,
+     "momentum": 3.3,
      "fomo": 15.0,
-     "staying": 6.1,
+     "staying": 7.2,
      "upside": 5
     },
     "why": [
-     "$139k liquidity",
-     "11 FOMO traders bought (AloneSourFlea, KINGTOWING1, MuckDuck8)",
-     "108 FOMO traders hold it",
+     "$133k liquidity",
+     "holders +5% in 3h",
+     "14 FOMO traders bought (AloneSourFlea, JaredDudley, KINGTOWING1)",
+     "110 FOMO traders hold it",
      "top FOMO traders hold: bystevenr, nekomayu, surgz",
-     "2 FOMO thesis posts",
-     "buyers dominate (1.3x more buys)"
+     "2 FOMO thesis posts"
     ],
     "safety": {
-     "top10_pct": 28.26,
-     "max_holder_pct": 3.81,
+     "top10_pct": 19.58,
+     "max_holder_pct": 3.19,
      "creator_pct": 0.0,
      "insider_pct": 2.04,
-     "insider_networks": 4,
-     "cluster_pct": 4.39,
-     "holders": 27221,
+     "insider_networks": 8,
+     "cluster_pct": 8.79,
+     "holders": 28734,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -8071,7 +8293,7 @@
     "verified": true,
     "rejects": [],
     "warnings": [
-     "Top 10 wallets hold 28%"
+     "Same-size wallets hold 9% (possible bundle)"
     ],
     "gates": [
      {
@@ -8080,11 +8302,11 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 51.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 51.4h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "67% below its peak (max 45%)"
+      "text": "70% below its peak (max 45%)"
      },
      {
       "ok": true,
@@ -8092,25 +8314,25 @@
      },
      {
       "ok": false,
-      "text": "Not spiking: 1h +138%, 6h -9% (max +100% / +200%)"
+      "text": "Not spiking: 1h +282%, 6h -15% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -9% in 3h"
+      "text": "Liquidity -13% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -14% in 3h"
+      "text": "Market cap -21% in 3h"
      },
      {
       "ok": true,
-      "text": "Holders -0% in 3h"
+      "text": "Holders +5% in 3h"
      }
     ],
     "fast_gates": [
      {
       "ok": true,
-      "text": "4 FOMO traders bought in 2h (needs 3+)"
+      "text": "7 FOMO traders bought in 2h (needs 3+)"
      },
      {
       "ok": true,
@@ -8118,29 +8340,29 @@
      },
      {
       "ok": true,
-      "text": "FOMO buyers 11 vs sellers 6"
+      "text": "FOMO buyers 14 vs sellers 9"
      },
      {
       "ok": false,
-      "text": "67% below its peak (max 45%)"
+      "text": "70% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
      {
       "ok": true,
-      "text": "5 top FOMO trader(s) hold it (bystevenr, nekomayu, surgz), 108 FOMO holders (needs 1+ top trader and 2+ holders)"
+      "text": "5 top FOMO trader(s) hold it (bystevenr, nekomayu, surgz), 110 FOMO holders (needs 1+ top trader and 2+ holders)"
      },
      {
       "ok": true,
-      "text": "Fresh FOMO buying: 11 bought vs 8 sold in 24h, 0 top trader(s) bought in 48h"
+      "text": "Fresh FOMO buying: 14 bought vs 11 sold in 24h, 0 top trader(s) bought in 48h"
      },
      {
       "ok": true,
-      "text": "Not too late: FOMO traders spotted it at $1.60M, now 0.4x (max 2.5x)"
+      "text": "Not too late: FOMO traders spotted it at $1.60M, now 0.3x (max 2.5x)"
      },
      {
       "ok": false,
-      "text": "Not run up yet: 6h -9% (max +100%)"
+      "text": "Not run up yet: 6h -15% (max +100%)"
      },
      {
       "ok": true,
@@ -8148,15 +8370,15 @@
      },
      {
       "ok": true,
-      "text": "Market cap $579k (max $1.00M)"
+      "text": "Market cap $535k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -9% in 3h"
+      "text": "Liquidity -13% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -14% in 3h"
+      "text": "Market cap -21% in 3h"
      }
     ],
     "project_gates": [
@@ -8166,11 +8388,11 @@
      },
      {
       "ok": true,
-      "text": "108 FOMO holder(s), 11 bought vs 8 sold in 24h (needs 1+ holder, not more sellers)"
+      "text": "110 FOMO holder(s), 14 bought vs 11 sold in 24h (needs 1+ holder, not more sellers)"
      },
      {
       "ok": true,
-      "text": "Market cap $579k (max $1.50M)"
+      "text": "Market cap $535k (max $1.50M)"
      },
      {
       "ok": true,
@@ -8178,19 +8400,19 @@
      },
      {
       "ok": false,
-      "text": "Before the spike: 1h +138%, 6h -9% (max +60% / +100%)"
+      "text": "Before the spike: 1h +282%, 6h -15% (max +60% / +100%)"
      },
      {
       "ok": true,
-      "text": "Recovering: +163% from its 24h low $220k (needs +15%)"
+      "text": "Recovering: +143% from its 24h low $220k (needs +15%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -9% in 3h"
+      "text": "Liquidity -13% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -14% in 3h"
+      "text": "Market cap -21% in 3h"
      }
     ],
     "early_gates": [
@@ -8204,23 +8426,23 @@
      },
      {
       "ok": false,
-      "text": "Clean wallets: top10 28%, dev 0.0%, bundles/clusters 4% (max 25/3/8%)"
+      "text": "Clean wallets: top10 20%, dev 0.0%, bundles/clusters 9% (max 25/3/8%)"
      },
      {
       "ok": true,
-      "text": "Deep liquidity $139k = 24% of market cap (needs $40k and 5%)"
+      "text": "Deep liquidity $133k = 25% of market cap (needs $40k and 5%)"
      },
      {
       "ok": true,
-      "text": "Organic demand: ~4457 buyers in 1h, 1.3x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~4920 buyers in 1h, 1.3x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 3078 min, 67% below peak, 1h +138% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 3085 min, 70% below peak, 1h +282% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $579k (max $5.00M)"
+      "text": "Market cap $535k (max $5.00M)"
      }
     ],
     "quality": 3.0,
@@ -8229,27 +8451,27 @@
      "GeckoTerminal score 34",
      "tech theme (launch)"
     ],
-    "buzz": 40,
+    "buzz": 42,
     "fomo": {
-     "buyers_1h": 4,
-     "buyers_2h": 4,
-     "buyers_6h": 11,
-     "buyers_24h": 11,
-     "buyers_7d": 165,
-     "sellers_6h": 6,
-     "sellers_24h": 8,
-     "named_holders": 108,
+     "buyers_1h": 7,
+     "buyers_2h": 7,
+     "buyers_6h": 14,
+     "buyers_24h": 14,
+     "buyers_7d": 167,
+     "sellers_6h": 9,
+     "sellers_24h": 11,
+     "named_holders": 110,
      "good_recent": [],
-     "fresh_buyers": 11,
-     "fresh_sellers": 8,
-     "buy_usd_6h": 39223,
+     "fresh_buyers": 14,
+     "fresh_sellers": 11,
+     "buy_usd_6h": 50723,
      "theses_24h": 2,
      "top_buyers": [
       "AloneSourFlea",
+      "JaredDudley",
       "KINGTOWING1",
       "MuckDuck8",
-      "RaspyDirtyFrog",
-      "finance_ry"
+      "RaspyDirtyFrog"
      ],
      "holders": [
       "0xstanczyk",
@@ -8273,10 +8495,10 @@
       "FiatLuxxx",
       "FloatLaunchpadEnjoyer"
      ],
-     "holders_n": 108,
+     "holders_n": 110,
      "wallets_holding": 0,
-     "onchain_trades": 72,
-     "onchain_span_h": 0.1,
+     "onchain_trades": 0,
+     "onchain_span_h": null,
      "good_holders": [
       "bystevenr",
       "nekomayu",
@@ -8286,9 +8508,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 73.8,
+     "first_seen_h": 73.9,
      "spotted_mcap": 1601696.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 3,
@@ -8299,7 +8521,7 @@
     "socials": {
      "x": "https://x.com/xcv19982/status/2119525061975519623"
     },
-    "checked": 1794436157.843359
+    "checked": 1794436595.7309844
    }
   },
   {
@@ -8527,47 +8749,47 @@
    ],
    "quality": 0,
    "quality_why": [],
-   "now_mcap": 1985056.0,
-   "now_liq": 186378.86,
+   "now_mcap": 1873064.0,
+   "now_liq": 180213.41,
    "live": {
-    "ts": 1794432548.673176,
-    "mcap": 1985056.0,
-    "liq": 186378.86,
-    "price": 0.001985,
+    "ts": 1794436187.141978,
+    "mcap": 1873064.0,
+    "liq": 180213.41,
+    "price": 0.001873,
     "vol": {
-     "m5": 1380.62,
-     "h1": 10733.04,
-     "h6": 93907.42,
-     "h24": 1214585.23
+     "m5": 198.1,
+     "h1": 52543.31,
+     "h6": 129799.92,
+     "h24": 1251462.17
     },
     "pc": {
-     "m5": 1.7,
-     "h1": -0.03,
-     "h6": -5.4,
-     "h24": -25.67
+     "m5": 0.16,
+     "h1": -4.77,
+     "h6": -12.15,
+     "h24": -30.96
     },
-    "buys_h1": 66,
-    "sells_h1": 25,
-    "age_h": 66.26379810479058
+    "buys_h1": 155,
+    "sells_h1": 88,
+    "age_h": 67.27448388326009
    },
    "peak_mcap": 5294874.0,
    "now": {
-    "score": 49.3,
+    "score": 49.4,
     "parts": {
-     "traction": 13.8,
+     "traction": 14.4,
      "holders": 9.5,
      "social": 4.5,
-     "momentum": 2.8,
+     "momentum": 3.0,
      "fomo": 9.0,
-     "staying": 6.2,
+     "staying": 5.5,
      "upside": 3.5
     },
     "why": [
-     "$180k liquidity",
+     "$174k liquidity",
      "73 FOMO traders hold it",
      "top FOMO traders hold: BasedShillBH, Spoily, theslopper",
-     "buyers dominate (1.7x more buys)",
-     "9,142 holders"
+     "buyers dominate (2.2x more buys)",
+     "9,135 holders"
     ],
     "safety": {
      "top10_pct": 6.76,
@@ -8576,9 +8798,9 @@
      "owner_pct": 0.0,
      "cluster_pct": 4.05,
      "insider_pct": 0.0,
-     "contract_pct": 10.0,
+     "contract_pct": 10.2,
      "holder_data_suspect": false,
-     "holders": 9142,
+     "holders": 9135,
      "honeypot": false,
      "buy_tax_pct": 0.0,
      "sell_tax_pct": 0.0,
@@ -8609,11 +8831,11 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 51.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 51.4h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "65% below its peak (max 45%)"
+      "text": "68% below its peak (max 45%)"
      },
      {
       "ok": true,
@@ -8621,15 +8843,15 @@
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -6%, 6h -12% (max +100% / +200%)"
+      "text": "Not spiking: 1h -12%, 6h -24% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -4% in 3h"
+      "text": "Liquidity -7% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -6% in 3h"
+      "text": "Market cap -13% in 3h"
      },
      {
       "ok": true,
@@ -8651,7 +8873,7 @@
      },
      {
       "ok": false,
-      "text": "65% below its peak (max 45%)"
+      "text": "68% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -8665,11 +8887,11 @@
      },
      {
       "ok": true,
-      "text": "Not too late: FOMO traders spotted it at $3.94M, now 0.5x (max 2.5x)"
+      "text": "Not too late: FOMO traders spotted it at $3.94M, now 0.4x (max 2.5x)"
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -12% (max +100%)"
+      "text": "Not run up yet: 6h -24% (max +100%)"
      },
      {
       "ok": true,
@@ -8677,22 +8899,22 @@
      },
      {
       "ok": false,
-      "text": "Market cap $1.87M (max $1.00M)"
+      "text": "Market cap $1.74M (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -4% in 3h"
+      "text": "Liquidity -7% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -6% in 3h"
+      "text": "Market cap -13% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 30,
+    "buzz": 34,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -8744,9 +8966,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 67.1,
+     "first_seen_h": 67.3,
      "spotted_mcap": 3936493.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": {
      "followers": 537,
@@ -8763,7 +8985,7 @@
      "telegram": "https://t.me/awesomebsc",
      "website": "https://xn--nib-9na0w.xyz/"
     },
-    "checked": 1794436157.8547502
+    "checked": 1794436597.9078119
    }
   },
   {
@@ -8948,20 +9170,20 @@
     }
    ],
    "now": {
-    "score": 38.0,
+    "score": 35.9,
     "parts": {
-     "traction": 4.9,
+     "traction": 3.2,
      "holders": 9.2,
      "social": 4.0,
      "momentum": 1.7,
      "fomo": 2.9,
-     "staying": 10.3,
+     "staying": 9.9,
      "upside": 5
     },
     "why": [
-     "$63k liquidity",
+     "$61k liquidity",
      "3 FOMO traders hold it",
-     "2,468 holders"
+     "2,466 holders"
     ],
     "safety": {
      "top10_pct": 10.08,
@@ -8972,7 +9194,7 @@
      "insider_pct": 0.0,
      "contract_pct": 19.8,
      "holder_data_suspect": false,
-     "holders": 2468,
+     "holders": 2466,
      "honeypot": false,
      "buy_tax_pct": 0.0,
      "sell_tax_pct": 0.0,
@@ -9003,31 +9225,31 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 95.7h (needs 3h+)"
+      "text": "Watched by GemRadar for 95.8h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "56% below its peak (max 45%)"
+      "text": "58% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 0.5x the 6h average"
+      "text": "Trading still active: last hour = 0.7x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -2%, 6h -16% (max +100% / +200%)"
+      "text": "Not spiking: 1h -5%, 6h -18% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -2% in 3h"
+      "text": "Liquidity -4% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -5% in 3h"
+      "text": "Market cap -8% in 3h"
      },
      {
       "ok": true,
-      "text": "Holders +0% in 3h"
+      "text": "Holders -0% in 3h"
      }
     ],
     "fast_gates": [
@@ -9045,7 +9267,7 @@
      },
      {
       "ok": false,
-      "text": "56% below its peak (max 45%)"
+      "text": "58% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -9055,7 +9277,7 @@
      },
      {
       "ok": false,
-      "text": "Fresh FOMO buying: 0 bought vs 1 sold in 24h, 0 top trader(s) bought in 48h"
+      "text": "Fresh FOMO buying: 0 bought vs 0 sold in 24h, 0 top trader(s) bought in 48h"
      },
      {
       "ok": true,
@@ -9063,7 +9285,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -16% (max +100%)"
+      "text": "Not run up yet: 6h -18% (max +100%)"
      },
      {
       "ok": true,
@@ -9071,15 +9293,15 @@
      },
      {
       "ok": true,
-      "text": "Market cap $485k (max $1.00M)"
+      "text": "Market cap $468k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -2% in 3h"
+      "text": "Liquidity -4% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -5% in 3h"
+      "text": "Market cap -8% in 3h"
      }
     ],
     "project_gates": [
@@ -9088,12 +9310,12 @@
       "text": "Real project 12/14 (needs 5+): website, X 1,166 followers, made 8d before the coin, GeckoTerminal score 61, on CoinGecko"
      },
      {
-      "ok": false,
-      "text": "3 FOMO holder(s), 0 bought vs 1 sold in 24h (needs 1+ holder, not more sellers)"
+      "ok": true,
+      "text": "3 FOMO holder(s), 0 bought vs 0 sold in 24h (needs 1+ holder, not more sellers)"
      },
      {
       "ok": true,
-      "text": "Market cap $485k (max $1.50M)"
+      "text": "Market cap $468k (max $1.50M)"
      },
      {
       "ok": true,
@@ -9101,19 +9323,19 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h -2%, 6h -16% (max +60% / +100%)"
+      "text": "Before the spike: 1h -5%, 6h -18% (max +60% / +100%)"
      },
      {
       "ok": false,
-      "text": "Recovering: +7% from its 24h low $454k (needs +15%)"
+      "text": "Recovering: +3% from its 24h low $454k (needs +15%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -2% in 3h"
+      "text": "Liquidity -4% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -5% in 3h"
+      "text": "Market cap -8% in 3h"
      }
     ],
     "early_gates": [
@@ -9131,19 +9353,19 @@
      },
      {
       "ok": true,
-      "text": "Deep liquidity $63k = 13% of market cap (needs $40k and 5%)"
+      "text": "Deep liquidity $61k = 13% of market cap (needs $40k and 5%)"
      },
      {
       "ok": false,
-      "text": "Organic demand: ~3 buyers in 1h, 1.0x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~3 buyers in 1h, 0.9x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 5741 min, 56% below peak, 1h -2% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 5749 min, 58% below peak, 1h -5% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $485k (max $5.00M)"
+      "text": "Market cap $468k (max $5.00M)"
      }
     ],
     "quality": 11.5,
@@ -9163,11 +9385,11 @@
      "buyers_24h": 0,
      "buyers_7d": 4,
      "sellers_6h": 0,
-     "sellers_24h": 1,
+     "sellers_24h": 0,
      "named_holders": 3,
      "good_recent": [],
      "fresh_buyers": 0,
-     "fresh_sellers": 1,
+     "fresh_sellers": 0,
      "buy_usd_6h": 0,
      "theses_24h": 0,
      "top_buyers": [],
@@ -9183,9 +9405,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 94.9,
+     "first_seen_h": 95.0,
      "spotted_mcap": 651002.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": {
      "followers": 1166,
@@ -9201,30 +9423,30 @@
      "x": "https://x.com/OakAgentKit",
      "website": "https://oakagentkit.org"
     },
-    "checked": 1794436163.7879534
+    "checked": 1794436609.4685886
    },
-   "now_mcap": 493258.0,
-   "now_liq": 63327.1,
+   "now_mcap": 485069.0,
+   "now_liq": 62747.69,
    "live": {
-    "ts": 1794432548.6731808,
-    "mcap": 493258.0,
-    "liq": 63327.1,
-    "price": 0.0005627,
+    "ts": 1794436187.1419823,
+    "mcap": 485069.0,
+    "liq": 62747.69,
+    "price": 0.0005534,
     "vol": {
-     "m5": 179.96,
-     "h1": 1839.61,
-     "h6": 13967.62,
-     "h24": 66712.49
+     "m5": 10.19,
+     "h1": 1236.83,
+     "h6": 14728.68,
+     "h24": 66111.5
     },
     "pc": {
-     "m5": 0.98,
-     "h1": -5.01,
-     "h6": -12.52,
-     "h24": -5.42
+     "m5": 0.15,
+     "h1": -1.66,
+     "h6": -16.51,
+     "h24": 2.39
     },
     "buys_h1": 6,
-    "sells_h1": 4,
-    "age_h": 232.4951869954427
+    "sells_h1": 6,
+    "age_h": 233.50587277330186
    },
    "peak_mcap": 912096.0
   },
@@ -9408,23 +9630,23 @@
     }
    ],
    "now": {
-    "score": 43.3,
+    "score": 43.9,
     "parts": {
-     "traction": 10.4,
+     "traction": 10.3,
      "holders": 8.2,
      "social": 2.9,
-     "momentum": 1.8,
+     "momentum": 2.0,
      "fomo": 4.3,
-     "staying": 13.7,
+     "staying": 14.2,
      "upside": 5
     },
     "why": [
-     "$86k liquidity",
+     "$88k liquidity",
      "holding up after 6d",
      "2 FOMO traders hold it",
      "top FOMO traders hold: gtsb",
-     "buyers dominate (1.1x more buys)",
-     "6,531 holders"
+     "buyers dominate (1.4x more buys)",
+     "6,526 holders"
     ],
     "safety": {
      "top10_pct": 17.58,
@@ -9433,7 +9655,7 @@
      "insider_pct": 6.24,
      "insider_networks": 76,
      "cluster_pct": 2.92,
-     "holders": 6531,
+     "holders": 6526,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -9456,11 +9678,11 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 97.9h (needs 3h+)"
+      "text": "Watched by GemRadar for 98.0h (needs 3h+)"
      },
      {
       "ok": true,
-      "text": "18% below its peak (max 45%)"
+      "text": "16% below its peak (max 45%)"
      },
      {
       "ok": true,
@@ -9468,15 +9690,15 @@
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -4%, 6h -5% (max +100% / +200%)"
+      "text": "Not spiking: 1h -2%, 6h -2% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -5% in 3h"
+      "text": "Liquidity -3% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -9% in 3h"
+      "text": "Market cap -6% in 3h"
      },
      {
       "ok": true,
@@ -9498,7 +9720,7 @@
      },
      {
       "ok": true,
-      "text": "18% below its peak (max 45%)"
+      "text": "16% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -9516,7 +9738,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -5% (max +100%)"
+      "text": "Not run up yet: 6h -2% (max +100%)"
      },
      {
       "ok": true,
@@ -9524,22 +9746,22 @@
      },
      {
       "ok": true,
-      "text": "Market cap $693k (max $1.00M)"
+      "text": "Market cap $713k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -5% in 3h"
+      "text": "Liquidity -3% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -9% in 3h"
+      "text": "Market cap -6% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 5,
+    "buzz": 9,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -9568,9 +9790,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 98.1,
+     "first_seen_h": 98.3,
      "spotted_mcap": 683642.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 0,
@@ -9582,30 +9804,30 @@
      "x": "https://x.com/RockstarGames/status/2118357919229964343",
      "website": "https://www.rockstargames.com/VI/media/screenshots"
     },
-    "checked": 1794436152.7483778
+    "checked": 1794436595.703018
    },
-   "now_mcap": 725276.0,
-   "now_liq": 88396.07,
+   "now_mcap": 698930.0,
+   "now_liq": 86843.59,
    "live": {
-    "ts": 1794432548.673187,
-    "mcap": 725276.0,
-    "liq": 88396.07,
-    "price": 0.0007439,
+    "ts": 1794436187.1419864,
+    "mcap": 698930.0,
+    "liq": 86843.59,
+    "price": 0.0007169,
     "vol": {
-     "m5": 187.76,
-     "h1": 13421.8,
-     "h6": 88557.09,
-     "h24": 289268.29
+     "m5": 1660.54,
+     "h1": 16530.65,
+     "h6": 94870.25,
+     "h24": 271328.81
     },
     "pc": {
-     "m5": -2.16,
-     "h1": -7.36,
-     "h6": 3.55,
-     "h24": -1.92
+     "m5": -1.79,
+     "h1": -3.58,
+     "h6": -4.11,
+     "h24": 4.39
     },
-    "buys_h1": 66,
-    "sells_h1": 65,
-    "age_h": 150.39268699720594
+    "buys_h1": 79,
+    "sells_h1": 67,
+    "age_h": 151.40337277452258
    },
    "peak_mcap": 843753.0
   },
@@ -9799,22 +10021,23 @@
     }
    ],
    "now": {
-    "score": 48.9,
+    "score": 50.3,
     "parts": {
-     "traction": 12.1,
-     "holders": 10.0,
+     "traction": 13.3,
+     "holders": 9.9,
      "social": 5.1,
-     "momentum": 2.2,
+     "momentum": 2.7,
      "fomo": 5.1,
-     "staying": 10.9,
+     "staying": 10.7,
      "upside": 3.5
     },
     "why": [
-     "$291k liquidity",
+     "$289k liquidity",
      "6 FOMO traders hold it",
      "1 FOMO thesis posts",
+     "buyers dominate (1.8x more buys)",
      "X 7,515 followers",
-     "7,204 holders"
+     "7,193 holders"
     ],
     "safety": {
      "top10_pct": 5.56,
@@ -9825,7 +10048,7 @@
      "insider_pct": 0.0,
      "contract_pct": 8.9,
      "holder_data_suspect": false,
-     "holders": 7204,
+     "holders": 7193,
      "honeypot": false,
      "buy_tax_pct": 0.0,
      "sell_tax_pct": 0.0,
@@ -9856,27 +10079,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 86.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 86.4h (needs 3h+)"
      },
      {
       "ok": true,
-      "text": "34% below its peak (max 45%)"
+      "text": "35% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 0.5x the 6h average"
+      "text": "Trading still active: last hour = 0.9x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -5%, 6h -6% (max +100% / +200%)"
+      "text": "Not spiking: 1h -5%, 6h -4% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -1% in 3h"
+      "text": "Liquidity -2% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -3% in 3h"
+      "text": "Market cap -4% in 3h"
      },
      {
       "ok": true,
@@ -9898,7 +10121,7 @@
      },
      {
       "ok": true,
-      "text": "34% below its peak (max 45%)"
+      "text": "35% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -9916,7 +10139,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -6% (max +100%)"
+      "text": "Not run up yet: 6h -4% (max +100%)"
      },
      {
       "ok": false,
@@ -9924,22 +10147,22 @@
      },
      {
       "ok": false,
-      "text": "Market cap $4.19M (max $1.00M)"
+      "text": "Market cap $4.14M (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -1% in 3h"
+      "text": "Liquidity -2% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -3% in 3h"
+      "text": "Market cap -4% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 16,
+    "buzz": 28,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -9970,9 +10193,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 88.7,
+     "first_seen_h": 88.8,
      "spotted_mcap": 3547732.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": {
      "followers": 7515,
@@ -9988,30 +10211,30 @@
      "x": "https://x.com/gangdotfun",
      "website": "https://gang.fun"
     },
-    "checked": 1794436157.7690842
+    "checked": 1794436595.7218482
    },
-   "now_mcap": 4394244.0,
-   "now_liq": 297996.66,
+   "now_mcap": 4189566.0,
+   "now_liq": 290588.32,
    "live": {
-    "ts": 1794432548.6731923,
-    "mcap": 4394244.0,
-    "liq": 297996.66,
-    "price": 0.00444,
+    "ts": 1794436187.1419907,
+    "mcap": 4189566.0,
+    "liq": 290588.32,
+    "price": 0.004233,
     "vol": {
-     "m5": 480.44,
-     "h1": 3963.76,
-     "h6": 87476.4,
-     "h24": 1619259.47
+     "m5": 299.93,
+     "h1": 4479.99,
+     "h6": 52407.81,
+     "h24": 1614801.15
     },
     "pc": {
-     "m5": 0.23,
-     "h1": 3.26,
-     "h6": -3.15,
-     "h24": -1.97
+     "m5": -0.3,
+     "h1": -3.77,
+     "h6": -6.42,
+     "h24": -9.68
     },
-    "buys_h1": 28,
-    "sells_h1": 28,
-    "age_h": 491.5282425537109
+    "buys_h1": 33,
+    "sells_h1": 30,
+    "age_h": 492.5389283310954
    },
    "peak_mcap": 6406769.0
   },
@@ -10175,20 +10398,20 @@
     }
    ],
    "now": {
-    "score": 55.4,
+    "score": 54.4,
     "parts": {
-     "traction": 18.4,
+     "traction": 18.2,
      "holders": 10.6,
      "social": 4.3,
-     "momentum": 2.7,
+     "momentum": 2.6,
      "fomo": 15.0,
-     "staying": 8.9,
+     "staying": 8.2,
      "upside": 3.5
     },
     "why": [
-     "$208k liquidity",
+     "$199k liquidity",
      "21 FOMO traders bought (404flipped, EarlyCuteFowl, JaredDudley)",
-     "56 FOMO traders hold it",
+     "54 FOMO traders hold it",
      "top FOMO traders hold: Boltz, lightningrat",
      "7 FOMO thesis posts",
      "trending on GeckoTerminal"
@@ -10223,27 +10446,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 86.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 86.4h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "85% below its peak (max 45%)"
+      "text": "87% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.2x the 6h average"
+      "text": "Trading still active: last hour = 0.5x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -22%, 6h -55% (max +100% / +200%)"
+      "text": "Not spiking: 1h -10%, 6h -57% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -15% in 3h"
+      "text": "Liquidity -19% in 3h"
      },
      {
-      "ok": true,
-      "text": "Market cap -29% in 3h"
+      "ok": false,
+      "text": "Market cap -35% in 3h"
      },
      {
       "ok": true,
@@ -10260,22 +10483,22 @@
       "text": "Age 31d (needs 20m+)"
      },
      {
-      "ok": true,
-      "text": "FOMO buyers 21 vs sellers 21"
+      "ok": false,
+      "text": "FOMO buyers 21 vs sellers 23"
      },
      {
       "ok": false,
-      "text": "85% below its peak (max 45%)"
+      "text": "87% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
      {
       "ok": true,
-      "text": "2 top FOMO trader(s) hold it (Boltz, lightningrat), 56 FOMO holders (needs 1+ top trader and 2+ holders)"
+      "text": "2 top FOMO trader(s) hold it (Boltz, lightningrat), 54 FOMO holders (needs 1+ top trader and 2+ holders)"
      },
      {
       "ok": false,
-      "text": "Fresh FOMO buying: 49 bought vs 63 sold in 24h, 4 top trader(s) bought in 48h"
+      "text": "Fresh FOMO buying: 49 bought vs 65 sold in 24h, 4 top trader(s) bought in 48h"
      },
      {
       "ok": true,
@@ -10283,7 +10506,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -55% (max +100%)"
+      "text": "Not run up yet: 6h -57% (max +100%)"
      },
      {
       "ok": false,
@@ -10291,31 +10514,97 @@
      },
      {
       "ok": false,
-      "text": "Market cap $1.50M (max $1.00M)"
+      "text": "Market cap $1.36M (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -15% in 3h"
+      "text": "Liquidity -19% in 3h"
      },
      {
-      "ok": true,
-      "text": "Market cap -29% in 3h"
+      "ok": false,
+      "text": "Market cap -35% in 3h"
      }
     ],
-    "project_gates": null,
-    "early_gates": null,
-    "quality": 0,
-    "quality_why": [],
-    "buzz": 28,
+    "project_gates": [
+     {
+      "ok": false,
+      "text": "Real project 4/14 (needs 5+): website, GeckoTerminal score 89, on CoinGecko"
+     },
+     {
+      "ok": false,
+      "text": "54 FOMO holder(s), 49 bought vs 65 sold in 24h (needs 1+ holder, not more sellers)"
+     },
+     {
+      "ok": true,
+      "text": "Market cap $1.36M (max $1.50M)"
+     },
+     {
+      "ok": false,
+      "text": "Age 31d (3h to 30d)"
+     },
+     {
+      "ok": true,
+      "text": "Before the spike: 1h -10%, 6h -57% (max +60% / +100%)"
+     },
+     {
+      "ok": false,
+      "text": "Recovering: -9% from its 24h low $1.50M (needs +15%)"
+     },
+     {
+      "ok": true,
+      "text": "Liquidity -19% in 3h"
+     },
+     {
+      "ok": false,
+      "text": "Market cap -35% in 3h"
+     }
+    ],
+    "early_gates": [
+     {
+      "ok": false,
+      "text": "Age 31d (1h to 6h)"
+     },
+     {
+      "ok": false,
+      "text": "Real project 4/14 (needs 6+)"
+     },
+     {
+      "ok": false,
+      "text": "Clean wallets: top10 16%, dev 0.0%, bundles/clusters 17% (max 25/3/8%)"
+     },
+     {
+      "ok": true,
+      "text": "Deep liquidity $199k = 15% of market cap (needs $40k and 5%)"
+     },
+     {
+      "ok": false,
+      "text": "Organic demand: ~498 buyers in 1h, 1.0x more buys than sells (needs 100+ buyers, 1-3x)"
+     },
+     {
+      "ok": false,
+      "text": "Holding its gains: watched 5186 min, 87% below peak, 1h -10% (needs 30+ min, max 30% below, max +150%)"
+     },
+     {
+      "ok": true,
+      "text": "Market cap $1.36M (max $5.00M)"
+     }
+    ],
+    "quality": 4.5,
+    "quality_why": [
+     "website",
+     "GeckoTerminal score 89",
+     "on CoinGecko"
+    ],
+    "buzz": 24,
     "fomo": {
-     "buyers_1h": 5,
+     "buyers_1h": 2,
      "buyers_2h": 5,
      "buyers_6h": 21,
      "buyers_24h": 49,
      "buyers_7d": 87,
-     "sellers_6h": 21,
-     "sellers_24h": 63,
-     "named_holders": 56,
+     "sellers_6h": 23,
+     "sellers_24h": 65,
+     "named_holders": 54,
      "good_recent": [
       "Boltz",
       "gtsb",
@@ -10323,7 +10612,7 @@
       "xbox360npc"
      ],
      "fresh_buyers": 49,
-     "fresh_sellers": 63,
+     "fresh_sellers": 65,
      "buy_usd_6h": 133647,
      "theses_24h": 7,
      "top_buyers": [
@@ -10355,7 +10644,7 @@
       "Seba_swing",
       "Slogi_Eth"
      ],
-     "holders_n": 56,
+     "holders_n": 54,
      "wallets_holding": 0,
      "onchain_trades": 0,
      "onchain_span_h": null,
@@ -10365,9 +10654,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 98.0,
+     "first_seen_h": 98.1,
      "spotted_mcap": 7519848.0,
-     "spotted_h": 51.2
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 0,
@@ -10379,30 +10668,30 @@
      "x": "https://x.com/i/communities/1997065943319826867",
      "website": "https://finance.yahoo.com/markets/crypto/articles/gta-6-trailer-features-dacity-131604628.html"
     },
-    "checked": 1794436167.1091058
+    "checked": 1794436609.5296588
    },
-   "now_mcap": 1959618.0,
-   "now_liq": 237316.11,
+   "now_mcap": 1438289.0,
+   "now_liq": 203874.24,
    "live": {
-    "ts": 1794432548.673197,
-    "mcap": 1959618.0,
-    "liq": 237316.11,
-    "price": 0.001996,
+    "ts": 1794436187.1419942,
+    "mcap": 1438289.0,
+    "liq": 203874.24,
+    "price": 0.001465,
     "vol": {
-     "m5": 7734.65,
-     "h1": 98342.08,
-     "h6": 2150337.45,
-     "h24": 7108084.22
+     "m5": 4636.18,
+     "h1": 350093.58,
+     "h6": 1994303.17,
+     "h24": 7457024.13
     },
     "pc": {
-     "m5": -0.93,
-     "h1": -13.01,
-     "h6": -30.9,
-     "h24": -72.98
+     "m5": -2.64,
+     "h1": -9.92,
+     "h6": -55.56,
+     "h24": -80.0
     },
-    "buys_h1": 503,
-    "sells_h1": 456,
-    "age_h": 754.2026870000542
+    "buys_h1": 1148,
+    "sells_h1": 1257,
+    "age_h": 755.2133727766927
    },
    "peak_mcap": 10223845.0
   },
@@ -10565,21 +10854,21 @@
     }
    ],
    "now": {
-    "score": 50.6,
+    "score": 51.6,
     "parts": {
-     "traction": 14.3,
-     "holders": 10.5,
+     "traction": 13.7,
+     "holders": 10.6,
      "social": 2.9,
-     "momentum": 1.7,
+     "momentum": 3.1,
      "fomo": 9.0,
-     "staying": 8.7,
+     "staying": 8.8,
      "upside": 3.5
     },
     "why": [
-     "$87k liquidity",
+     "$86k liquidity",
      "4 FOMO traders bought (Aurelius0121, Richi3Rich, grittzzy)",
      "29 FOMO traders hold it",
-     "12,678 holders"
+     "12,730 holders"
     ],
     "safety": {
      "top10_pct": 17.87,
@@ -10588,7 +10877,7 @@
      "insider_pct": 0,
      "insider_networks": 0,
      "cluster_pct": 0.0,
-     "holders": 12678,
+     "holders": 12730,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -10609,7 +10898,7 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 97.6h (needs 3h+)"
+      "text": "Watched by GemRadar for 97.7h (needs 3h+)"
      },
      {
       "ok": false,
@@ -10617,11 +10906,11 @@
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 2.4x the 6h average"
+      "text": "Trading still active: last hour = 2.0x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -32%, 6h -29% (max +100% / +200%)"
+      "text": "Not spiking: 1h -23%, 6h -30% (max +100% / +200%)"
      },
      {
       "ok": true,
@@ -10647,7 +10936,7 @@
      },
      {
       "ok": false,
-      "text": "FOMO buyers 4 vs sellers 5"
+      "text": "FOMO buyers 4 vs sellers 7"
      },
      {
       "ok": false,
@@ -10660,8 +10949,8 @@
       "text": "0 top FOMO trader(s) hold it, 29 FOMO holders (needs 1+ top trader and 2+ holders)"
      },
      {
-      "ok": true,
-      "text": "Fresh FOMO buying: 12 bought vs 9 sold in 24h, 1 top trader(s) bought in 48h"
+      "ok": false,
+      "text": "Fresh FOMO buying: 11 bought vs 11 sold in 24h, 1 top trader(s) bought in 48h"
      },
      {
       "ok": true,
@@ -10669,7 +10958,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -29% (max +100%)"
+      "text": "Not run up yet: 6h -30% (max +100%)"
      },
      {
       "ok": true,
@@ -10692,21 +10981,21 @@
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 43,
+    "buzz": 38,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
      "buyers_6h": 4,
-     "buyers_24h": 12,
+     "buyers_24h": 11,
      "buyers_7d": 43,
-     "sellers_6h": 5,
-     "sellers_24h": 9,
+     "sellers_6h": 7,
+     "sellers_24h": 11,
      "named_holders": 29,
      "good_recent": [
       "okuracrypto"
      ],
-     "fresh_buyers": 12,
-     "fresh_sellers": 9,
+     "fresh_buyers": 11,
+     "fresh_sellers": 11,
      "buy_usd_6h": 15147,
      "theses_24h": 0,
      "top_buyers": [
@@ -10744,9 +11033,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 98.2,
+     "first_seen_h": 98.3,
      "spotted_mcap": 2863276.0,
-     "spotted_h": 51.2
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 0,
@@ -10758,30 +11047,30 @@
      "x": "https://x.com/stankonsf",
      "telegram": "https://t.me/fartstank"
     },
-    "checked": 1794436157.8574805
+    "checked": 1794436597.9075413
    },
-   "now_mcap": 3225614.0,
-   "now_liq": 106728.88,
+   "now_mcap": 2184936.0,
+   "now_liq": 86169.29,
    "live": {
-    "ts": 1794432548.6732037,
-    "mcap": 3225614.0,
-    "liq": 106728.88,
-    "price": 0.003225,
+    "ts": 1794436187.1419985,
+    "mcap": 2184936.0,
+    "liq": 86169.29,
+    "price": 0.002184,
     "vol": {
-     "m5": 4545.57,
-     "h1": 37645.24,
-     "h6": 175959.26,
-     "h24": 862804.47
+     "m5": 9461.02,
+     "h1": 100026.3,
+     "h6": 247928.87,
+     "h24": 882071.16
     },
     "pc": {
-     "m5": -0.2,
-     "h1": 3.83,
-     "h6": -8.34,
-     "h24": -40.46
+     "m5": -12.35,
+     "h1": -30.99,
+     "h6": -30.39,
+     "h24": -60.21
     },
-    "buys_h1": 275,
-    "sells_h1": 325,
-    "age_h": 319.5387981128608
+    "buys_h1": 429,
+    "sells_h1": 457,
+    "age_h": 320.54948388909236
    },
    "peak_mcap": 5585403.0
   },
@@ -10971,45 +11260,45 @@
      "text": "Liquidity -18% in 3h"
     }
    ],
-   "now_mcap": 335719.0,
-   "now_liq": 35936.65,
+   "now_mcap": 339755.0,
+   "now_liq": 36476.42,
    "live": {
-    "ts": 1794432548.6732097,
-    "mcap": 335719.0,
-    "liq": 35936.65,
-    "price": 0.0003357,
+    "ts": 1794436187.142003,
+    "mcap": 339755.0,
+    "liq": 36476.42,
+    "price": 0.0003397,
     "vol": {
-     "m5": 132.25,
-     "h1": 1832.15,
-     "h6": 4662.63,
-     "h24": 31574.27
+     "m5": 0.0,
+     "h1": 3020.5,
+     "h6": 6211.92,
+     "h24": 31013.16
     },
     "pc": {
-     "m5": 0.81,
-     "h1": -12.49,
-     "h6": -26.15,
-     "h24": 37.61
+     "m5": 0.0,
+     "h1": 1.2,
+     "h6": -18.38,
+     "h24": 16.82
     },
-    "buys_h1": 2,
-    "sells_h1": 13,
-    "age_h": 434.068242558865
+    "buys_h1": 18,
+    "sells_h1": 9,
+    "age_h": 435.0789283346219
    },
    "peak_mcap": 503051.0,
    "now": {
-    "score": 39.9,
+    "score": 39.8,
     "parts": {
      "traction": 5.7,
      "holders": 6.4,
      "social": 2.9,
      "momentum": 3.2,
      "fomo": 7.0,
-     "staying": 9.7,
+     "staying": 9.6,
      "upside": 5
     },
     "why": [
      "18 FOMO traders hold it",
      "top FOMO traders hold: prevaile",
-     "buyers dominate (2.0x more buys)",
+     "buyers dominate (2.2x more buys)",
      "661 holders"
     ],
     "safety": {
@@ -11052,27 +11341,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 86.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 86.4h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "58% below its peak (max 45%)"
+      "text": "59% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 2.9x the 6h average"
+      "text": "Trading still active: last hour = 3.0x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h +1%, 6h -18% (max +100% / +200%)"
+      "text": "Not spiking: 1h +0%, 6h -19% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -8% in 3h"
+      "text": "Liquidity -9% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -15% in 3h"
+      "text": "Market cap -16% in 3h"
      },
      {
       "ok": true,
@@ -11094,7 +11383,7 @@
      },
      {
       "ok": false,
-      "text": "58% below its peak (max 45%)"
+      "text": "59% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -11112,7 +11401,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -18% (max +100%)"
+      "text": "Not run up yet: 6h -19% (max +100%)"
      },
      {
       "ok": false,
@@ -11120,15 +11409,15 @@
      },
      {
       "ok": true,
-      "text": "Market cap $340k (max $1.00M)"
+      "text": "Market cap $337k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -8% in 3h"
+      "text": "Liquidity -9% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -15% in 3h"
+      "text": "Market cap -16% in 3h"
      }
     ],
     "project_gates": [
@@ -11142,7 +11431,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $340k (max $1.50M)"
+      "text": "Market cap $337k (max $1.50M)"
      },
      {
       "ok": true,
@@ -11150,19 +11439,19 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h +1%, 6h -18% (max +60% / +100%)"
+      "text": "Before the spike: 1h +0%, 6h -19% (max +60% / +100%)"
      },
      {
       "ok": true,
-      "text": "Recovering: +19% from its 24h low $285k (needs +15%)"
+      "text": "Recovering: +18% from its 24h low $285k (needs +15%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -8% in 3h"
+      "text": "Liquidity -9% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -15% in 3h"
+      "text": "Market cap -16% in 3h"
      }
     ],
     "early_gates": [
@@ -11184,15 +11473,15 @@
      },
      {
       "ok": false,
-      "text": "Organic demand: ~9 buyers in 1h, 2.0x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~11 buyers in 1h, 2.2x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 5178 min, 58% below peak, 1h +1% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 5185 min, 59% below peak, 1h +0% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $340k (max $5.00M)"
+      "text": "Market cap $337k (max $5.00M)"
      }
     ],
     "quality": 4.5,
@@ -11247,9 +11536,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 96.9,
+     "first_seen_h": 97.0,
      "spotted_mcap": 202403.0,
-     "spotted_h": 51.2
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 0,
@@ -11261,7 +11550,7 @@
      "x": "https://x.com/GlobalCoinRH",
      "website": "https://globalcoin.online/"
     },
-    "checked": 1794436162.0778444
+    "checked": 1794436609.4384372
    }
   },
   {
@@ -11425,57 +11714,57 @@
      "text": "Liquidity +1% in 3h"
     }
    ],
-   "now_mcap": 688376.0,
-   "now_liq": 74158.98,
+   "now_mcap": 601381.0,
+   "now_liq": 69118.49,
    "live": {
-    "ts": 1794432548.6732154,
-    "mcap": 688376.0,
-    "liq": 74158.98,
-    "price": 0.0006931,
+    "ts": 1794436187.1420076,
+    "mcap": 601381.0,
+    "liq": 69118.49,
+    "price": 0.0006055,
     "vol": {
-     "m5": 356.67,
-     "h1": 7150.2,
-     "h6": 58279.91,
-     "h24": 431300.31
+     "m5": 1300.85,
+     "h1": 16612.26,
+     "h6": 67999.86,
+     "h24": 425133.39
     },
     "pc": {
-     "m5": -0.04,
-     "h1": 8.05,
-     "h6": 7.63,
-     "h24": -19.51
+     "m5": -3.13,
+     "h1": -11.78,
+     "h6": -9.65,
+     "h24": -34.99
     },
-    "buys_h1": 56,
-    "sells_h1": 40,
-    "age_h": 150.4099092271593
+    "buys_h1": 156,
+    "sells_h1": 93,
+    "age_h": 151.42059500250923
    },
    "peak_mcap": 1094228.0,
    "now": {
-    "score": 48.7,
+    "score": 48.3,
     "parts": {
-     "traction": 11.2,
+     "traction": 11.3,
      "holders": 8.8,
      "social": 4.9,
-     "momentum": 3.0,
+     "momentum": 3.1,
      "fomo": 4.4,
-     "staying": 11.4,
+     "staying": 10.8,
      "upside": 5
     },
     "why": [
-     "$70k liquidity",
+     "$69k liquidity",
      "4 FOMO traders hold it",
      "1 FOMO thesis posts",
-     "buyers dominate (1.6x more buys)",
+     "buyers dominate (1.7x more buys)",
      "X 2,343 followers",
      "1 mentions on 4chan /biz/"
     ],
     "safety": {
-     "top10_pct": 23.5,
+     "top10_pct": 23.43,
      "max_holder_pct": 9.76,
      "creator_pct": 0.0,
      "insider_pct": 0,
      "insider_networks": 0,
-     "cluster_pct": 3.99,
-     "holders": 5016,
+     "cluster_pct": 3.98,
+     "holders": 4999,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -11496,30 +11785,30 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 97.7h (needs 3h+)"
+      "text": "Watched by GemRadar for 97.8h (needs 3h+)"
+     },
+     {
+      "ok": false,
+      "text": "46% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "44% below its peak (max 45%)"
+      "text": "Trading still active: last hour = 1.6x the 6h average"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.4x the 6h average"
+      "text": "Not spiking: 1h -8%, 6h -15% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -10%, 6h -7% (max +100% / +200%)"
+      "text": "Liquidity -5% in 3h"
      },
      {
       "ok": true,
-      "text": "Liquidity -3% in 3h"
+      "text": "Market cap -9% in 3h"
      },
      {
-      "ok": true,
-      "text": "Market cap -5% in 3h"
-     },
-     {
-      "ok": true,
+      "ok": false,
       "text": "Holders -1% in 3h"
      }
     ],
@@ -11537,8 +11826,8 @@
       "text": "FOMO buyers 0 vs sellers 0"
      },
      {
-      "ok": true,
-      "text": "44% below its peak (max 45%)"
+      "ok": false,
+      "text": "46% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -11556,7 +11845,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -7% (max +100%)"
+      "text": "Not run up yet: 6h -15% (max +100%)"
      },
      {
       "ok": true,
@@ -11564,22 +11853,22 @@
      },
      {
       "ok": true,
-      "text": "Market cap $620k (max $1.00M)"
+      "text": "Market cap $600k (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -3% in 3h"
+      "text": "Liquidity -5% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -5% in 3h"
+      "text": "Market cap -9% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 35,
+    "buzz": 38,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -11608,9 +11897,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 96.5,
+     "first_seen_h": 96.6,
      "spotted_mcap": 864094.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": {
      "followers": 2343,
@@ -11626,7 +11915,7 @@
      "x": "https://x.com/solwealthcoin",
      "website": "https://wealthcoinsol.com/"
     },
-    "checked": 1794436155.8315885
+    "checked": 1794436595.7244966
    }
   },
   {
@@ -11777,46 +12066,46 @@
      "text": "0% below its peak (max 45%)"
     }
    ],
-   "now_mcap": 1273206.0,
-   "now_liq": 116754.62,
+   "now_mcap": 1195862.0,
+   "now_liq": 112994.11,
    "live": {
-    "ts": 1794432548.6732213,
-    "mcap": 1273206.0,
-    "liq": 116754.62,
-    "price": 0.001287,
+    "ts": 1794436187.1420116,
+    "mcap": 1195862.0,
+    "liq": 112994.11,
+    "price": 0.001209,
     "vol": {
-     "m5": 1366.48,
-     "h1": 10493.55,
-     "h6": 46734.66,
-     "h24": 265144.8
+     "m5": 1953.0,
+     "h1": 20846.64,
+     "h6": 59475.74,
+     "h24": 277093.19
     },
     "pc": {
-     "m5": -1.06,
-     "h1": 3.28,
-     "h6": 2.63,
-     "h24": -18.38
+     "m5": -3.99,
+     "h1": -1.91,
+     "h6": -8.03,
+     "h24": -22.15
     },
-    "buys_h1": 64,
-    "sells_h1": 43,
-    "age_h": 506.6565758955892
+    "buys_h1": 91,
+    "sells_h1": 89,
+    "age_h": 507.6672616703288
    },
    "peak_mcap": 2828243.0,
    "now": {
-    "score": 38.9,
+    "score": 38.8,
     "parts": {
-     "traction": 9.3,
+     "traction": 9.1,
      "holders": 9.1,
      "social": 3.8,
-     "momentum": 2.5,
+     "momentum": 2.4,
      "fomo": 6.0,
-     "staying": 10.7,
+     "staying": 10.9,
      "upside": 3.5
     },
     "why": [
-     "$113k liquidity",
+     "$114k liquidity",
      "21 FOMO traders hold it",
      "1 FOMO thesis posts",
-     "23,232 holders"
+     "23,229 holders"
     ],
     "safety": {
      "top10_pct": 20.39,
@@ -11825,7 +12114,7 @@
      "insider_pct": 2.02,
      "insider_networks": 78,
      "cluster_pct": 8.57,
-     "holders": 23232,
+     "holders": 23229,
      "mint_authority": false,
      "freeze_authority": false,
      "transfer_fee_pct": 0.0,
@@ -11848,27 +12137,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 86.3h (needs 3h+)"
+      "text": "Watched by GemRadar for 86.4h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "60% below its peak (max 45%)"
+      "text": "59% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 2.1x the 6h average"
+      "text": "Trading still active: last hour = 1.9x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -2%, 6h -8% (max +100% / +200%)"
+      "text": "Not spiking: 1h -3%, 6h -2% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -4% in 3h"
+      "text": "Liquidity -3% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -8% in 3h"
+      "text": "Market cap -5% in 3h"
      },
      {
       "ok": true,
@@ -11890,7 +12179,7 @@
      },
      {
       "ok": false,
-      "text": "60% below its peak (max 45%)"
+      "text": "59% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -11908,7 +12197,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -8% (max +100%)"
+      "text": "Not run up yet: 6h -2% (max +100%)"
      },
      {
       "ok": false,
@@ -11916,15 +12205,15 @@
      },
      {
       "ok": false,
-      "text": "Market cap $1.19M (max $1.00M)"
+      "text": "Market cap $1.23M (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -4% in 3h"
+      "text": "Liquidity -3% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -8% in 3h"
+      "text": "Market cap -5% in 3h"
      }
     ],
     "project_gates": [
@@ -11938,7 +12227,7 @@
      },
      {
       "ok": true,
-      "text": "Market cap $1.19M (max $1.50M)"
+      "text": "Market cap $1.23M (max $1.50M)"
      },
      {
       "ok": true,
@@ -11946,19 +12235,19 @@
      },
      {
       "ok": true,
-      "text": "Before the spike: 1h -2%, 6h -8% (max +60% / +100%)"
+      "text": "Before the spike: 1h -3%, 6h -2% (max +60% / +100%)"
      },
      {
       "ok": false,
-      "text": "Recovering: +0% from its 24h low $1.19M (needs +15%)"
+      "text": "Recovering: +3% from its 24h low $1.19M (needs +15%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -4% in 3h"
+      "text": "Liquidity -3% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap -8% in 3h"
+      "text": "Market cap -5% in 3h"
      }
     ],
     "early_gates": [
@@ -11976,19 +12265,19 @@
      },
      {
       "ok": true,
-      "text": "Deep liquidity $113k = 9% of market cap (needs $40k and 5%)"
+      "text": "Deep liquidity $114k = 9% of market cap (needs $40k and 5%)"
      },
      {
       "ok": false,
-      "text": "Organic demand: ~45 buyers in 1h, 1.0x more buys than sells (needs 100+ buyers, 1-3x)"
+      "text": "Organic demand: ~42 buyers in 1h, 1.0x more buys than sells (needs 100+ buyers, 1-3x)"
      },
      {
       "ok": false,
-      "text": "Holding its gains: watched 5178 min, 60% below peak, 1h -2% (needs 30+ min, max 30% below, max +150%)"
+      "text": "Holding its gains: watched 5185 min, 59% below peak, 1h -3% (needs 30+ min, max 30% below, max +150%)"
      },
      {
       "ok": true,
-      "text": "Market cap $1.19M (max $5.00M)"
+      "text": "Market cap $1.23M (max $5.00M)"
      }
     ],
     "quality": 3.0,
@@ -11997,7 +12286,7 @@
      "GeckoTerminal score 54",
      "on CoinGecko"
     ],
-    "buzz": 23,
+    "buzz": 20,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -12042,9 +12331,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 98.2,
+     "first_seen_h": 98.4,
      "spotted_mcap": 1477672.0,
-     "spotted_h": 51.2
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 0,
@@ -12059,7 +12348,7 @@
      "instagram": "https://www.instagram.com/chootherescue/",
      "website": "https://www.chootherescue.com/"
     },
-    "checked": 1794436157.860243
+    "checked": 1794436597.9213943
    }
   },
   {
@@ -12143,43 +12432,43 @@
      "text": "Holders +18% in 3h"
     }
    ],
-   "now_mcap": 1639772.0,
-   "now_liq": 1212545.38,
+   "now_mcap": 1464723.0,
+   "now_liq": 1093089.03,
    "peak_mcap": 15215669.0,
    "live": {
-    "ts": 1794432548.6732278,
-    "mcap": 1639772.0,
-    "liq": 1212545.38,
-    "price": 0.001653,
+    "ts": 1794436187.1420157,
+    "mcap": 1464723.0,
+    "liq": 1093089.03,
+    "price": 0.001476,
     "vol": {
-     "m5": 86.66,
-     "h1": 3809.01,
-     "h6": 61023.81,
-     "h24": 214871.98
+     "m5": 259.6,
+     "h1": 11659.81,
+     "h6": 43983.89,
+     "h24": 221533.73
     },
     "pc": {
-     "m5": 0.41,
-     "h1": 10.21,
-     "h6": 0.61,
-     "h24": -47.41
+     "m5": -1.14,
+     "h1": -10.68,
+     "h6": -20.52,
+     "h24": -54.65
     },
-    "buys_h1": 21,
-    "sells_h1": 20,
-    "age_h": 388.442131452908
+    "buys_h1": 32,
+    "sells_h1": 40,
+    "age_h": 389.4528172270372
    },
    "now": {
-    "score": 44.8,
+    "score": 44.3,
     "parts": {
-     "traction": 6.4,
+     "traction": 5.9,
      "holders": 8.8,
      "social": 6.2,
-     "momentum": 2.8,
+     "momentum": 2.7,
      "fomo": 6.7,
-     "staying": 10.4,
+     "staying": 10.5,
      "upside": 3.5
     },
     "why": [
-     "$1093k liquidity",
+     "$1102k liquidity",
      "10 FOMO traders hold it",
      "trending on GeckoTerminal",
      "1,735 holders"
@@ -12224,7 +12513,7 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 97.9h (needs 3h+)"
+      "text": "Watched by GemRadar for 98.0h (needs 3h+)"
      },
      {
       "ok": false,
@@ -12232,19 +12521,19 @@
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 1.6x the 6h average"
+      "text": "Trading still active: last hour = 0.9x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -11%, 6h -21% (max +100% / +200%)"
+      "text": "Not spiking: 1h +3%, 6h -20% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity +1% in 3h"
+      "text": "Liquidity +2% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap +1% in 3h"
+      "text": "Market cap +2% in 3h"
      },
      {
       "ok": true,
@@ -12284,7 +12573,7 @@
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -21% (max +100%)"
+      "text": "Not run up yet: 6h -20% (max +100%)"
      },
      {
       "ok": false,
@@ -12292,22 +12581,22 @@
      },
      {
       "ok": false,
-      "text": "Market cap $1.46M (max $1.00M)"
+      "text": "Market cap $1.48M (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity +1% in 3h"
+      "text": "Liquidity +2% in 3h"
      },
      {
       "ok": true,
-      "text": "Market cap +1% in 3h"
+      "text": "Market cap +2% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 31,
+    "buzz": 22,
     "fomo": {
      "buyers_1h": 0,
      "buyers_2h": 0,
@@ -12344,9 +12633,9 @@
      "good_holders": [],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 98.0,
+     "first_seen_h": 98.1,
      "spotted_mcap": 7497267.0,
-     "spotted_h": 51.2
+     "spotted_h": 51.4
     },
     "x": null,
     "biz": 0,
@@ -12359,7 +12648,7 @@
      "telegram": "https://t.me/fobodotfun",
      "website": "https://fobo.fun"
     },
-    "checked": 1794436157.8685431
+    "checked": 1794436600.5634704
    }
   },
   {
@@ -12434,43 +12723,43 @@
      "text": "6% below its peak (max 45%)"
     }
    ],
-   "now_mcap": 6428938.0,
-   "now_liq": 563446.64,
+   "now_mcap": 6171369.0,
+   "now_liq": 567008.92,
    "peak_mcap": 15576850.0,
    "live": {
-    "ts": 1794432548.6732337,
-    "mcap": 6428938.0,
-    "liq": 563446.64,
-    "price": 0.006435,
+    "ts": 1794436187.1420195,
+    "mcap": 6171369.0,
+    "liq": 567008.92,
+    "price": 0.006177,
     "vol": {
-     "m5": 15479.74,
-     "h1": 258627.01,
-     "h6": 919661.42,
-     "h24": 1600079.3
+     "m5": 7110.52,
+     "h1": 751980.1,
+     "h6": 1664832.42,
+     "h24": 2367445.0
     },
     "pc": {
-     "m5": -3.16,
-     "h1": -21.73,
-     "h6": -29.94,
-     "h24": -42.44
+     "m5": 4.0,
+     "h1": 10.45,
+     "h6": -33.59,
+     "h24": -44.47
     },
-    "buys_h1": 689,
-    "sells_h1": 464,
-    "age_h": 335.2237981209988
+    "buys_h1": 1969,
+    "sells_h1": 1758,
+    "age_h": 336.2344838948568
    },
    "now": {
-    "score": 67.4,
+    "score": 67.8,
     "parts": {
      "traction": 19.8,
      "holders": 11.2,
      "social": 6.8,
-     "momentum": 3.9,
+     "momentum": 4.4,
      "fomo": 15.0,
-     "staying": 8.7,
+     "staying": 8.6,
      "upside": 2
     },
     "why": [
-     "$560k liquidity",
+     "$551k liquidity",
      "16 FOMO traders bought (0xstanczyk, CHIEF_117, FiatLuxxx)",
      "73 FOMO traders hold it",
      "top FOMO traders hold: Krmi, Spoily, awtorkowski7",
@@ -12505,27 +12794,27 @@
      },
      {
       "ok": true,
-      "text": "Watched by GemRadar for 97.9h (needs 3h+)"
+      "text": "Watched by GemRadar for 98.0h (needs 3h+)"
      },
      {
       "ok": false,
-      "text": "64% below its peak (max 45%)"
+      "text": "65% below its peak (max 45%)"
      },
      {
       "ok": true,
-      "text": "Trading still active: last hour = 2.9x the 6h average"
+      "text": "Trading still active: last hour = 2.3x the 6h average"
      },
      {
       "ok": true,
-      "text": "Not spiking: 1h -6%, 6h -35% (max +100% / +200%)"
+      "text": "Not spiking: 1h +13%, 6h -38% (max +100% / +200%)"
      },
      {
       "ok": true,
-      "text": "Liquidity -13% in 3h"
+      "text": "Liquidity -14% in 3h"
      },
      {
       "ok": false,
-      "text": "Market cap -33% in 3h"
+      "text": "Market cap -36% in 3h"
      },
      {
       "ok": true,
@@ -12543,11 +12832,11 @@
      },
      {
       "ok": true,
-      "text": "FOMO buyers 16 vs sellers 15"
+      "text": "FOMO buyers 16 vs sellers 16"
      },
      {
       "ok": false,
-      "text": "64% below its peak (max 45%)"
+      "text": "65% below its peak (max 45%)"
      }
     ],
     "smart_gates": [
@@ -12557,15 +12846,15 @@
      },
      {
       "ok": true,
-      "text": "Fresh FOMO buying: 28 bought vs 26 sold in 24h, 4 top trader(s) bought in 48h"
+      "text": "Fresh FOMO buying: 28 bought vs 27 sold in 24h, 4 top trader(s) bought in 48h"
      },
      {
       "ok": true,
-      "text": "Not too late: FOMO traders spotted it at $13.22M, now 0.5x (max 2.5x)"
+      "text": "Not too late: FOMO traders spotted it at $13.22M, now 0.4x (max 2.5x)"
      },
      {
       "ok": true,
-      "text": "Not run up yet: 6h -35% (max +100%)"
+      "text": "Not run up yet: 6h -38% (max +100%)"
      },
      {
       "ok": false,
@@ -12573,30 +12862,30 @@
      },
      {
       "ok": false,
-      "text": "Market cap $5.98M (max $1.00M)"
+      "text": "Market cap $5.76M (max $1.00M)"
      },
      {
       "ok": true,
-      "text": "Liquidity -13% in 3h"
+      "text": "Liquidity -14% in 3h"
      },
      {
       "ok": false,
-      "text": "Market cap -33% in 3h"
+      "text": "Market cap -36% in 3h"
      }
     ],
     "project_gates": null,
     "early_gates": null,
     "quality": 0,
     "quality_why": [],
-    "buzz": 57,
+    "buzz": 54,
     "fomo": {
-     "buyers_1h": 5,
+     "buyers_1h": 0,
      "buyers_2h": 5,
      "buyers_6h": 16,
      "buyers_24h": 28,
      "buyers_7d": 134,
-     "sellers_6h": 15,
-     "sellers_24h": 26,
+     "sellers_6h": 16,
+     "sellers_24h": 27,
      "named_holders": 73,
      "good_recent": [
       "GrandSafeAnt",
@@ -12605,7 +12894,7 @@
       "awtorkowski7"
      ],
      "fresh_buyers": 28,
-     "fresh_sellers": 26,
+     "fresh_sellers": 27,
      "buy_usd_6h": 69641,
      "theses_24h": 13,
      "top_buyers": [
@@ -12649,9 +12938,9 @@
      ],
      "graduated": false,
      "rank": null,
-     "first_seen_h": 98.2,
+     "first_seen_h": 98.4,
      "spotted_mcap": 13217996.0,
-     "spotted_h": 51.3
+     "spotted_h": 51.4
     },
     "x": {
      "followers": 9958,
@@ -12667,7 +12956,7 @@
      "x": "https://x.com/floatdotxyz",
      "website": "https://www.floatlaunch.xyz/"
     },
-    "checked": 1794436148.7306674
+    "checked": 1794436595.6949325
    }
   }
  ],
