@@ -10,7 +10,7 @@ keeps this at or below 900 of the 1,000 free calls. The free plan has no card, s
 """
 from __future__ import annotations
 
-VERSION = 4  # radar.py checks this, so an outdated upload is reported instead of failing silently
+VERSION = 6  # radar.py checks this, so an outdated upload is reported instead of failing silently
 
 import json
 import os
@@ -119,6 +119,20 @@ def absorb(state, events):
         typ = e.get("alertType")
         chain = norm_chain(e.get("chain"))
         addr = e.get("tokenAddress")
+        # Watchlist notifications are independent of market/safety scoring, including new chains.
+        if (typ == "buy" and addr and e.get("chain")
+                and str(e.get("trader") or "").strip().lstrip("@").casefold() == "resellcalendar"):
+            event_id = str(eid)
+            watch_chain = chain or str(e["chain"]).strip().lower()
+            coin_key = token_key(watch_chain, addr)
+            if (event_id not in state.get("fomo_buy_notified", {})
+                    and coin_key not in state.get("fomo_buy_coins_notified", {})):
+                state.setdefault("fomo_buy_pending", {}).setdefault(event_id, {
+                    "chain": watch_chain, "address": addr,
+                    "symbol": e.get("token") or "?", "trader": "ResellCalendar",
+                    "usd": _num(e.get("tradeUsd") or e.get("usdValue")),
+                    "ts": (e.get("ts") or e.get("execTs") or time.time() * 1000) / 1000,
+                })
         if typ not in ("buy", "sell", "thesis") or not chain or not addr:
             continue
         seen.append(eid)

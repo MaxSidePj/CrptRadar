@@ -5,6 +5,14 @@ your iPhone, and publishes a dashboard on GitHub Pages.
 
 ## What it does
 
+- **ResellCalendar buys:** one separate ntfy notification per coin (chain and contract) bought by ResellCalendar
+  observed in the FOMO trade feed, with coin, chain, buy amount, UTC trade time, contract and chart.
+  These activity notifications bypass score, age, scam checks, quiet hours and normal coin alert
+  caps. They are not safety endorsements. Replayed trades are deduplicated across runs; failed
+  pushes are retried. Further buys of the same coin do not trigger another notification, even
+  across scanner runs. Different contracts remain separate even with the same symbol. Normal scored
+  alerts for that coin remain eligible. Coverage depends on the feed: it reports large trades,
+  and GitHub Actions schedule gaps can miss events beyond its roughly 15-minute replay window.
 - Scans new and trending pools on all chains indexed by GeckoTerminal, plus DexScreener's new
   profiles, boosts and community takeovers, about every 90 seconds while a run is active.
 - Remembers each launch (the watch pool) and re-checks it: dead coins are dropped, active ones are

@@ -3,6 +3,7 @@ import json
 import os
 import time
 import unittest
+from unittest.mock import patch
 
 os.environ["DRY_RUN"] = "1"
 import radar  # noqa: E402
@@ -170,6 +171,111 @@ class AlertTests(unittest.TestCase):
 def fomo_event(i, typ, trader, addr="abc", minutes_ago=10, chain="solana"):
     return {"type": "alert", "id": f"e{i}", "alertType": typ, "trader": trader, "token": "GEM",
             "tokenAddress": addr, "chain": chain, "tradeUsd": 3000, "ts": (time.time() - minutes_ago * 60) * 1000}
+
+
+class ResellCalendarTests(unittest.TestCase):
+    def setUp(self):
+        self.state = radar.fresh_state({})
+
+    def notify(self, result=True):
+        with patch.object(radar, "push", return_value=result) as push, patch.object(radar, "save_state"):
+            count = radar.notify_fomo_buys(self.state)
+        return count, push
+
+    def test_buy_bypasses_scoring_and_existing_coin_alert(self):
+        self.state["alerted"]["solana:abc"] = {"ts": time.time()}
+        radar.fomo.absorb(self.state, [fomo_event(1, "buy", "ResellCalendar")])
+        with patch.object(radar, "maybe_alert", side_effect=AssertionError("must bypass scoring")):
+            count, push = self.notify()
+        self.assertEqual(count, 1)
+        title, body = push.call_args.args
+        self.assertIn("ResellCalendar", title)
+        self.assertIn("$GEM", title)
+        self.assertIn("$3,000.00", body)
+        self.assertIn("UTC", body)
+        self.assertIn("Contract: abc", body)
+        self.assertIn("scam checks are not required", body)
+        self.assertEqual(push.call_args.kwargs["click"], "https://dexscreener.com/solana/abc")
+        self.assertEqual(self.state["alerts"], [])
+
+    def test_only_exact_handle_buys(self):
+        events = [fomo_event(1, "sell", "ResellCalendar"), fomo_event(2, "thesis", "ResellCalendar"),
+                  fomo_event(3, "buy", "ResellCalendarFake"), fomo_event(4, "buy", "other"),
+                  fomo_event(5, "buy", " @resellcalendar ")]
+        radar.fomo.absorb(self.state, events)
+        self.assertEqual(self.notify()[0], 1)
+        self.assertEqual(set(self.state["fomo_buy_notified"]), {"e5"})
+
+    def test_replays_and_second_buy_same_coin_do_not_alert(self):
+        event = fomo_event(1, "buy", "ResellCalendar")
+        radar.fomo.absorb(self.state, [event, event])
+        self.assertEqual(self.notify()[0], 1)
+        self.state["fomo_seen"] = []  # even if the general stream's dedupe list is lost
+        radar.fomo.absorb(self.state, [event, fomo_event(2, "buy", "ResellCalendar")])
+        self.assertEqual(self.notify()[0], 0)
+        self.assertEqual(self.notify()[0], 0)
+
+    def test_ten_buys_in_one_batch_only_send_once(self):
+        radar.fomo.absorb(self.state, [fomo_event(i, "buy", "ResellCalendar") for i in range(10)])
+        count, push = self.notify()
+        self.assertEqual(count, 1)
+        push.assert_called_once()
+        self.assertFalse(self.state["fomo_buy_pending"])
+
+    def test_contract_normalization_and_distinct_coins(self):
+        radar.fomo.absorb(self.state, [fomo_event(1, "buy", "ResellCalendar", addr="0xABC", chain="eth"),
+                                      fomo_event(2, "buy", "ResellCalendar", addr="0xabc", chain="ethereum"),
+                                      fomo_event(3, "buy", "ResellCalendar", addr="0xdef", chain="eth")])
+        self.assertEqual(self.notify()[0], 2)
+        self.assertEqual(len(self.state["fomo_buy_coins_notified"]), 2)
+
+    def test_coin_deduplication_does_not_expire(self):
+        self.state["fomo_buy_coins_notified"] = {"solana:abc": time.time() - 365 * 86400}
+        radar.prune_state(self.state, CFG)
+        radar.fomo.absorb(self.state, [fomo_event(1, "buy", "ResellCalendar")])
+        self.assertEqual(self.notify()[0], 0)
+
+    def test_failed_push_retried(self):
+        radar.fomo.absorb(self.state, [fomo_event(1, "buy", "ResellCalendar")])
+        self.assertEqual(self.notify(False)[0], 0)
+        self.assertIn("e1", self.state["fomo_buy_pending"])
+        self.assertNotIn("e1", self.state["fomo_buy_notified"])
+        self.assertEqual(self.notify()[0], 1)
+        self.assertFalse(self.state["fomo_buy_pending"])
+
+    def test_chain_alias_and_unindexed_chain(self):
+        radar.fomo.absorb(self.state, [fomo_event(1, "buy", "ResellCalendar", chain="eth"),
+                                      fomo_event(2, "buy", "ResellCalendar", chain="newchain")])
+        count, push = self.notify()
+        self.assertEqual(count, 2)
+        self.assertIn("ethereum/abc", push.call_args_list[0].kwargs["click"])
+        self.assertIn("newchain/abc", push.call_args_list[1].kwargs["click"])
+
+    def test_pending_and_delivered_survive_stale_repository_or_lost_cache(self):
+        import tempfile, pathlib
+        with tempfile.TemporaryDirectory() as d:
+            alerts, cache = pathlib.Path(d) / "alerts.json", pathlib.Path(d) / "cache.json"
+            with patch.object(radar, "ALERTS_FILE", alerts), patch.object(radar, "CACHE_FILE", cache):
+                radar.fomo.absorb(self.state, [fomo_event(1, "buy", "ResellCalendar"),
+                                              fomo_event(2, "buy", "ResellCalendar", addr="def")])
+                with patch.object(radar, "push", side_effect=[True, False]):
+                    self.assertEqual(radar.notify_fomo_buys(self.state), 1)
+                radar.save_state(self.state)
+                original = alerts.read_text()
+                for lose_cache in (False, True):
+                    if lose_cache:
+                        alerts.write_text(original)
+                        cache.unlink()
+                    else:
+                        alerts.write_text('{}')
+                    restored = radar.fresh_state(radar.load_state())
+                    self.assertIn("e1", restored["fomo_buy_notified"])
+                    self.assertIn("e2", restored["fomo_buy_pending"])
+                    self.assertIn("solana:abc", restored["fomo_buy_coins_notified"])
+                    radar.fomo.absorb(restored, [fomo_event(3, "buy", "ResellCalendar")])
+                    with patch.object(radar, "push", return_value=True) as push:
+                        self.assertEqual(radar.notify_fomo_buys(restored), 1)
+                        push.assert_called_once()
 
 
 class FomoTests(unittest.TestCase):

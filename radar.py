@@ -46,7 +46,8 @@ ROOT = Path(__file__).resolve().parent
 CONFIG_FILE = ROOT / "config.json"
 ALERTS_FILE = ROOT / "state" / "alerts.json"   # committed to git (small, changes only on alerts)
 CACHE_FILE = ROOT / "cache" / "radar.json"     # kept with actions/cache (watch pool, board, caches)
-ALERT_KEYS = ("alerted", "alerts", "welcomed", "heartbeat")
+FOMO_BUY_KEYS = ("fomo_buy_notified", "fomo_buy_pending", "fomo_buy_coins_notified")
+ALERT_KEYS = ("alerted", "alerts", "welcomed", "heartbeat") + FOMO_BUY_KEYS
 
 # Free-tier ceilings (never exceeded, whatever config.json says)
 NTFY_DAILY_CEILING = 60      # ntfy.sh free/anonymous allows 250 messages a day
@@ -271,6 +272,11 @@ def load_state():
         if a["key"] not in alerts and a["key"] not in removed:
             alerts[a["key"]] = a
     state["alerts"] = sorted(alerts.values(), key=lambda a: a.get("ts", 0), reverse=True)
+    # Both repository state and the run cache protect watchlist trades against replay.
+    for field in FOMO_BUY_KEYS:
+        state.setdefault(field, {}).update(state.pop(field + "_backup", None) or {})
+    for eid in state["fomo_buy_notified"]:
+        state["fomo_buy_pending"].pop(eid, None)
     return state
 
 
@@ -297,6 +303,8 @@ def prune_state(state, cfg):
     state["alerted"] = {k: v for k, v in state["alerted"].items() if t - v["ts"] < max(keep_s, 30 * 86400)}
     state["alerts"] = state["alerts"][:150]
     state["fomo_spotted"] = {k: v for k, v in (state.get("fomo_spotted") or {}).items() if t - v["ts"] < 30 * 86400}
+    state["fomo_buy_notified"] = {k: ts for k, ts in state.get("fomo_buy_notified", {}).items()
+                                  if t - ts < 30 * 86400}
     w = state["watch"]
     if len(w) > 5000:
         for k in sorted(w, key=lambda k: w[k][3])[:len(w) - 5000]:
@@ -318,6 +326,8 @@ def save_state(state):
     cache = {k: v for k, v in state.items() if k not in ALERT_KEYS}
     cache["alerted_backup"] = state.get("alerted", {})
     cache["alerts_backup"] = state.get("alerts", [])
+    for field in FOMO_BUY_KEYS:
+        cache[field + "_backup"] = state.get(field, {})
     cache["removed_backup"] = [k for k in state.get("alerted", {}) if k not in {a["key"] for a in state.get("alerts", [])}]
     _write_json(CACHE_FILE, cache)
 
@@ -1404,6 +1414,40 @@ def alerts_today(state):
     return sum(1 for a in state["alerts"] if a.get("day") == day)
 
 
+def notify_fomo_buys(state):
+    """Notify the first observed ResellCalendar buy per chain/contract; retry failures.
+
+    These are activity notifications, independent of scoring, quiet hours and coin alert caps.
+    They do not mark the coin as alerted, so a later qualifying coin alert still works.
+    """
+    pending = state.setdefault("fomo_buy_pending", {})
+    notified = state.setdefault("fomo_buy_notified", {})
+    # Keep this ledger permanently, including after a coin disappears from the overview.
+    coins_notified = state.setdefault("fomo_buy_coins_notified", {})
+    sent = 0
+    for eid, trade in list(pending.items()):
+        coin_key = fomo.token_key(trade["chain"], trade["address"])
+        if eid in notified or coin_key in coins_notified:
+            if eid in notified:
+                coins_notified.setdefault(coin_key, notified[eid])
+            del pending[eid]
+            continue
+        chart = ("https://dexscreener.com/" + urllib.parse.quote(trade["chain"], safe="")
+                 + "/" + urllib.parse.quote(trade["address"], safe=""))
+        stamp = datetime.fromtimestamp(trade["ts"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        amount = f"${trade['usd']:,.2f}" if trade["usd"] else "unknown amount"
+        title = f"ResellCalendar bought ${trade['symbol']} ({trade['chain']})"
+        message = (f"FOMO buy: {amount}\nTime: {stamp}\nContract: {trade['address']}\n"
+                   "Trader activity alert; score and scam checks are not required for this notification.")
+        if push(title, message, click=chart, tags=["eyes"], priority=4):
+            notified[eid] = now()
+            coins_notified[coin_key] = notified[eid]
+            del pending[eid]
+            sent += 1
+            save_state(state)
+    return sent
+
+
 def in_quiet_hours(cfg):
     q = cfg.get("quiet_hours_utc") or []
     return datetime.now(timezone.utc).hour in q
@@ -1749,7 +1793,7 @@ def publish_alerts(state):
         log(f"  alert publish skipped ({type(e).__name__}); dashboard updates at the end of the run")
 
 
-NEEDED_VERSIONS = {"fomo.py": (fomo, 4), "fomo_chain.py": (fomo_chain, 1)}
+NEEDED_VERSIONS = {"fomo.py": (fomo, 6), "fomo_chain.py": (fomo_chain, 1)}
 
 
 def outdated_files():
@@ -1802,7 +1846,8 @@ def main():
     ctx = {}
     if not state.get("welcomed") and os.environ.get("NTFY_TOPIC"):
         if push("✅ GemRadar is live", "You'll get an alert only when a new token scores "
-                f"{cfg['alert_min_score']}+ and passes the scam checks (max {cfg['max_alerts_per_day']}/day).",
+                f"{cfg['alert_min_score']}+ and passes the scam checks (max {cfg['max_alerts_per_day']}/day). "
+                "ResellCalendar buys also trigger separate activity notifications regardless of score.",
                 click=os.environ.get("DASHBOARD_URL") or None, tags=["satellite"], priority=3):
             state["welcomed"] = True
     old = outdated_files()
@@ -1823,6 +1868,7 @@ def main():
         c0 = now()
         try:
             n = fomo.absorb(state, stream.drain())
+            notify_fomo_buys(state)
             fomo.refresh(state, log)
             log(f"FOMO: {n} new trades, {len(state.get('fomo', {}))} coins traded in 24h"
                 f"{'' if stream.connected else ' (stream offline)'}")
@@ -1844,6 +1890,7 @@ def main():
         time.sleep(max(5, cycle_s - (now() - c0)))
     stream.close()
     fomo.absorb(state, stream.drain())
+    notify_fomo_buys(state)
     save_state(state)
     log(f"run finished after {now() - start:.0f}s; calls: {http.calls}")
 
