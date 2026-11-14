@@ -48,6 +48,13 @@ your iPhone, and publishes a dashboard on GitHub Pages.
   deep liquidity, organic demand and holding their gains, under $5M. In a price replay it would have
   caught CLAUDIA at $203k (57x to peak), PAID at $1.3M (40x), FLOAT at $1.1M (13x) and DOPE at $3.5M
   (9x), and skipped HODL and AMD (both went to ~$2k).
+- 🌱 Fresh launch: the really early coins, often under $10k (pump.fun and other bonding curves
+  included): 15 min to 24h old, $3k-$150k market cap, with a real founder behind it: the coin's own
+  X account (no tweet/community links, no borrowed big accounts), ideally made a week+ before the
+  coin, plus followers, website, Telegram, description, tech theme, paid DexScreener profile or FOMO
+  buyers (6+/12). Every scam check still applies (incl. serial-rugger devs), plus 40+ holders,
+  clean wallets (top 10 ≤30%, biggest ≤8%, dev ≤5%, bundles ≤12%), 25+ buys an hour on both sides
+  and holding up (max 40% below its peak). Max 4 a day, 1 per scan. Lottery tickets: size small.
 - 💎/🏆 don't alert on a spike (max +100% in 1h, +200% in 6h).
 - FOMO trades of any size on Solana, read for free from the public blockchain: every FOMO-app trade
   is signed by one FOMO wallet (identified by Bitquery, not confirmed by FOMO). GemRadar keeps 12
@@ -111,6 +118,12 @@ Edit `config.json` on GitHub and commit. Useful settings:
 | `early_min_quality` | 6 | Project score needed for 🚀 |
 | `early_max_mcap_usd` | 5000000 | 🚀 only below this market cap |
 | `early_max_per_day` | 3 | Max 🚀 alerts per day |
+| `fresh_lane` | true | 🌱 alerts for brand-new tiny-cap coins with a real founder |
+| `fresh_min_mcap_usd` / `fresh_max_mcap_usd` | 3000 / 150000 | 🌱 market cap range |
+| `fresh_max_age_hours` | 24 | 🌱 only for coins up to this age (and 15+ min old) |
+| `fresh_min_quality` | 6 | Founder/project signals needed (0-12); higher = fewer 🌱 |
+| `fresh_min_holders` / `fresh_min_buys_1h` | 40 / 25 | Minimum holders and buys in the last hour |
+| `fresh_max_per_day` | 4 | Max 🌱 alerts per day (and 1 per scan) |
 | `min_liquidity_usd` | 12000 | Ignore coins with less liquidity |
 | `max_mcap_usd` | 50000000 | Ignore coins above this market cap |
 | `chains_only` | `[]` | e.g. `["solana", "base"]` to restrict |

@@ -729,6 +729,157 @@ class EarlyLaunchTests(unittest.TestCase):
         self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
 
 
+GT_FOUNDER = {"websites": ["https://plogintel.site"], "twitter": "PlogTerminal", "telegram": "plogterminal",
+              "coingecko": None, "gt_score": 20, "verified": False, "categories": [], "launchpad": True,
+              "description": "Plog Terminal is an AI research agent that reads on-chain data for traders."}
+X_FOUNDER = {"followers": 1800, "tweets": 240, "age_days": 60}
+FRESH_SAFE = {**SAFE, "holders": 160, "top10_pct": 19, "max_holder_pct": 4, "creator_pct": 1.5,
+              "launchpad": "Pump.Fun", "lp_locked_pct": 100}
+
+
+class FreshLaunchTests(unittest.TestCase):
+    def coin(self, gt=GT_FOUNDER, x=X_FOUNDER, safety=None, mcap=8_000, buys=140, sells=90, age_h=1.5,
+             watched_min=25, peak=None, m5=3, symbol="PLOG", name="Plog Terminal", socials=None):
+        state = radar.fresh_state({})
+        t = token(symbol=symbol, name=name, age_h=age_h, mcap=mcap, liq=0, curve=True, dex="pumpfun",
+                  buys_h1=buys, sells_h1=sells, buyers_h1=None, socials=socials or {}, trending=False,
+                  profile=False, vol={"m5": 300, "h1": 6_000, "h6": 9_000, "h24": 9_000},
+                  pc={"m5": m5, "h1": 30, "h6": 60, "h24": 60})
+        snaps = [[time.time() - watched_min * 60, mcap * 0.7, 0, 3000, 60, 0], [time.time(), mcap, 0, 6000, buys, 0]]
+        state["history"][t["key"]] = {"first": snaps[0][0], "peak": peak or mcap, "peak_ts": time.time(),
+                                      "trend_hits": 0, "snaps": snaps}
+        safety = {**FRESH_SAFE, **(safety or {})}
+        handle = radar.parse_x_handle(t["socials"].get("x")) or radar.gt_x_handle(gt)
+        q, why, x_ok, x_text = radar.fresh_project(t, gt, x, handle, None, CFG)
+        v = radar.judge_safety(safety, t, CFG)
+        sc, parts, why_s = radar.score_token(t, safety, v, {"x": x, "fomo": None}, state, CFG)
+        last = radar.score_token.last
+        e = {**t, "score": sc, "parts": parts, "why": why_s, "warnings": v["warnings"], "rejects": v["rejects"],
+             "verified": v["verified"], "safety": safety, "links": radar.links_for(t), "fomo": None,
+             "buzz": last["buzz"], "fresh_quality": q, "fresh_why": why,
+             **{k: last[k] for k in ("gates", "fast_gates", "smart_gates", "project_gates", "early_gates",
+                                     "quality", "quality_why")}}
+        e["fresh_gates"] = radar.fresh_lane_gates(t, state["history"][t["key"]], safety, last["gates"], q, x_ok,
+                                                  x_text, CFG)
+        return state, e
+
+    def test_founder_launch_under_10k_alerts(self):
+        state, e = self.coin()
+        self.assertTrue(radar.maybe_alert(e, state, CFG, 0), e["fresh_gates"])
+        a = state["alerts"][0]
+        self.assertEqual(a["kind"], "fresh")
+        self.assertLess(a["mcap"], 10_000)
+
+    def test_meme_without_own_x_account_blocked(self):
+        state, e = self.coin(gt={**GT_FOUNDER, "twitter": None}, x=None,
+                             socials={"x": "https://x.com/elonmusk/status/123"})
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_borrowed_big_x_account_blocked(self):
+        state, e = self.coin(gt={**GT_FOUNDER, "twitter": "elonmusk"},
+                             x={"followers": 200_000_000, "tweets": 90_000, "age_days": 6000})
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0), e["fresh_gates"])
+
+    def test_burner_x_account_and_no_site_stays_below_the_bar(self):
+        state, e = self.coin(gt={**GT_FOUNDER, "websites": [], "telegram": None, "description": ""},
+                             x={"followers": 40, "tweets": 3, "age_days": 0}, name="Plog", symbol="PLOG")
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0), (e["fresh_quality"], e["fresh_why"]))
+
+    def test_link_to_pump_fun_is_not_a_website(self):
+        self.assertFalse(radar.own_website("https://pump.fun/coin/abc"))
+        self.assertTrue(radar.own_website("https://plogintel.site"))
+
+    def test_serial_rugger_dev_or_bad_wallets_blocked(self):
+        for bad in ({"risks": [{"name": "Creator history of rugged tokens", "level": "danger"}]},
+                    {"creator_pct": 7}, {"top10_pct": 33}, {"max_holder_pct": 10}, {"cluster_pct": 15},
+                    {"holders": 25}, {"mint_authority": True}):
+            state, e = self.coin(safety=bad)
+            self.assertFalse(radar.maybe_alert(e, state, CFG, 0), bad)
+
+    def test_dumping_or_just_launched_blocked(self):
+        for kw in ({"peak": 20_000}, {"m5": -30}, {"watched_min": 5}, {"age_h": 0.1}, {"age_h": 30},
+                   {"mcap": 400_000}, {"buys": 10, "sells": 5}, {"buys": 300, "sells": 20}):
+            state, e = self.coin(**kw)
+            self.assertFalse(radar.maybe_alert(e, state, CFG, 0), kw)
+
+    def test_max_four_a_day_and_one_per_scan(self):
+        state = radar.fresh_state({})
+        sent = []
+        for i in range(10):
+            _, e = self.coin()
+            e["key"], e["address"] = f"solana:fresh{i}", f"fresh{i}"
+            state["stats"]["cycles"] = i // 2  # two candidates per scan
+            sent.append(radar.maybe_alert(e, state, CFG, 0))
+        self.assertEqual(sent, [True, False] * 4 + [False, False])  # 1 per scan, then the cap of 4 a day
+
+    def test_fresh_lane_can_be_switched_off(self):
+        state, e = self.coin()
+        self.assertFalse(radar.maybe_alert(e, state, {**CFG, "fresh_lane": False}, 0))
+
+    def test_prefilter_lets_bonding_curve_coins_in(self):
+        t = token(mcap=8_000, liq=0, curve=True, age_h=1, buys_h1=60, sells_h1=40, pc={"m5": 0, "h1": 10})
+        self.assertIsNone(radar.fresh_prefilter(t, CFG))
+        self.assertEqual(radar.prefilter(t, CFG), "low liquidity")  # the normal lanes still skip it
+        self.assertIsNotNone(radar.fresh_prefilter({**t, "curve": False}, CFG))  # migrated pool without liquidity
+
+    def test_build_token_marks_pump_fun_curve(self):
+        pair = {"baseToken": {"address": "abcpump", "symbol": "PLOG"}, "dexId": "pumpfun", "marketCap": 8000,
+                "txns": {"h1": {"buys": 50, "sells": 30}}, "pairCreatedAt": (time.time() - 3600) * 1000}
+        ctx = {"gt_trending": set(), "cto": set(), "profile": set(), "boost": {}}
+        t = radar.build_token({"key": "solana:abcpump", "chain": "solana", "address": "abcpump", "sources": {"new"}},
+                              [pair], ctx)
+        self.assertTrue(t["curve"])
+        self.assertFalse(t["profile_paid"])
+
+    def test_fresh_scan_end_to_end(self):
+        state = radar.fresh_state({})
+        t = token(symbol="PLOG", name="Plog Terminal", age_h=1.5, mcap=8_000, liq=0, curve=True, dex="pumpfun",
+                  buys_h1=140, sells_h1=90, buyers_h1=None, socials={}, trending=False, profile=False,
+                  vol={"m5": 300, "h1": 6_000, "h6": 9_000, "h24": 9_000}, pc={"m5": 3, "h1": 30, "h6": 60, "h24": 60})
+        state["history"][t["key"]] = {"first": time.time() - 1800, "peak": 8_000, "peak_ts": time.time(),
+                                      "trend_hits": 0, "snaps": [[time.time() - 1800, 6000, 0, 3000, 60, 0]]}
+        budget = {"fresh": 4, "fresh_gt": 4, "gt_info": 0}
+        results = []
+        with patch.object(radar, "x_profile", return_value=X_FOUNDER), \
+                patch.object(radar, "safety_solana", return_value=FRESH_SAFE) as rc, \
+                patch.object(radar.Http, "get_json",
+                             return_value={"data": {"attributes": {**GT_FOUNDER,
+                                                                   "twitter_handle": "PlogTerminal",
+                                                                   "telegram_handle": "plogterminal"}}}):
+            radar.fresh_scan(radar.Http(), state, CFG, [t], results, "", set(), budget)
+        self.assertEqual(rc.call_count, 1)
+        self.assertEqual(len(results), 1, results)
+        e = results[0]
+        self.assertTrue(all(g["ok"] for g in e["fresh_gates"]), e["fresh_gates"])
+        self.assertTrue(radar.maybe_alert(e, state, CFG, 0))
+        self.assertEqual(state["alerts"][0]["kind"], "fresh")
+
+    def test_coin_without_socials_costs_no_scam_check(self):
+        state = radar.fresh_state({})
+        t = token(age_h=1, mcap=8_000, liq=0, curve=True, socials={}, buys_h1=60, sells_h1=40)
+        with patch.object(radar, "safety_solana") as rc, \
+                patch.object(radar.Http, "get_json", return_value={"data": {"attributes": {"websites": []}}}):
+            radar.fresh_scan(radar.Http(), state, CFG, [t], [], "", set(), {"fresh": 4, "fresh_gt": 4})
+        rc.assert_not_called()
+
+    def test_watch_pool_keeps_fresh_curve_coins(self):
+        state = radar.fresh_state({})
+        k = "solana:abc"
+        state["watch"][k] = ["solana", "abc", "PLOG", time.time() - 8 * 3600, 0, 0]
+        radar.update_watch(state, {k: {}}, {k: [{}]}, {}, CFG, {k})
+        self.assertIn(k, state["watch"])
+        radar.update_watch(state, {k: {}}, {k: [{}]}, {}, CFG, set())
+        self.assertNotIn(k, state["watch"])
+
+    def test_alerted_curve_coin_is_not_removed_for_zero_liquidity(self):
+        state = radar.fresh_state({})
+        state["alerts"] = [{"key": "solana:abc", "chain": "solana", "address": "abc", "symbol": "PLOG", "mcap": 8000}]
+        pair = {"baseToken": {"address": "abc"}, "dexId": "pumpfun", "marketCap": 12000}
+        with patch.object(radar.Http, "get_json", return_value=[pair]):
+            radar.refresh_alerts(radar.Http(), state)
+        self.assertEqual(len(state["alerts"]), 1)
+
+
 class FailureReportTests(unittest.TestCase):
     def test_all_files_match(self):
         self.assertEqual(radar.outdated_files(), [])
