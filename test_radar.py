@@ -880,6 +880,117 @@ class FreshLaunchTests(unittest.TestCase):
         self.assertEqual(len(state["alerts"]), 1)
 
 
+VIRAL_SAFE = {**SAFE, "holders": 1400, "top10_pct": 22, "max_holder_pct": 4, "creator_pct": 0.5}
+
+
+class ViralMemeTests(unittest.TestCase):
+    """Ni Hao Cat (mihao): launched Oct 25 at ~$27k, sat at $130k-$500k on ~$50k/day volume for two weeks
+    while @iamnihaocat grew to thousands of followers, then ran to $20M+ on Nov 10-11."""
+
+    def coin(self, x=None, mcap=235_000, age_h=7 * 24, safety=None, pc=None, watched_h=6, mcap_3h=None,
+             x_hist=None):
+        state = radar.fresh_state({})
+        t = token(symbol="mihao", name="ni hao cat", age_h=age_h, mcap=mcap, liq=60_000, buys_h1=45, sells_h1=30,
+                  buyers_h1=None, socials={"x": "https://x.com/iamnihaocat?s=11", "website": "https://mihao.fun/"},
+                  trending=False, vol={"m5": 100, "h1": 2_000, "h6": 13_000, "h24": 53_000},
+                  pc=pc or {"m5": 1, "h1": 4, "h6": 9, "h24": 12})
+        with_history(state, t, hours=watched_h, mcap_start=mcap_3h or mcap * 0.95, holders_start=1300,
+                     holders_now=1400, trend_hits=0)
+        x = x or {"followers": 2_100, "tweets": 300, "age_days": 7.2}
+        if x_hist:
+            state["x_hist"]["iamnihaocat"] = x_hist
+        safety = {**VIRAL_SAFE, **(safety or {})}
+        ok, text, why = radar.viral_signal(t, x, "iamnihaocat", state, CFG)
+        v = radar.judge_safety(safety, t, CFG)
+        sc, parts, why_s = radar.score_token(t, safety, v, {"x": x, "fomo": None}, state, CFG)
+        last = radar.score_token.last
+        e = {**t, "score": sc, "parts": parts, "why": why_s, "warnings": v["warnings"], "rejects": v["rejects"],
+             "verified": v["verified"], "safety": safety, "links": radar.links_for(t), "fomo": None,
+             "buzz": last["buzz"], "viral_why": why,
+             **{k: last[k] for k in ("gates", "fast_gates", "smart_gates", "project_gates", "early_gates",
+                                     "quality", "quality_why")}}
+        e["viral_gates"] = radar.viral_lane_gates(t, state["history"][t["key"]], safety, last["gates"], ok, text,
+                                                  CFG)
+        return state, t, e
+
+    def test_ni_hao_cat_base_alerts_as_viral_meme(self):
+        state, t, e = self.coin()
+        self.assertEqual(radar.prefilter(t, CFG), "low volume")  # why the normal lanes skipped it
+        self.assertIsNone(radar.viral_prefilter(t, CFG))
+        self.assertTrue(radar.maybe_alert(e, state, CFG, 0), e["viral_gates"])
+        self.assertEqual(state["alerts"][0]["kind"], "viral")
+
+    def test_slow_x_account_is_not_viral(self):
+        state, t, e = self.coin(x={"followers": 2_100, "tweets": 300, "age_days": 400})   # old, slow account
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+        state, t, e = self.coin(x={"followers": 600, "tweets": 40, "age_days": 2})       # too small
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_old_account_with_measured_growth_counts(self):
+        h = [[time.time() - 23 * 3600, 4_000]]
+        state, t, e = self.coin(x={"followers": 5_000, "tweets": 900, "age_days": 400}, x_hist=h)
+        self.assertTrue(radar.maybe_alert(e, state, CFG, 0), e["viral_gates"])
+
+    def test_losing_followers_blocks(self):
+        h = [[time.time() - 23 * 3600, 2_400]]
+        state, t, e = self.coin(x_hist=h)
+        self.assertFalse(radar.maybe_alert(e, state, CFG, 0))
+
+    def test_after_the_run_or_dumping_is_blocked(self):
+        for kw in ({"mcap": 14_000_000}, {"pc": {"m5": 5, "h1": 92, "h6": 197, "h24": 400}},
+                   {"mcap_3h": 600_000}, {"watched_h": 0.5}):
+            state, t, e = self.coin(**kw)
+            self.assertFalse(radar.maybe_alert(e, state, CFG, 0), kw)
+
+    def test_scam_or_concentrated_blocked(self):
+        for bad in ({"top10_pct": 40}, {"holders": 150}, {"mint_authority": True}, {"max_holder_pct": 15}):
+            state, t, e = self.coin(safety=bad)
+            self.assertFalse(radar.maybe_alert(e, state, CFG, 0), bad)
+
+    def test_tweet_or_community_link_is_not_an_own_account(self):
+        _, t, _ = self.coin()
+        t["socials"]["x"] = "https://x.com/i/communities/123"
+        self.assertEqual(radar.viral_prefilter(t, CFG), "no own X account")
+
+    def test_max_three_a_day(self):
+        state = radar.fresh_state({})
+        sent = 0
+        for i in range(6):
+            _, _, e = self.coin()
+            e["key"], e["address"] = f"solana:v{i}", f"v{i}"
+            state["stats"]["cycles"] = i
+            sent += radar.maybe_alert(e, state, CFG, 0)
+        self.assertEqual(sent, 3)
+
+    def test_x_lookups_are_budgeted_and_build_history(self):
+        state = radar.fresh_state({})
+        user = {"user": {"followers": 3000, "tweets": 10, "joined": "Sun Oct 25 10:14:43 +0000 2026"}}
+        budget = {"viral_x": 1}
+        with patch.object(radar.Http, "get_json", return_value=user) as g:
+            http = radar.Http()
+            self.assertEqual(radar.x_profile(http, state, "a", budget, "viral_x")["followers"], 3000)
+            self.assertIsNone(radar.x_profile(http, state, "b", budget, "viral_x"))  # budget used up
+        self.assertEqual(g.call_count, 1)
+        self.assertEqual(state["x_hist"]["a"][0][1], 3000)
+        self.assertIsNone(radar.x_growth(state, "a", 3500))  # needs 12h+ of history first
+
+    def test_viral_scan_end_to_end_on_quiet_coin(self):
+        state, t, _ = self.coin()
+        budget = {"viral": 3, "viral_x": 6}
+        results = []
+        x = {"followers": 2_100, "tweets": 300, "age_days": 7.2}
+
+        def fake_x(http, st, handle, *a):
+            st["x_cache"][handle.lower()] = {"ts": time.time(), "data": x}
+            return x
+        with patch.object(radar, "x_profile", side_effect=fake_x), \
+                patch.object(radar, "safety_solana", return_value=VIRAL_SAFE) as rc:
+            radar.viral_scan(radar.Http(), state, CFG, [t], results, "", set(), budget)
+        self.assertEqual(rc.call_count, 1)
+        self.assertEqual(len(results), 1)
+        self.assertTrue(radar.maybe_alert(results[0], state, CFG, 0), results[0]["viral_gates"])
+
+
 class FailureReportTests(unittest.TestCase):
     def test_all_files_match(self):
         self.assertEqual(radar.outdated_files(), [])

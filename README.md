@@ -55,6 +55,11 @@ your iPhone, and publishes a dashboard on GitHub Pages.
   buyers (6+/12). Every scam check still applies (incl. serial-rugger devs), plus 40+ holders,
   clean wallets (top 10 ≤30%, biggest ≤8%, dev ≤5%, bundles ≤12%), 25+ buys an hour on both sides
   and holding up (max 40% below its peak). Max 4 a day, 1 per scan. Lottery tickets: size small.
+- 📣 Viral meme: the coin's own X account gains followers fast (1,000+, ~150+/day on an account under
+  60 days, or +15% in 24h measured by GemRadar) while the coin is still $20k-$1.5M, 6h-21d old and
+  before its spike. 300+ holders, top 10 ≤30%, every scam check, not losing market cap, liquidity or
+  holders over 3h. Quiet coins skip the volume filter here (Ni Hao Cat traded ~$50k/day at
+  $130k-$500k for two weeks before running to $20M+). Max 3 a day, 1 per scan.
 - 💎/🏆 don't alert on a spike (max +100% in 1h, +200% in 6h).
 - FOMO trades of any size on Solana, read for free from the public blockchain: every FOMO-app trade
   is signed by one FOMO wallet (identified by Bitquery, not confirmed by FOMO). GemRadar keeps 12
@@ -124,6 +129,10 @@ Edit `config.json` on GitHub and commit. Useful settings:
 | `fresh_min_quality` | 6 | Founder/project signals needed (0-12); higher = fewer 🌱 |
 | `fresh_min_holders` / `fresh_min_buys_1h` | 40 / 25 | Minimum holders and buys in the last hour |
 | `fresh_max_per_day` | 4 | Max 🌱 alerts per day (and 1 per scan) |
+| `viral_lane` | true | 📣 alerts for memes whose X community grows fast |
+| `viral_min_followers` / `viral_min_followers_per_day` | 1000 / 150 | X followers needed and how fast |
+| `viral_max_mcap_usd` | 1500000 | 📣 only below this market cap |
+| `viral_max_per_day` | 3 | Max 📣 alerts per day (and 1 per scan) |
 | `min_liquidity_usd` | 12000 | Ignore coins with less liquidity |
 | `max_mcap_usd` | 50000000 | Ignore coins above this market cap |
 | `chains_only` | `[]` | e.g. `["solana", "base"]` to restrict |

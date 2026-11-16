@@ -113,6 +113,7 @@ function tokenCard(e, extra = "") {
       ${e.project_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.project_gates, "🧩 Early-project checks (real project, before the spike)") : ""}
       ${e.early_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.early_gates, "🚀 Early-launch checks (1-6h old)") : ""}
       ${e.fresh_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.fresh_gates, "🌱 Fresh-launch checks (new, tiny cap, real founder)") : ""}
+      ${e.viral_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.viral_gates, "📣 Viral-meme checks (X community growing fast, before the run)") : ""}
       ${(e.why || []).length ? `<p class="muted">Why: ${esc(e.why.join(", "))}</p>` : ""}
       <div class="tags">${safetyTags(e)}</div>
       <div class="addr">${esc(e.address)}</div>
@@ -138,9 +139,10 @@ function renderAlerts() {
       smart_gates: cur.smart_gates || a.smart_gates, project_gates: cur.project_gates || a.project_gates,
       early_gates: cur.early_gates || a.early_gates, fresh_gates: cur.fresh_gates || a.fresh_gates,
       fresh_quality: cur.fresh_quality ?? a.fresh_quality, fresh_why: cur.fresh_why || a.fresh_why,
+      viral_gates: cur.viral_gates || a.viral_gates,
       quality: cur.quality ?? a.quality, quality_why: cur.quality_why || a.quality_why };
     applyLive(e, LIVE[(a.address || "").toLowerCase()], a.live);
-    const extra = `<p><b>${{ gem: "💎 Gem", survivor: "🏆 Survivor", fomo: "🔥 FOMO hype", smart: "🐋 Smart money", project: "🧩 Early project", early: "🚀 Early launch", fresh: "🌱 Fresh launch" }[a.kind] || "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}, score ${Math.round(a.score)}${cur.score != null ? ` → now ${Math.round(cur.score)}` : ""}
+    const extra = `<p><b>${{ gem: "💎 Gem", survivor: "🏆 Survivor", fomo: "🔥 FOMO hype", smart: "🐋 Smart money", project: "🧩 Early project", early: "🚀 Early launch", fresh: "🌱 Fresh launch", viral: "📣 Viral meme" }[a.kind] || "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}, score ${Math.round(a.score)}${cur.score != null ? ` → now ${Math.round(cur.score)}` : ""}
       · now ${perfText(e.mcap_now, a.mcap)}</p>`;
     return tokenCard(e, extra);
   }).join("");

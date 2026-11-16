@@ -120,6 +120,21 @@ DEFAULT_CONFIG = {
     "fresh_max_per_day": 4,
     "fresh_info_lookups_per_cycle": 4,
     "fresh_deep_checks_per_cycle": 4,
+    "viral_lane": True,
+    "viral_min_age_hours": 6,
+    "viral_max_age_days": 21,
+    "viral_min_mcap_usd": 20000,
+    "viral_max_mcap_usd": 1500000,
+    "viral_min_liquidity_usd": 10000,
+    "viral_min_followers": 1000,
+    "viral_min_followers_per_day": 150,
+    "viral_max_account_age_days": 60,
+    "viral_min_growth_24h_pct": 15,
+    "viral_min_holders": 300,
+    "viral_max_top10_pct": 30,
+    "viral_max_per_day": 3,
+    "viral_x_lookups_per_cycle": 6,
+    "viral_deep_checks_per_cycle": 3,
     "new_chains":["robinhood", "hyperevm", "hyperliquid", "monad", "abstract", "plasma", "megaeth", "unichain", "sonic", "berachain", "ink", "soneium", "worldchain", "stable", "story", "arc", "katana", "plume"],
     "tech_keywords": ["launchpad", "pad", "launch", "pay", "payment", "swap", "dex", "ai", "agent", "protocol", "labs", "bridge", "terminal", "bot", "network", "layer", "zk", "depin", "rwa", "oracle", "wallet", "exchange", "perp", "stake", "yield", "infra", "compute", "gpu", "platform", "app", "trading", "defi", "chain", "robinhood"],
     "min_liquidity_usd": 12000,
@@ -311,6 +326,7 @@ def fresh_state(state):
     state.setdefault("history", {})      # key -> {"first", "peak", "peak_ts", "trend_hits", "snaps": [[ts, mcap, liq, vol_h1, buys_h1, holders]]}
     state.setdefault("safety_cache", {}) # key -> {"ts", "data"}
     state.setdefault("x_cache", {})      # handle -> {"ts", "data"}
+    state.setdefault("x_hist", {})       # handle -> [[ts, followers], ...] (8 days)
     state.setdefault("board", [])
     state.setdefault("rejected", [])
     state.setdefault("stats", {})
@@ -325,6 +341,12 @@ def prune_state(state, cfg):
     state["safety_cache"] = {k: v for k, v in state["safety_cache"].items() if t - v["ts"] < 6 * 3600}
     state["x_cache"] = {k: v for k, v in state["x_cache"].items() if t - v["ts"] < 24 * 3600}
     state["gt_info"] = {k: v for k, v in (state.get("gt_info") or {}).items() if t - v["ts"] < 24 * 3600}
+    xh = state.get("x_hist") or {}
+    for h in list(xh):
+        xh[h] = [p for p in xh[h] if t - p[0] < 8 * 86400]
+        if not xh[h]:
+            del xh[h]
+    state["x_hist"] = xh
     state["alerted"] = {k: v for k, v in state["alerted"].items() if t - v["ts"] < max(keep_s, 30 * 86400)}
     state["alerts"] = state["alerts"][:150]
     state["fomo_spotted"] = {k: v for k, v in (state.get("fomo_spotted") or {}).items() if t - v["ts"] < 30 * 86400}
@@ -514,6 +536,7 @@ def discover(http, cfg, ctx, state):
 
 
 def update_watch(state, seeds, pairs, tokens_by_key, cfg, fresh_keys=()):
+    # fresh_keys also holds quiet viral candidates (own X account, liquidity, young): kept while alive.
     """Track re-check results; forget launches that died or got too old.
     fresh_keys: tiny new launches still alive for the 🌱 lane (bonding-curve coins have no DEX liquidity yet)."""
     watch, t = state["watch"], now()
@@ -886,13 +909,19 @@ def judge_safety(m, t, cfg):
 
 # --------------------------------------------------------------------------- social
 
-def x_profile(http, state, handle):
+def x_profile(http, state, handle, budget=None, pool=None):
+    """X account followers/tweets/age via fxtwitter (cached 6h). Every fetch is also kept in x_hist (8 days),
+    so follower growth can be measured. With budget/pool: an uncached lookup costs one unit of budget[pool]."""
     if not handle:
         return None
     hk = handle.lower()
     c = state["x_cache"].get(hk)
     if c and now() - c["ts"] < 6 * 3600:
         return c["data"]
+    if budget is not None:
+        if budget.get(pool, 0) <= 0:
+            return c["data"] if c else None
+        budget[pool] -= 1
     d = http.get_json(f"https://api.fxtwitter.com/{handle}", timeout=15, retries=0)
     u = (d or {}).get("user")
     data = None
@@ -900,13 +929,27 @@ def x_profile(http, state, handle):
         age_days = None
         try:
             joined = datetime.strptime(u.get("joined", ""), "%a %b %d %H:%M:%S %z %Y")
-            age_days = (datetime.now(timezone.utc) - joined).days
+            age_days = round((datetime.now(timezone.utc) - joined).total_seconds() / 86400, 2)
         except ValueError:
             pass
         data = {"followers": int(fnum(u.get("followers"))), "tweets": int(fnum(u.get("tweets"))),
                 "age_days": age_days}
+        hist = state.setdefault("x_hist", {}).setdefault(hk, [])
+        hist.append([round(now()), data["followers"]])
+        del hist[:-40]
     state["x_cache"][hk] = {"ts": now(), "data": data}
     return data
+
+
+def x_growth(state, handle, followers, hours=24):
+    """Follower growth over about the last `hours` (None until GemRadar has watched the account 12h+)."""
+    pts = (state.get("x_hist") or {}).get((handle or "").lower()) or []
+    target = now() - hours * 3600
+    old = next((p for p in pts if p[0] >= target - 6 * 3600), None)
+    if not old or now() - old[0] < 12 * 3600 or not old[1]:
+        return None
+    return {"pct": (followers - old[1]) / old[1] * 100, "added": followers - old[1],
+            "hours": (now() - old[0]) / 3600}
 
 
 def biz_corpus(http, ctx):
@@ -1272,6 +1315,80 @@ def early_lane_gates(t, hist, holders, safety_m, gates, quality, cfg):
     return out
 
 
+def viral_prefilter(t, cfg):
+    """📣 lane, step 1 (free): a young meme coin with its own X account, still small, still tradable."""
+    if not cfg.get("viral_lane"):
+        return "viral lane off"
+    if (t["symbol"] or "").upper() in STABLE_OR_MAJOR:
+        return "major/stable"
+    age = t["age_h"]
+    if age is None or not cfg["viral_min_age_hours"] <= age <= cfg["viral_max_age_days"] * 24:
+        return "age out of viral range"
+    if not cfg["viral_min_mcap_usd"] <= t["mcap"] <= cfg["viral_max_mcap_usd"]:
+        return "market cap out of viral range"
+    if t["liq"] < cfg["viral_min_liquidity_usd"] and not t.get("curve"):
+        return "low liquidity"
+    if not parse_x_handle(t["socials"].get("x")):
+        return "no own X account"
+    if t["pc"].get("h1", 0) < -35 or t["pc"].get("h6", 0) < -60:
+        return "dumping"
+    return None
+
+
+def viral_signal(t, xp, handle, state, cfg):
+    """Is the coin's X account blowing up? Followers per day since the account was made (works on first
+    sight, for young accounts) or measured growth over the last 24h. Returns (ok, text, why)."""
+    if not xp:
+        return False, f"X @{handle} not found", []
+    f, age_d = xp.get("followers") or 0, xp.get("age_days")
+    per_day = f / max(age_d, 1) if age_d is not None else 0
+    g = x_growth(state, handle, f)
+    young = age_d is not None and age_d <= cfg["viral_max_account_age_days"]
+    fast = young and per_day >= cfg["viral_min_followers_per_day"]
+    growing = g is not None and g["pct"] >= cfg["viral_min_growth_24h_pct"] and g["added"] >= 200
+    shrinking = g is not None and g["pct"] < -2
+    ok = f >= cfg["viral_min_followers"] and (fast or growing) and not shrinking
+    text = f"X @{handle}: {f:,} followers"
+    if age_d is not None:
+        text += f" in {age_d:.0f}d (~{per_day:,.0f}/day)"
+    if g is not None:
+        text += f", {g['pct']:+.0f}% in {g['hours']:.0f}h"
+    text += (f" (needs {cfg['viral_min_followers']:,}+ and ~{cfg['viral_min_followers_per_day']}/day on an account "
+             f"under {cfg['viral_max_account_age_days']}d, or +{cfg['viral_min_growth_24h_pct']}% in 24h)")
+    why = [f"X @{handle} {f:,} followers" + (f", ~{per_day:,.0f}/day" if fast else "")
+           + (f", {g['pct']:+.0f}% in 24h" if growing else "")]
+    return ok, text, why
+
+
+def viral_lane_gates(t, hist, safety_m, gates, x_ok, x_text, cfg):
+    """📣 lane, step 3: viral X community + holders coming in + clean wallets + forming a base, before the spike."""
+    m = safety_m or {}
+    age = t["age_h"] or 0
+    out = [{"ok": x_ok, "text": x_text},
+           {"ok": cfg["viral_min_age_hours"] <= age <= cfg["viral_max_age_days"] * 24,
+            "text": f"Age {fmt_age(age)} ({cfg['viral_min_age_hours']}h to {cfg['viral_max_age_days']}d)"},
+           {"ok": cfg["viral_min_mcap_usd"] <= t["mcap"] <= cfg["viral_max_mcap_usd"],
+            "text": f"Market cap {fmt_usd(t['mcap'])} ({fmt_usd(cfg['viral_min_mcap_usd'])} to "
+                    f"{fmt_usd(cfg['viral_max_mcap_usd'])})"}]
+    holders = m.get("holders") or 0
+    out.append({"ok": holders >= cfg["viral_min_holders"],
+                "text": f"{holders:,} holders (needs {cfg['viral_min_holders']}+)"})
+    top10, single = m.get("top10_pct", 100), m.get("max_holder_pct", 100)
+    out.append({"ok": top10 <= cfg["viral_max_top10_pct"] and single <= cfg["max_single_holder_pct"],
+                "text": f"Spread out: top10 {top10:.0f}%, biggest wallet {single:.0f}% "
+                        f"(max {cfg['viral_max_top10_pct']}% / {cfg['max_single_holder_pct']}%)"})
+    pc1, pc6 = t["pc"].get("h1", 0), t["pc"].get("h6", 0)
+    out.append({"ok": pc1 < 60 and pc6 < 100,
+                "text": f"Before the spike: 1h {pc1:+.0f}%, 6h {pc6:+.0f}% (max +60% / +100%)"})
+    watched = (now() - hist["first"]) / 3600 if hist else 0
+    out.append({"ok": watched >= 1 and t["pc"].get("m5", 0) > -15,
+                "text": f"Watched {watched:.1f}h (needs 1h+), not dropping now (5m {t['pc'].get('m5', 0):+.0f}%)"})
+    for g in gates:  # not dumping / losing liquidity / losing holders over 3h, no bot holders
+        if any(w in g["text"] for w in ("Market cap", "Liquidity", "Holders", "faster than buys")):
+            out.append(g)
+    return out
+
+
 def fresh_prefilter(t, cfg):
     """🌱 lane, step 1 (free): a brand-new tiny coin that is alive. Returns reason or None."""
     if not cfg.get("fresh_lane"):
@@ -1624,10 +1741,13 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
              and entry["score"] >= cfg["early_min_score"] and all(g["ok"] for g in entry["early_gates"]))
     fresh = (not normal and not fast and not smart and not project and not early and cfg.get("fresh_lane")
              and entry.get("fresh_gates") and all(g["ok"] for g in entry["fresh_gates"]))
-    if not (normal or fast or smart or project or early or fresh):
+    viral = (not normal and not fast and not smart and not project and not early and not fresh
+             and cfg.get("viral_lane") and entry.get("viral_gates") and all(g["ok"] for g in entry["viral_gates"]))
+    if not (normal or fast or smart or project or early or fresh or viral):
         return False
     for lane, on, cap in (("project", project, cfg["project_max_per_day"]), ("early", early, cfg["early_max_per_day"]),
-                          ("fresh", fresh, cfg.get("fresh_max_per_day", 4))):
+                          ("fresh", fresh, cfg.get("fresh_max_per_day", 4)),
+                          ("viral", viral, cfg.get("viral_max_per_day", 3))):
         if not on:
             continue
         day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -1652,9 +1772,9 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
     if (alerts_today(state) >= cfg["max_alerts_per_day"] or in_quiet_hours(cfg)) and entry["score"] < cfg["exceptional_score"]:
         return False
     kind = ("fomo" if fast else "smart" if smart else "project" if project else "early" if early
-            else "fresh" if fresh else "gem" if (t["age_h"] or 0) <= cfg["gem_max_age_hours"] else "survivor")
+            else "fresh" if fresh else "viral" if viral else "gem" if (t["age_h"] or 0) <= cfg["gem_max_age_hours"] else "survivor")
     icon, label = {"fomo": ("🔥", "FOMO hype"), "smart": ("🐋", "Smart money"), "project": ("🧩", "Early project"),
-                   "early": ("🚀", "Early launch"), "fresh": ("🌱", "Fresh launch"), "gem": ("💎", "Gem"), "survivor": ("🏆", "Survivor")}[kind]
+                   "early": ("🚀", "Early launch"), "fresh": ("🌱", "Fresh launch"), "viral": ("📣", "Viral meme"), "gem": ("💎", "Gem"), "survivor": ("🏆", "Survivor")}[kind]
     title = f"{icon} {label}: ${t['symbol']} ({t['chain']}) score {entry['score']:.0f}"
     lines = [
         f"MC {fmt_usd(t['mcap'])} · Liq {'bonding curve' if entry.get('curve') and not t['liq'] else fmt_usd(t['liq'])}"
@@ -1679,6 +1799,9 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
     if fresh:
         lines.append("Founder: " + ", ".join((entry.get("fresh_why") or [])[:4]))
         lines.append("Brand new and tiny - real team, clean wallets, but most launches still die. Size small.")
+    if viral:
+        lines.append("Community: " + ", ".join((entry.get("viral_why") or [])[:2]))
+        lines.append("Early: its X community is growing fast before the coin ran - memes can also just fade")
     if project:
         lines.append("Project: " + ", ".join((entry.get("quality_why") or [])[:4]))
         lines.append("Early: real project forming a base before a run - it may also never run")
@@ -1702,7 +1825,7 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         actions.append({"action": "view", "label": "Bubblemap", "url": links["bubblemap"]})
     actions.append({"action": "view", "label": "X posts", "url": links["x_search"]})
     sent = push(title, "\n".join(lines), click=links["chart"], actions=actions,
-                tags=[{"fomo": "fire", "smart": "whale", "project": "jigsaw", "early": "rocket", "fresh": "seedling", "gem": "gem", "survivor": "trophy"}[kind]], priority=5 if entry["score"] >= cfg["exceptional_score"] else 4)
+                tags=[{"fomo": "fire", "smart": "whale", "project": "jigsaw", "early": "rocket", "fresh": "seedling", "viral": "loudspeaker", "gem": "gem", "survivor": "trophy"}[kind]], priority=5 if entry["score"] >= cfg["exceptional_score"] else 4)
     rec = {"key": t["key"], "ts": now(), "day": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
            "kind": kind, "symbol": t["symbol"], "name": t["name"], "chain": t["chain"], "address": t["address"],
            "score": entry["score"], "mcap": t["mcap"], "price": t.get("price"), "liq": t["liq"],
@@ -1715,7 +1838,9 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
            "cg_trending": entry.get("cg_trending"), "fast_gates": entry.get("fast_gates"), "fomo": entry.get("fomo"), "buzz": entry.get("buzz"),
            "gates": (entry.get("fast_gates") if fast else entry.get("smart_gates") if smart
                      else entry.get("project_gates") if project else entry.get("early_gates") if early
-                     else entry.get("fresh_gates") if fresh else entry.get("gates")),
+                     else entry.get("fresh_gates") if fresh else entry.get("viral_gates") if viral
+                     else entry.get("gates")),
+           "viral_gates": entry.get("viral_gates"), "viral_why": entry.get("viral_why"),
            "fresh_gates": entry.get("fresh_gates"), "fresh_quality": entry.get("fresh_quality"),
            "fresh_why": entry.get("fresh_why"), "curve": entry.get("curve"),
            "quality": entry.get("quality"), "quality_why": entry.get("quality_why")}
@@ -1755,8 +1880,9 @@ def scan_cycle(http, state, cfg, ctx):
     tokens.sort(key=lambda t: (bool(fomo.stats(state, t["key"])), quick(t)), reverse=True)
 
     fresh = [t for t in built.values() if fresh_prefilter(t, cfg) is None]
+    viral = [t for t in built.values() if viral_prefilter(t, cfg) is None]
     update_watch(state, seeds, pairs, {k: t for k, t in built.items() if k in {x["key"] for x in tokens}}, cfg,
-                 {t["key"] for t in fresh})
+                 {t["key"] for t in fresh + viral})
     for t in tokens:
         cached = state["safety_cache"].get(t["key"])
         record_history(state, t, ((cached or {}).get("data") or {}).get("holders"))
@@ -1764,13 +1890,16 @@ def scan_cycle(http, state, cfg, ctx):
     cg = coingecko_trending(http, ctx)
     budget = {"deep": min(int(cfg["deep_checks_per_cycle"]), MAX_DEEP_CHECKS), "alerts": 4, "gt_info": 3,
               "fresh": min(int(cfg.get("fresh_deep_checks_per_cycle", 4)), 5),
-              "fresh_gt": min(int(cfg.get("fresh_info_lookups_per_cycle", 4)), 6)}
+              "fresh_gt": min(int(cfg.get("fresh_info_lookups_per_cycle", 4)), 6),
+              "viral": min(int(cfg.get("viral_deep_checks_per_cycle", 3)), 5),
+              "viral_x": min(int(cfg.get("viral_x_lookups_per_cycle", 6)), 10)}
     results = []
     for t in tokens:
         entry = evaluate(http, state, cfg, t, corpus, cg, budget, "deep")
         if entry:
             results.append(entry)
     fresh_scan(http, state, cfg, fresh, results, corpus, cg, budget)
+    viral_scan(http, state, cfg, viral, results, corpus, cg, budget)
     rescore_alerts(http, state, cfg, built, results, corpus, cg, budget)
     lookup_fomo_holders(state, results)
     if ctx.get("rpc"):
@@ -1878,6 +2007,36 @@ def fresh_scan(http, state, cfg, cands, results, corpus, cg, budget):
             by_key[k] = e
 
 
+def viral_scan(http, state, cfg, cands, results, corpus, cg, budget):
+    """📣 Viral memes: the coin's X account gains followers fast (a community forming), often while the
+    coin is still quiet and small. Quiet coins skip the normal volume filter here."""
+    by_key = {e["key"]: e for e in results}
+    xc = state["x_cache"]
+    cands = [t for t in cands if t["key"] not in state["alerted"]]
+    cands.sort(key=lambda t: ((parse_x_handle(t["socials"].get("x")) or "").lower() in xc, t["mcap"] <= 500_000,
+                              t["buys_h1"]), reverse=True)
+    for t in cands:
+        k = t["key"]
+        cached = state["safety_cache"].get(k)
+        record_history(state, t, ((cached or {}).get("data") or {}).get("holders"))
+        handle = parse_x_handle(t["socials"].get("x"))
+        xp = x_profile(http, state, handle, budget, "viral_x")
+        if handle.lower() not in xc:
+            continue  # looked up in a later cycle
+        ok, text, why = viral_signal(t, xp, handle, state, cfg)
+        if not ok:
+            continue
+        e = by_key.get(k) or evaluate(http, state, cfg, t, corpus, cg, budget, "viral")
+        if not e:
+            continue  # scam check budget used up: next cycle
+        e["x"] = e.get("x") or xp
+        e["viral_gates"] = viral_lane_gates(t, state["history"].get(k), e["safety"], e["gates"], ok, text, cfg)
+        e["viral_why"], e["curve"] = why, t.get("curve")
+        if k not in by_key and not e["rejects"]:
+            results.append(e)
+            by_key[k] = e
+
+
 def lookup_fomo_holders(state, results):
     """Ask FOMO which traders hold the most promising safe coin (1 per cycle, 15 a day, needs the key)."""
     picks = [e for e in results if not e["rejects"] and e["verified"] and e["key"] not in state["alerted"]
@@ -1893,7 +2052,7 @@ def lookup_fomo_holders(state, results):
 
 NOW_FIELDS = ("score", "parts", "why", "safety", "verified", "rejects", "warnings", "gates", "fast_gates",
               "smart_gates", "project_gates", "early_gates", "quality", "quality_why", "buzz",
-              "fresh_gates", "fresh_quality", "fresh_why",
+              "fresh_gates", "fresh_quality", "fresh_why", "viral_gates", "viral_why",
               "fomo", "x", "biz", "cg_trending", "trending", "cto", "boosts", "socials", "checked")
 
 
