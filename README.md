@@ -89,7 +89,8 @@ your iPhone, and publishes a dashboard on GitHub Pages.
    "GemRadar is live" notification. Open `https://<your-username>.github.io/GemRadar/` in Safari,
    tap **Share → Add to Home Screen**.
 
-After that it runs by itself every 15 minutes.
+After that it scans almost continuously: each run lasts ~29 minutes and queues the next one
+(set the repository variable `CONTINUOUS_SCAN` to `false` to fall back to the hourly-ish cron).
 
 ## Tuning
 
@@ -153,8 +154,8 @@ Edit `config.json` on GitHub and commit. Useful settings:
 
 | Service | Free limit | GemRadar uses |
 |---|---|---|
-| GitHub Actions (public repo) | unlimited minutes | ~1 run per 15 min |
-| GitHub Pages | 100 GB/month, ~10 deploys/hour | 4 deploys/hour, tiny page |
+| GitHub Actions (public repo) | unlimited minutes | back-to-back ~30 min runs |
+| GitHub Pages | 100 GB/month, ~10 deploys/hour | ~2 deploys/hour, tiny page |
 | GitHub cache | 10 GB, old entries auto-deleted | ~1 MB per run |
 | ntfy.sh | 250 messages/day | max 60/day (hard-coded) |
 | GeckoTerminal | 30 calls/min | max 15/min |
