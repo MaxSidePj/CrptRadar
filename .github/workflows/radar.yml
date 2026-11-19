@@ -2,6 +2,7 @@ name: GemRadar scan
 
 on:
   schedule:
+    # Fallback only: GitHub throttles this to roughly once an hour. The chain below keeps scanning continuous.
     - cron: "*/15 * * * *"
   workflow_dispatch:
   push:
@@ -16,7 +17,7 @@ on:
 
 permissions:
   contents: write
-  actions: read
+  actions: write
   pages: write
   id-token: write
 
@@ -27,7 +28,7 @@ concurrency:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     outputs:
       artifact_id: ${{ steps.upload.outputs.artifact_id }}
     steps:
@@ -54,7 +55,7 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           FOMO_API_KEY: ${{ secrets.FOMO_API_KEY }}
           DASHBOARD_URL: ${{ format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
-          RUN_SECONDS: "660"
+          RUN_SECONDS: "1740"
           CYCLE_SECONDS: "90"
         run: python radar.py
 
@@ -104,3 +105,17 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           artifact_name: github-pages
+
+  # Start the next run right away instead of waiting for the throttled cron (gap ~2 min instead of ~50).
+  # workflow_dispatch from GITHUB_TOKEN is allowed to trigger runs. The concurrency group keeps at most one
+  # running + one queued, so cron and this chain never pile up. Stop it: repo variable CONTINUOUS_SCAN=false.
+  next:
+    needs: [scan, deploy]
+    if: ${{ !cancelled() && vars.CONTINUOUS_SCAN != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Queue the next scan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run radar.yml --repo "${{ github.repository }}" --ref main
