@@ -13,9 +13,10 @@ Free public RPC, no key. Calls are paced (one every 2.5 s, max ~16 per cycle) an
 """
 from __future__ import annotations
 
-VERSION = 1  # radar.py checks this, so an outdated upload is reported instead of failing silently
+VERSION = 2  # radar.py checks this, so an outdated upload is reported instead of failing silently
 
 import json
+import os
 import time
 import urllib.error
 import urllib.request
@@ -36,6 +37,7 @@ MAX_PARSE_PER_COIN = 8
 class Rpc:
     def __init__(self, log):
         self.log, self.last, self.calls, self.paused_until = log, 0.0, 0, 0.0
+        self.url = os.environ.get("SOLANA_RPC_URL", "").strip() or RPC
 
     def budget_left(self):
         return CALLS_PER_CYCLE - self.calls if time.time() >= self.paused_until else 0
@@ -49,7 +51,7 @@ class Rpc:
         self.last = time.time()
         self.calls += 1
         body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params}).encode()
-        req = urllib.request.Request(RPC, data=body, headers={"Content-Type": "application/json",
+        req = urllib.request.Request(self.url, data=body, headers={"Content-Type": "application/json",
                                                               "User-Agent": "GemRadar"})
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
@@ -61,6 +63,12 @@ class Rpc:
             return None
         except Exception as e:
             self.log(f"  Solana RPC {method}: {type(e).__name__}")
+            return None
+        if data.get("error"):
+            code = data["error"].get("code")
+            if code in (429, -32005):
+                self.paused_until = time.time() + 120
+            self.log(f"  Solana RPC {method}: RPC error {code}")
             return None
         return data.get("result")
 
@@ -169,9 +177,10 @@ def due(state, key):
     return not c or time.time() - c["ts"] >= COIN_RECHECK
 
 
-def run_cycle(state, rpc, candidates, log):
+def run_cycle(state, rpc, candidates, log, reset_budget=True):
     """candidates: [(key, mint)] in priority order. Index update first, then as many coins as budget allows."""
-    rpc.calls = 0
+    if reset_budget:
+        rpc.calls = 0
     n = update_index(state, rpc)
     index = _index_set(_st(state))
     checked = 0

@@ -5,6 +5,44 @@ your iPhone, and publishes a dashboard on GitHub Pages.
 
 ## What it does
 
+- **Direct Solana wallet watch:** polls 0xsneakky's verified trading wallet
+  `FfztZq1outrYfyYbKw5P4LGo4xUc4XYEdf7o91UdS7qu` before market discovery on each active scan.
+  It recognizes swaps on Pump/PumpSwap, Raydium, Meteora and Orca, including inner routed calls,
+  from confirmed token balance changes. Small buys can enter the same filtered trader-call lane
+  without the FOMO feed's roughly $3k position threshold. Transfers, airdrops, LP deposits and
+  failed transactions do not trigger raw activity notifications. Every quality check still applies.
+  The actual Fiona buy on 19 Nov at 21:02:32 UTC is included as a reduced public regression fixture.
+  The signer shown in some FOMO trade records is not the trading wallet; the configured address
+  was resolved through FOMO's verified-wallet endpoint and checked against the actual transaction.
+  Cursor, pending transactions and deduplication survive Actions cache restores. Bootstrap/recovery
+  considers the last 2 hours by default. Null transactions retry; incomplete wallet history blocks
+  the additional trader-call lane until it catches up. Older signals still expire normally.
+  Uses the public Solana RPC without a key or paid FOMO requests. Wallet polling gets up to
+  `wallet_rpc_calls_per_cycle` calls (default 8) within the existing shared 16-call cycle budget.
+  `SOLANA_RPC_URL` can override the public endpoint in the runner environment if needed.
+  Set `wallet_watch: false` to disable it, or edit `tracked_solana_wallets` and `tracked_traders`.
+  Coverage is limited to the configured Solana wallet and recognized swap programs; other wallets,
+  chains, unsupported instructions, RPC delays and Actions downtime can still miss or delay activity.
+  Polling is about every 90 seconds while a run is active, plus scan/RPC processing time, not instant.
+- **Filtered trader calls (👀):** watches `0xsneakky` by default and prioritizes recent buys for
+  checks. It never sends a notification just because he bought. The additional lane requires
+  verified scam checks and score 40+, with no mandatory coin age or observation wait by default,
+  $20k+ liquidity, $30k-$1M market cap, 100+ holders, top 10 <=30%, biggest wallet <=8%,
+  dev <=5%, same-size clusters <=12%, and supporting demand (another FOMO buyer without a later
+  observed sell, or 25 distinct hourly buyers). Also requires 40+ hourly buys, buys >=1.2x sells,
+  the normal volume floor, 5m change -10% to +40%, no more than 1.5x the
+  first observed market cap, <=25% drawdown and <=15% liquidity loss. A sell observed from him
+  cancels that signal; a new buy after it starts a new quote baseline. Signals expire after
+  2 hours from the first buy, even if he tops up. Max 3 alerts/day, 1/scan, with normal global
+  caps and coin deduplication. Other lanes remain eligible on their own criteria.
+  Configure `tracked_traders`, `tracked_lane` and the other `tracked_*` settings in config.json.
+  The feed is partial: no observed sell is not proof he still holds; unknown fill sizes are
+  never used as conviction. First observed market cap is not his execution market cap.
+  Audits of actual checks are kept in the Actions cache for 7 days (max 5,000 observations).
+  Older alerts cannot be backtested exactly without the original buys and safety/market snapshots.
+  A fast launch can pass even with a large first-hour gain. Alerts can fire on the first scan
+  after the buy is received and the checks pass; feed delays, scan duration and Actions gaps
+  still affect delivery. These checks filter observable risks and demand, not future returns.
 - **ResellCalendar buys:** one separate ntfy notification per coin (chain and contract) bought by ResellCalendar
   observed in the FOMO trade feed, with coin, chain, buy amount, UTC trade time, contract and chart.
   These activity notifications bypass score, age, scam checks, quiet hours and normal coin alert

@@ -10,7 +10,7 @@ keeps this at or below 900 of the 1,000 free calls. The free plan has no card, s
 """
 from __future__ import annotations
 
-VERSION = 7  # radar.py checks this, so an outdated upload is reported instead of failing silently
+VERSION = 8  # radar.py checks this, so an outdated upload is reported instead of failing silently
 
 import json
 import os
@@ -373,6 +373,34 @@ def stats(state, key, now=None):
 def has_signal(fs):
     """Enough FOMO interest to look at a coin even while its trading is still quiet."""
     return bool(fs) and (fs["holders_n"] >= 2 or fs["good_holders"] or fs["buyers_24h"] >= 2 or fs["rank"])
+
+
+def tracked_signal(state, key, handles, now=None, max_age_hours=2):
+    """A recent watched buy without a subsequent observed sell; never infer a live balance.
+
+    Use the first buy after the last sell, so repeated top-ups cannot refresh an old signal.
+    Amounts are deliberately unused: usdValue is not a reliable fill size.
+    """
+    now = time.time() if now is None else now
+    norm = lambda h: str(h or "").strip().lstrip("@").casefold()
+    watched = {norm(h) for h in handles}
+    rec = (state.get("fomo") or {}).get(key) or {}
+    buys, sells = rec.get("buys", []), rec.get("sells", [])
+    signals = []
+    for handle in sorted(watched - {""}):
+        last_sell = max((r[0] for r in sells if norm(r[1]) == handle and r[0] <= now), default=0)
+        entries = [r[0] for r in buys if norm(r[1]) == handle and last_sell < r[0] <= now]
+        if not entries:
+            continue
+        first = min(entries)
+        if now - first > max_age_hours * 3600:
+            continue
+        others = {norm(r[1]) for r in buys if 0 <= now - r[0] <= 2 * 3600
+                  and norm(r[1]) not in watched and norm(r[1]) not in {"", "?"}
+                  and not any(norm(s[1]) == norm(r[1]) and r[0] <= s[0] <= now for s in sells)}
+        signals.append({"trader": handle, "buy_ts": first, "age_minutes": (now - first) / 60,
+                        "other_buyers": len(others)})
+    return min(signals, key=lambda s: s["buy_ts"]) if signals else None
 
 
 def points(fs):

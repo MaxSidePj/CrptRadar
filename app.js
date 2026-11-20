@@ -103,6 +103,7 @@ function tokenCard(e, extra = "") {
         <div><span>Checked</span>${e.checked ? ago(e.checked) : "?"}</div>
       </div>
       ${fomoLine(e.fomo)}
+      ${e.tracked_call ? `<p class="muted">👀 ${esc(e.tracked_call.trader)} buy observed; first checked at MC ${usd(e.tracked_call.observed_mcap)}. No later sell observed in the partial feed.</p>` : ""}
       ${e.fresh_quality ? `<p class="muted">🌱 Founder ${Math.round(e.fresh_quality)}/12: ${esc((e.fresh_why || []).join(", "))}</p>` : ""}
       ${e.quality ? `<p class="muted">🧩 Project ${Math.round(e.quality)}/14: ${esc((e.quality_why || []).join(", "))}</p>` : ""}
       ${e.buzz != null ? `<div class="bar"><b>Buzz</b><i><em style="width:${e.buzz}%;background:var(--mid)"></em></i><span>${e.buzz}/100</span></div>` : ""}
@@ -110,6 +111,7 @@ function tokenCard(e, extra = "") {
       ${gateList(e.gates)}
       ${e.fast_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.fast_gates, "FOMO fast-lane checks (young coins)") : ""}
       ${e.smart_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.smart_gates, "🐋 Smart-money checks (before the run)") : ""}
+      ${e.tracked_gates ? gateList(e.tracked_gates, "👀 Filtered trader-call checks") : ""}
       ${e.project_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.project_gates, "🧩 Early-project checks (real project, before the spike)") : ""}
       ${e.early_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.early_gates, "🚀 Early-launch checks (1-6h old)") : ""}
       ${e.fresh_gates && !(e.gates || []).every((g) => g.ok) ? gateList(e.fresh_gates, "🌱 Fresh-launch checks (new, tiny cap, real founder)") : ""}
@@ -137,12 +139,13 @@ function renderAlerts() {
       fomo: (cur.fomo && typeof cur.fomo === "object") ? cur.fomo : (a.fomo && typeof a.fomo === "object" ? a.fomo : null),
       buzz: cur.buzz ?? a.buzz, fast_gates: cur.fast_gates || a.fast_gates,
       smart_gates: cur.smart_gates || a.smart_gates, project_gates: cur.project_gates || a.project_gates,
+      tracked_gates: cur.tracked_gates || a.tracked_gates, tracked_call: cur.tracked_call || a.tracked_call,
       early_gates: cur.early_gates || a.early_gates, fresh_gates: cur.fresh_gates || a.fresh_gates,
       fresh_quality: cur.fresh_quality ?? a.fresh_quality, fresh_why: cur.fresh_why || a.fresh_why,
       viral_gates: cur.viral_gates || a.viral_gates,
       quality: cur.quality ?? a.quality, quality_why: cur.quality_why || a.quality_why };
     applyLive(e, LIVE[(a.address || "").toLowerCase()], a.live);
-    const extra = `<p><b>${{ gem: "💎 Gem", survivor: "🏆 Survivor", fomo: "🔥 FOMO hype", smart: "🐋 Smart money", project: "🧩 Early project", early: "🚀 Early launch", fresh: "🌱 Fresh launch", viral: "📣 Viral meme" }[a.kind] || "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}, score ${Math.round(a.score)}${cur.score != null ? ` → now ${Math.round(cur.score)}` : ""}
+    const extra = `<p><b>${{ tracked: "👀 Filtered trader call", gem: "💎 Gem", survivor: "🏆 Survivor", fomo: "🔥 FOMO hype", smart: "🐋 Smart money", project: "🧩 Early project", early: "🚀 Early launch", fresh: "🌱 Fresh launch", viral: "📣 Viral meme" }[a.kind] || "🚀 Runner"}</b> · alerted ${ago(a.ts)} at MC ${usd(a.mcap)}, score ${Math.round(a.score)}${cur.score != null ? ` → now ${Math.round(cur.score)}` : ""}
       · now ${perfText(e.mcap_now, a.mcap)}</p>`;
     return tokenCard(e, extra);
   }).join("");

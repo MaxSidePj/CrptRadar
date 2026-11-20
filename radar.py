@@ -41,6 +41,7 @@ from pathlib import Path
 
 import fomo
 import fomo_chain
+import wallet_watch
 
 ROOT = Path(__file__).resolve().parent
 CONFIG_FILE = ROOT / "config.json"
@@ -69,6 +70,19 @@ DEFAULT_CONFIG = {
     "fomo_fast_lane": True,
     "fomo_fast_min_buyers": 3,
     "fomo_fast_min_score": 55,
+    "tracked_lane": True,
+    "tracked_traders": ["0xsneakky"],
+    "tracked_min_score": 40,
+    "tracked_max_signal_hours": 2,
+    "tracked_min_observed_minutes": 0,
+    "tracked_min_age_minutes": 0,
+    "tracked_min_liquidity_usd": 20000,
+    "tracked_max_mcap_usd": 1000000,
+    "tracked_max_rise": 1.5,
+    "tracked_max_per_day": 3,
+    "wallet_watch": True,
+    "tracked_solana_wallets": {"0xsneakky": "FfztZq1outrYfyYbKw5P4LGo4xUc4XYEdf7o91UdS7qu"},
+    "wallet_rpc_calls_per_cycle": 8,
     "smart_money_lane": True,
     "smart_min_holders": 2,
     "smart_min_top_traders": 1,
@@ -350,6 +364,8 @@ def prune_state(state, cfg):
     state["alerted"] = {k: v for k, v in state["alerted"].items() if t - v["ts"] < max(keep_s, 30 * 86400)}
     state["alerts"] = state["alerts"][:150]
     state["fomo_spotted"] = {k: v for k, v in (state.get("fomo_spotted") or {}).items() if t - v["ts"] < 30 * 86400}
+    state["tracked_quotes"] = {k: v for k, v in state.get("tracked_quotes", {}).items() if t - v["ts"] < 86400}
+    state["tracked_audit"] = [r for r in state.get("tracked_audit", []) if t - r["ts"] < 7 * 86400][-5000:]
     state["fomo_buy_notified"] = {k: ts for k, ts in state.get("fomo_buy_notified", {}).items()
                                   if t - ts < 30 * 86400}
     w = state["watch"]
@@ -1173,6 +1189,56 @@ def smart_lane_gates(t, hist, holders, fs, gates, cfg):
     return out
 
 
+def tracked_candidate(state, key, cfg):
+    if not cfg.get("tracked_lane"):
+        return None
+    return fomo.tracked_signal(state, key, cfg["tracked_traders"], now=now(),
+                               max_age_hours=cfg["tracked_max_signal_hours"])
+
+
+def tracked_lane_gates(t, safety, gates, state, cfg):
+    """Watched traders accelerate checking, but never bypass verified contract safety."""
+    signal = tracked_candidate(state, t["key"], cfg)
+    if not signal:
+        return None, None
+    quotes = state.setdefault("tracked_quotes", {})
+    quote_key = f"{t['key']}:{signal['trader']}:{signal['buy_ts']}"
+    quote = quotes.setdefault(quote_key, {"ts": now(), "mcap": t["mcap"], "liq": t["liq"], "peak": t["mcap"]})
+    quote["peak"] = max(quote["peak"], t["mcap"])
+    signal = {**signal, "observed_ts": quote["ts"], "observed_mcap": quote["mcap"]}
+    m = safety or {}
+    out = []
+
+    def gate(ok, text):
+        out.append({"ok": bool(ok), "text": text})
+
+    caught_up = wallet_watch.coverage(state, signal["trader"], cfg, now=now())
+    if caught_up is not None:
+        gate(caught_up, "Direct wallet history is caught up and recently checked")
+    watched = (now() - quote["ts"]) / 60
+    gate(watched >= cfg["tracked_min_observed_minutes"],
+         f"Watched after {signal['trader']} buy for {watched:.1f}m (needs {cfg['tracked_min_observed_minutes']}m)")
+    gate(t["age_h"] is not None and t["age_h"] * 60 >= cfg["tracked_min_age_minutes"],
+         f"Coin age {fmt_age(t['age_h'])} (needs {cfg['tracked_min_age_minutes']}m+)")
+    gate(cfg["min_mcap_usd"] <= t["mcap"] <= cfg["tracked_max_mcap_usd"], "Tracked call market cap in range")
+    gate(t["liq"] >= max(cfg["tracked_min_liquidity_usd"], cfg["min_liquidity_usd"]), "Tracked call liquidity sufficient")
+    gate(m.get("holders", 0) >= 100 and not m.get("holder_data_suspect"), "100+ holders with consistent data")
+    gate(m.get("top10_pct", 100) <= 30 and m.get("max_holder_pct", 100) <= 8
+         and max(m.get("creator_pct", 100), m.get("owner_pct", 0)) <= 5
+         and m.get("cluster_pct", 100) <= 12, "Tracked call wallet concentration within limits")
+    gate(signal["other_buyers"] >= 1 or (t.get("buyers_h1") or 0) >= 25,
+         f"Supporting demand: {signal['other_buyers']} other FOMO buyers or 25+ distinct hourly buyers")
+    gate(t["buys_h1"] >= 40 and t["buys_h1"] >= 1.2 * max(t["sells_h1"], 1)
+         and t["vol"].get("h1", 0) >= cfg["min_volume_1h_usd"], "Active trading with buys ahead of sells")
+    rise = t["mcap"] / max(quote["mcap"], 1)
+    gate(rise <= cfg["tracked_max_rise"] and -10 <= t["pc"].get("m5", 0) <= 40,
+         f"Not chasing: {rise:.2f}x first observed market cap (max {cfg['tracked_max_rise']}x), 5m -10% to +40%")
+    dd = (1 - t["mcap"] / max(quote["peak"], 1)) * 100
+    gate(dd <= 25 and t["liq"] >= quote["liq"] * 0.85, "Holding up: drawdown <=25%, liquidity loss <=15%")
+    out.extend(g for g in gates if "faster than buys" in g["text"])
+    return out, signal
+
+
 DS_TO_GT = {v: k for k, v in GT_TO_DS.items()}
 
 
@@ -1614,7 +1680,9 @@ def score_token(t, safety_m, verdict, social, state, cfg):
     if social.get("gt") is not None and not quality:
         quality, qwhy = project_quality(t, social.get("gt"), social.get("x"), cfg)
     early = early_lane_gates(t, hist, holders, safety_m, gates, quality if social.get("gt") is not None else None, cfg)
+    tracked, tracked_call = tracked_lane_gates(t, safety_m, gates, state, cfg)
     score_token.last = {"gates": gates, "buzz": buzz, "fast_gates": fast, "smart_gates": smart,
+                        "tracked_gates": tracked, "tracked_call": tracked_call,
                         "project_gates": project, "early_gates": early, "quality": quality, "quality_why": qwhy}
     return round(clamp(total, 0, 100), 1), parts, why[:6]
 
@@ -1743,11 +1811,15 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
              and entry.get("fresh_gates") and all(g["ok"] for g in entry["fresh_gates"]))
     viral = (not normal and not fast and not smart and not project and not early and not fresh
              and cfg.get("viral_lane") and entry.get("viral_gates") and all(g["ok"] for g in entry["viral_gates"]))
-    if not (normal or fast or smart or project or early or fresh or viral):
+    tracked = (not any((normal, fast, smart, project, early, fresh, viral)) and cfg.get("tracked_lane")
+               and entry.get("tracked_gates") and entry["score"] >= cfg["tracked_min_score"]
+               and all(g["ok"] for g in entry["tracked_gates"]))
+    if not (normal or fast or smart or project or early or fresh or viral or tracked):
         return False
     for lane, on, cap in (("project", project, cfg["project_max_per_day"]), ("early", early, cfg["early_max_per_day"]),
                           ("fresh", fresh, cfg.get("fresh_max_per_day", 4)),
-                          ("viral", viral, cfg.get("viral_max_per_day", 3))):
+                          ("viral", viral, cfg.get("viral_max_per_day", 3)),
+                          ("tracked", tracked, cfg["tracked_max_per_day"])):
         if not on:
             continue
         day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -1772,8 +1844,8 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
     if (alerts_today(state) >= cfg["max_alerts_per_day"] or in_quiet_hours(cfg)) and entry["score"] < cfg["exceptional_score"]:
         return False
     kind = ("fomo" if fast else "smart" if smart else "project" if project else "early" if early
-            else "fresh" if fresh else "viral" if viral else "gem" if (t["age_h"] or 0) <= cfg["gem_max_age_hours"] else "survivor")
-    icon, label = {"fomo": ("🔥", "FOMO hype"), "smart": ("🐋", "Smart money"), "project": ("🧩", "Early project"),
+            else "fresh" if fresh else "viral" if viral else "tracked" if tracked else "gem" if (t["age_h"] or 0) <= cfg["gem_max_age_hours"] else "survivor")
+    icon, label = {"tracked": ("👀", "Filtered trader call"), "fomo": ("🔥", "FOMO hype"), "smart": ("🐋", "Smart money"), "project": ("🧩", "Early project"),
                    "early": ("🚀", "Early launch"), "fresh": ("🌱", "Fresh launch"), "viral": ("📣", "Viral meme"), "gem": ("💎", "Gem"), "survivor": ("🏆", "Survivor")}[kind]
     title = f"{icon} {label}: ${t['symbol']} ({t['chain']}) score {entry['score']:.0f}"
     lines = [
@@ -1783,6 +1855,10 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         f"Buzz {entry.get('buzz', 0)}/100 · staying power {entry['parts'].get('staying', 0):.0f}/25",
     ]
     fs = entry.get("fomo")
+    call = entry.get("tracked_call")
+    if call:
+        lines.append(f"{call['trader']} buy observed; first checked at MC {fmt_usd(call['observed_mcap'])}, "
+                     f"now {fmt_usd(t['mcap'])}. No later sell observed in the partial feed.")
     if fs:
         line = f"FOMO app: {fs['holders_n']} traders hold, {fs['buyers_6h']} bought (6h)"
         names = fs["good_holders"] or fs["holders"] or fs["top_buyers"]
@@ -1825,7 +1901,7 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
         actions.append({"action": "view", "label": "Bubblemap", "url": links["bubblemap"]})
     actions.append({"action": "view", "label": "X posts", "url": links["x_search"]})
     sent = push(title, "\n".join(lines), click=links["chart"], actions=actions,
-                tags=[{"fomo": "fire", "smart": "whale", "project": "jigsaw", "early": "rocket", "fresh": "seedling", "viral": "loudspeaker", "gem": "gem", "survivor": "trophy"}[kind]], priority=5 if entry["score"] >= cfg["exceptional_score"] else 4)
+                tags=[{"tracked": "eyes", "fomo": "fire", "smart": "whale", "project": "jigsaw", "early": "rocket", "fresh": "seedling", "viral": "loudspeaker", "gem": "gem", "survivor": "trophy"}[kind]], priority=5 if entry["score"] >= cfg["exceptional_score"] else 4)
     rec = {"key": t["key"], "ts": now(), "day": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
            "kind": kind, "symbol": t["symbol"], "name": t["name"], "chain": t["chain"], "address": t["address"],
            "score": entry["score"], "mcap": t["mcap"], "price": t.get("price"), "liq": t["liq"],
@@ -1836,7 +1912,8 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
            "socials": t.get("socials"), "dex": t.get("dex"), "url": t.get("url"), "biz": entry.get("biz"),
            "trending": t.get("trending"), "cto": t.get("cto"), "boosts": t.get("boosts"),
            "cg_trending": entry.get("cg_trending"), "fast_gates": entry.get("fast_gates"), "fomo": entry.get("fomo"), "buzz": entry.get("buzz"),
-           "gates": (entry.get("fast_gates") if fast else entry.get("smart_gates") if smart
+           "tracked_gates": entry.get("tracked_gates"), "tracked_call": call,
+           "gates": (entry.get("tracked_gates") if tracked else entry.get("fast_gates") if fast else entry.get("smart_gates") if smart
                      else entry.get("project_gates") if project else entry.get("early_gates") if early
                      else entry.get("fresh_gates") if fresh else entry.get("viral_gates") if viral
                      else entry.get("gates")),
@@ -1854,6 +1931,12 @@ def maybe_alert(entry, state, cfg, cycle_alerts):
 
 def scan_cycle(http, state, cfg, ctx):
     t0 = now()
+    if ctx.get("rpc"):
+        ctx["rpc"].calls = 0
+        wallet_events = wallet_watch.poll(state, ctx["rpc"], cfg, log)
+        if wallet_events:
+            fomo.absorb(state, wallet_events)
+            log(f"Direct wallet watch: {len(wallet_events)} new buys/sells")
     ctx["gt_trending"], ctx["cto"], ctx["profile"], ctx["boost"] = set(), set(), set(), {}
     seeds = discover(http, cfg, ctx, state)
     pairs = ds_market(http, seeds)
@@ -1877,7 +1960,8 @@ def scan_cycle(http, state, cfg, ctx):
     def quick(t):
         dummy = {"verified": True, "rejects": [], "warnings": [], "penalty": 0}
         return score_token(t, {}, dummy, {}, state, cfg)[0]
-    tokens.sort(key=lambda t: (bool(fomo.stats(state, t["key"])), quick(t)), reverse=True)
+    tokens.sort(key=lambda t: (bool(tracked_candidate(state, t["key"], cfg)),
+                               bool(fomo.stats(state, t["key"])), quick(t)), reverse=True)
 
     fresh = [t for t in built.values() if fresh_prefilter(t, cfg) is None]
     viral = [t for t in built.values() if viral_prefilter(t, cfg) is None]
@@ -1907,7 +1991,7 @@ def scan_cycle(http, state, cfg, ctx):
         safe.sort(key=lambda e: e["score"], reverse=True)
         quiet.sort(key=lambda t: t["liq"], reverse=True)
         fomo_chain.run_cycle(state, ctx["rpc"], [(e["key"], e["address"]) for e in safe[:4]]
-                             + [(t["key"], t["address"]) for t in quiet], log)
+                             + [(t["key"], t["address"]) for t in quiet], log, reset_budget=False)
 
     results.sort(key=lambda e: e["score"], reverse=True)
     sent = 0
@@ -1923,7 +2007,7 @@ def scan_cycle(http, state, cfg, ctx):
 def evaluate(http, state, cfg, t, corpus, cg, budget, pool):
     """Safety + social + score for one token. None if its safety check has to wait for a later cycle."""
     cached = state["safety_cache"].get(t["key"])
-    ttl = 1200 if (t["age_h"] or 0) < 24 else 3600
+    ttl = 1200 if (t["age_h"] or 0) < 24 or tracked_candidate(state, t["key"], cfg) else 3600
     if cached and now() - cached["ts"] < ttl:
         m = cached["data"]
     elif budget[pool] > 0:
@@ -1952,6 +2036,15 @@ def evaluate(http, state, cfg, t, corpus, cg, budget, pool):
     record_history(state, t, (m or {}).get("holders"))
     score, parts, why = score_token(t, m, verdict, social, state, cfg)
     extra = score_token.last
+    if extra["tracked_gates"]:
+        safety_ts = (state["safety_cache"].get(t["key"]) or {}).get("ts", 0)
+        extra["tracked_gates"].append({"ok": now() - safety_ts <= 1200,
+                                       "text": "Safety checked within 20 minutes"})
+        # Keep actual observations, not reconstructed candles, for future signal evaluation.
+        state.setdefault("tracked_audit", []).append({"ts": now(), "key": t["key"], "score": score,
+            "mcap": t["mcap"], "liq": t["liq"], "call": extra["tracked_call"],
+            "gates": extra["tracked_gates"], "verified": verdict["verified"], "rejects": verdict["rejects"]})
+        del state["tracked_audit"][:-5000]
     return {**{k: t[k] for k in ("key", "chain", "address", "symbol", "name", "url", "price", "liq", "mcap",
                                  "vol", "pc", "buys_h1", "sells_h1", "age_h", "socials", "trending", "cto",
                                  "boosts", "image", "dex", "sources")},
@@ -1959,6 +2052,7 @@ def evaluate(http, state, cfg, t, corpus, cg, budget, pool):
             "rejects": verdict["rejects"], "warnings": verdict["warnings"], "links": links_for(t),
             "x": social.get("x"), "biz": social.get("biz"), "cg_trending": social.get("cg_trending"),
             "gates": extra["gates"], "fast_gates": extra["fast_gates"], "smart_gates": extra["smart_gates"],
+            "tracked_gates": extra["tracked_gates"], "tracked_call": extra["tracked_call"],
             "project_gates": extra["project_gates"], "early_gates": extra["early_gates"],
             "quality": extra["quality"], "quality_why": extra["quality_why"],
             "buzz": extra["buzz"],
@@ -2051,6 +2145,7 @@ def lookup_fomo_holders(state, results):
 
 
 NOW_FIELDS = ("score", "parts", "why", "safety", "verified", "rejects", "warnings", "gates", "fast_gates",
+              "tracked_gates", "tracked_call",
               "smart_gates", "project_gates", "early_gates", "quality", "quality_why", "buzz",
               "fresh_gates", "fresh_quality", "fresh_why", "viral_gates", "viral_why",
               "fomo", "x", "biz", "cg_trending", "trending", "cto", "boosts", "socials", "checked")
@@ -2165,7 +2260,7 @@ def publish_alerts(state):
         log(f"  alert publish skipped ({type(e).__name__}); dashboard updates at the end of the run")
 
 
-NEEDED_VERSIONS = {"fomo.py": (fomo, 6), "fomo_chain.py": (fomo_chain, 1)}
+NEEDED_VERSIONS = {"fomo.py": (fomo, 8), "fomo_chain.py": (fomo_chain, 2), "wallet_watch.py": (wallet_watch, 1)}
 
 
 def outdated_files():

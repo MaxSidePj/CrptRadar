@@ -1055,5 +1055,160 @@ class FomoBoardChainTests(unittest.TestCase):
         self.assertEqual(fomo.norm_chain("ETH"), "ethereum")
 
 
+class TrackedTraderTests(unittest.TestCase):
+    def setUp(self):
+        self.state = radar.fresh_state({})
+        self.t = token(age_h=0.5, mcap=100_000, liq=30_000,
+                       pc={"m5": 5, "h1": 60, "h6": 60}, buyers_h1=None)
+        self.clock = time.time()
+        self.state["wallet_monitor"] = {CFG["tracked_solana_wallets"]["0xsneakky"]: {"ready": True, "checked": self.clock}}
+        self.timer = patch.object(radar, "now", side_effect=lambda: self.clock)
+        self.timer.start()
+        self.add(1, "buy", " @0xSneakky ", minutes_ago=10)
+        self.add(2, "buy", "other", minutes_ago=8)
+
+    def tearDown(self):
+        self.timer.stop()
+
+    def add(self, i, side, trader, minutes_ago=0):
+        e = fomo_event(i, side, trader, minutes_ago=minutes_ago)
+        e["ts"] = (self.clock - minutes_ago * 60) * 1000
+        radar.fomo.absorb(self.state, [e])
+
+    def gates(self, t=None, safety=None):
+        self.state["wallet_monitor"][CFG["tracked_solana_wallets"]["0xsneakky"]]["checked"] = self.clock
+        return radar.tracked_lane_gates(t or self.t, safety or SAFE, [], self.state, CFG)
+
+    def mature(self):
+        self.gates()
+        self.clock += 301
+        return self.gates()
+
+    def test_pass_on_first_check_without_mandatory_wait(self):
+        gates, call = self.gates()
+        self.assertTrue(all(g["ok"] for g in gates), gates)
+        self.assertEqual(call["trader"], "0xsneakky")
+        self.assertEqual(call["observed_mcap"], 100_000)
+
+    def test_optional_observation_wait_can_still_be_configured(self):
+        cfg = {**CFG, "tracked_min_observed_minutes": 5, "wallet_watch": False}
+        gates, _ = radar.tracked_lane_gates(self.t, SAFE, [], self.state, cfg)
+        self.assertFalse(all(g["ok"] for g in gates))
+        self.clock += 301
+        gates, _ = radar.tracked_lane_gates(self.t, SAFE, [], self.state, cfg)
+        self.assertTrue(all(g["ok"] for g in gates), gates)
+
+    def test_buy_alone_does_not_qualify(self):
+        self.state["fomo"][self.t["key"]]["buys"] = self.state["fomo"][self.t["key"]]["buys"][:1]
+        gates, _ = self.mature()
+        self.assertFalse(all(g["ok"] for g in gates))
+        gates, _ = self.gates(t={**self.t, "buyers_h1": 30})
+        self.assertTrue(all(g["ok"] for g in gates), gates)
+
+    def test_observed_sell_cancels_and_rebuy_resets_quote(self):
+        self.mature()
+        self.add(3, "sell", "0xsneakky")
+        self.assertEqual(self.gates(), (None, None))
+        self.clock += 60
+        self.add(4, "buy", "0xsneakky")
+        gates, call = self.gates()
+        self.assertTrue(all(g["ok"] for g in gates), gates)
+        self.assertEqual(call["observed_ts"], self.clock)
+
+    def test_topup_does_not_refresh_expiry(self):
+        self.clock += 3 * 3600
+        self.add(3, "buy", "0xsneakky")
+        self.assertEqual(self.gates(), (None, None))
+
+    def test_other_buyer_selling_removes_confirmation(self):
+        self.add(3, "sell", "other")
+        gates, _ = self.mature()
+        self.assertFalse(all(g["ok"] for g in gates))
+
+    def test_chase_dump_thin_liquidity_and_bad_wallets_fail(self):
+        self.mature()
+        for changes in ({"mcap": 170_000}, {"liq": 10_000}, {"pc": {"m5": -20, "h1": 30}},
+                        {"pc": {"m5": 50, "h1": 650}}, {"buys_h1": 5}, {"age_h": None}):
+            with self.subTest(changes=changes):
+                gates, _ = self.gates(t={**self.t, **changes})
+                self.assertFalse(all(g["ok"] for g in gates), gates)
+        gates, _ = self.gates(safety={**SAFE, "top10_pct": 34})
+        self.assertFalse(all(g["ok"] for g in gates))
+
+    def test_fiona_style_launch_can_pass_first_evaluation(self):
+        # Illustrative demand/safety snapshot, not a reconstruction of Sneakky's historical entry.
+        t = {**self.t, "symbol": "FIONA", "age_h": 1.06, "mcap": 839_460, "liq": 74_004,
+             "buys_h1": 20546, "sells_h1": 16983, "vol": {"h1": 2355446, "h6": 2504224, "h24": 2504224},
+             "pc": {"m5": 19.29, "h1": 652, "h6": 2590, "h24": 2590}}
+        safety = {**SAFE, "holders": 4265, "top10_pct": 13.47, "max_holder_pct": 2.03,
+                  "insider_pct": 16.03, "cluster_pct": 6.42}
+        self.state["safety_cache"][t["key"]] = {"ts": self.clock, "data": safety}
+        with patch.object(radar, "gt_info", return_value={}), patch.object(radar, "x_profile", return_value=None):
+            e = radar.evaluate(None, self.state, CFG, t, "", set(), {"deep": 0}, "deep")
+        self.assertTrue(all(g["ok"] for g in e["tracked_gates"]), e["tracked_gates"])
+        with patch.object(radar, "push", return_value=True):
+            self.assertTrue(radar.maybe_alert(e, self.state, CFG, 0), e)
+        self.assertEqual(self.state["alerts"][0]["kind"], "tracked")
+
+    def test_very_young_coin_can_pass_if_checks_already_pass(self):
+        gates, _ = self.gates(t={**self.t, "age_h": 0.05})
+        self.assertTrue(all(g["ok"] for g in gates), gates)
+
+    def test_exact_handle_only_and_future_buys_ignored(self):
+        self.state["fomo"] = {}
+        self.add(1, "buy", "0xsneakkyFake")
+        self.add(3, "buy", "0xsneakky", minutes_ago=-5)
+        self.assertEqual(self.gates(), (None, None))
+
+    def entry(self):
+        gates, call = self.mature()
+        return {**self.t, "score": 48, "verified": True, "rejects": [], "warnings": [],
+                "safety": SAFE, "links": radar.links_for(self.t), "gates": [{"ok": False}],
+                "tracked_gates": gates, "tracked_call": call, "parts": {}, "why": []}
+
+    def test_alert_delivery_caps_and_dedupe(self):
+        e = self.entry()
+        with patch.object(radar, "push", return_value=True) as push:
+            self.assertTrue(radar.maybe_alert(e, self.state, CFG, 0))
+            self.assertFalse(radar.maybe_alert(e, self.state, CFG, 0))
+        self.assertEqual(self.state["alerts"][0]["kind"], "tracked")
+        self.assertIn("0xsneakky", push.call_args.args[1])
+        state = radar.fresh_state({})
+        with patch.object(radar, "push"):
+            self.assertFalse(radar.maybe_alert(e, state, {**CFG, "tracked_max_per_day": 0}, 0))
+            self.assertFalse(radar.maybe_alert(e, state, CFG, CFG["max_alerts_per_cycle"]))
+
+    def test_safety_unverified_and_score_never_bypassed(self):
+        e = self.entry()
+        for changes in ({"verified": False}, {"rejects": ["Honeypot"]}, {"score": CFG["tracked_min_score"] - 1}):
+            with patch.object(radar, "push") as push:
+                self.assertFalse(radar.maybe_alert({**e, **changes}, self.state, CFG, 0))
+                push.assert_not_called()
+
+    def test_disabled_lane_and_daily_cap(self):
+        e = self.entry()
+        with patch.object(radar, "push", return_value=True):
+            self.assertFalse(radar.maybe_alert(e, self.state, {**CFG, "tracked_lane": False}, 0))
+            for i in range(4):
+                self.state["stats"]["cycles"] = i
+                self.assertEqual(radar.maybe_alert({**e, "key": f"coin{i}"}, self.state, CFG, 0), i < 3)
+
+    def test_observation_survives_cached_state_roundtrip(self):
+        self.mature()
+        self.state = json.loads(json.dumps(self.state))
+        gates, call = self.gates()
+        self.assertTrue(all(g["ok"] for g in gates), gates)
+        self.assertEqual(call["observed_mcap"], 100_000)
+
+    def test_evaluate_records_audit_and_rejects_stale_safety(self):
+        self.mature()
+        self.state["safety_cache"][self.t["key"]] = {"ts": self.clock - 1300, "data": SAFE}
+        with patch.object(radar, "gt_info", return_value={}), patch.object(radar, "x_profile", return_value=None):
+            e = radar.evaluate(None, self.state, CFG, self.t, "", set(), {"deep": 0}, "deep")
+        self.assertIsNotNone(e["tracked_gates"])
+        self.assertFalse(e["tracked_gates"][-1]["ok"])
+        self.assertEqual(self.state["tracked_audit"][-1]["mcap"], 100_000)
+
+
 if __name__ == "__main__":
     unittest.main()
