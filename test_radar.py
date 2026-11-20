@@ -1038,5 +1038,22 @@ class ParsingTests(unittest.TestCase):
         self.assertEqual(t["socials"]["x"], "https://x.com/gem")
 
 
+class FomoBoardChainTests(unittest.TestCase):
+    def test_numeric_chain_ids_do_not_crash(self):
+        import fomo
+        data = {"tokens": [{"rank": 1, "chain": 8453, "token": {"address": "0xAbC"}},
+                           {"rank": 2, "network": "solana", "token": {"address": "Mint1"}},
+                           {"rank": 3, "chain": 999999, "token": {"address": "0xdef"}},
+                           {"rank": 4, "chainId": "56", "token": {"address": "0x123"}},
+                           "junk"]}
+        out = fomo._board_tokens(data)
+        self.assertEqual(out[fomo.token_key("base", "0xAbC")]["rank"], 1)
+        self.assertEqual(out[fomo.token_key("solana", "Mint1")]["rank"], 2)
+        self.assertEqual(out[fomo.token_key("bsc", "0x123")]["rank"], 4)
+        self.assertEqual(len(out), 3)
+        self.assertIsNone(fomo.norm_chain(None))
+        self.assertEqual(fomo.norm_chain("ETH"), "ethereum")
+
+
 if __name__ == "__main__":
     unittest.main()

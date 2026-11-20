@@ -10,7 +10,7 @@ keeps this at or below 900 of the 1,000 free calls. The free plan has no card, s
 """
 from __future__ import annotations
 
-VERSION = 6  # radar.py checks this, so an outdated upload is reported instead of failing silently
+VERSION = 7  # radar.py checks this, so an outdated upload is reported instead of failing silently
 
 import json
 import os
@@ -26,8 +26,20 @@ CHAIN_MAP = {"eth": "ethereum", "ethereum": "ethereum", "bnb": "bsc", "bsc": "bs
              "abstract": "abstract", "monad": "monad", "avalanche": "avalanche", "tron": "tron"}
 
 
+# Some fomoapi.io responses give the chain as a numeric chain id instead of a name.
+CHAIN_IDS = {1: "ethereum", 56: "bsc", 8453: "base", 42161: "arbitrum", 137: "polygon", 43114: "avalanche",
+             2741: "abstract", 143: "monad", 728126428: "tron", 792703809: "solana", 1399811149: "solana"}
+
+
 def norm_chain(c):
-    return CHAIN_MAP.get((c or "").lower())
+    if isinstance(c, bool) or c is None:
+        return None
+    if isinstance(c, (int, float)):
+        return CHAIN_IDS.get(int(c))
+    c = str(c).strip().lower()
+    if c.isdigit():
+        return CHAIN_IDS.get(int(c))
+    return CHAIN_MAP.get(c)
 
 
 class FomoStream:
@@ -252,8 +264,11 @@ def _handle(row):
 def _board_tokens(data):
     out = {}
     for i, t in enumerate(_rows(data, "tokens", "board", "data")):
-        tok = t.get("token") or {}
-        chain = norm_chain(t.get("network") or tok.get("network") or t.get("chain") or tok.get("chain"))
+        if not isinstance(t, dict):
+            continue
+        tok = t.get("token") if isinstance(t.get("token"), dict) else {}
+        chain = next((c for c in (norm_chain(t.get(f)) or norm_chain(tok.get(f))
+                                  for f in ("network", "chain", "chainId", "chain_id")) if c), None)
         addr = tok.get("address") or t.get("address")
         if chain and addr:
             out[token_key(chain, addr)] = {"rank": int(_num(t.get("rank")) or i + 1),
